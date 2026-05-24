@@ -559,6 +559,7 @@ function Home({ user, flash }) {
   const [books, setBooks] = useState([]);
   const [title, setTitle] = useState("");
   const [search, setSearch] = useState("");
+  const [activeBook, setActiveBook] = useState(null);
 
   async function logout() {
     await signOut(auth);
@@ -573,6 +574,7 @@ function Home({ user, flash }) {
     }
 
     const newBook = {
+      id: Date.now().toString(),
       title: title.trim(),
       pages: 1,
       emoji: "📔",
@@ -591,13 +593,52 @@ function Home({ user, flash }) {
     }
 
     setTitle("");
+    setActiveBook(newBook);
     flash("Scrapbook created 💖");
-    setSection("home");
+    setSection("editor");
   }
 
   const filteredBooks = books.filter((book) =>
     book.title.toLowerCase().includes(search.toLowerCase())
   );
+
+  if (section === "editor") {
+    return (
+      <div className="phone">
+        <div className="screen paper">
+          <div className="top">
+            <button className="iconBtn" onClick={() => setSection("home")}>‹</button>
+            <b>{activeBook?.title || "Untitled Scrapbook"}</b>
+            <button onClick={() => flash("Saved 💖")}>Save</button>
+          </div>
+
+          <div className="canvas">
+            <div className="note">
+              {activeBook?.title || "My Scrapbook"}
+              <br />
+              <small>Tap tools below to start editing ♡</small>
+            </div>
+
+            <div className="sticker">🌼</div>
+            <div className="tape">pink tape</div>
+          </div>
+
+          <div className="tools">
+            <button onClick={() => flash("Photo upload coming next 📷")}>📷 Photo</button>
+            <button onClick={() => flash("Sticker menu coming next ✨")}>✨ Sticker</button>
+            <button onClick={() => flash("Text tool coming next 𝑇")}>𝑇 Text</button>
+            <button onClick={() => flash("Backgrounds coming next 🎨")}>🎨 Background</button>
+          </div>
+
+          <div className="tools">
+            <button onClick={() => flash("Layers coming next")}>Layers</button>
+            <button onClick={() => flash("Delete coming next")}>Delete</button>
+            <button onClick={() => flash("Duplicate coming next")}>Duplicate</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (section === "create") {
     return (
@@ -615,7 +656,7 @@ function Home({ user, flash }) {
             />
 
             <button onClick={createBook}>
-              Create 💖
+              Create & Start Editing 💖
             </button>
           </div>
         </div>
@@ -640,7 +681,14 @@ function Home({ user, flash }) {
             <p className="muted">No scrapbooks found yet.</p>
           ) : (
             filteredBooks.map((book) => (
-              <div className="bookCard" key={book.title}>
+              <div
+                className="bookCard"
+                key={book.id || book.title}
+                onClick={() => {
+                  setActiveBook(book);
+                  setSection("editor");
+                }}
+              >
                 <div className="thumb">{book.emoji}</div>
                 <div>
                   <h3>{book.title}</h3>
@@ -656,7 +704,13 @@ function Home({ user, flash }) {
   }
 
   if (section === "templates") {
-    const templates = ["Baby Book 🎀", "Wedding 💍", "Travel ✈️", "Family Memories 💖", "Summer Book ☀️"];
+    const templates = [
+      "Baby Book 🎀",
+      "Wedding 💍",
+      "Travel ✈️",
+      "Family Memories 💖",
+      "Summer Book ☀️"
+    ];
 
     return (
       <div className="phone">
@@ -671,10 +725,12 @@ function Home({ user, flash }) {
                 <h3>{template}</h3>
                 <p className="muted">Ready-made scrapbook layout</p>
               </div>
-              <button onClick={() => {
-                setTitle(template);
-                setSection("create");
-              }}>
+              <button
+                onClick={() => {
+                  setTitle(template);
+                  setSection("create");
+                }}
+              >
                 Use
               </button>
             </div>
@@ -738,7 +794,14 @@ function Home({ user, flash }) {
           <p className="muted">No scrapbooks yet. Create your first one 💕</p>
         ) : (
           books.map((book) => (
-            <div className="bookCard" key={book.title}>
+            <div
+              className="bookCard"
+              key={book.id || book.title}
+              onClick={() => {
+                setActiveBook(book);
+                setSection("editor");
+              }}
+            >
               <div className="thumb">{book.emoji}</div>
               <div>
                 <h3>{book.title}</h3>
