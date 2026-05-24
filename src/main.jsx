@@ -132,13 +132,64 @@ function Login({ go, flash }) {
       flash("Login error: " + e.message);
     }
   }
-  return <FormPage title="Login" go={go}>
-    <input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
-    <input placeholder="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-    <button onClick={submit}>Login</button>
-    <button className="link" onClick={() => go("forgot")}>Forgot password?</button>
-    <button className="secondary" onClick={() => go("signup")}>Create account</button>
-  </FormPage>;
+  ```jsx
+return (
+  <Phone>
+    <div className="auth-page">
+
+      <div className="auth-logo">
+        💖 Pocket Scrapbook
+      </div>
+
+      <h1>
+        {mode === "login"
+          ? "Welcome Back ✨"
+          : "Create Your Scrapbook 💕"}
+      </h1>
+
+      <p className="auth-sub">
+        Save memories, photos, milestones, and magical moments.
+      </p>
+
+      <div className="auth-card">
+
+        <input
+          placeholder="Email"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+        />
+
+        <input
+          placeholder="Password"
+          type="password"
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+        />
+
+        <button onClick={submit}>
+          {mode === "login"
+            ? "Login ✨"
+            : "Create Account 💖"}
+        </button>
+
+      </div>
+
+      <button
+        className="text-btn"
+        onClick={() =>
+          go(mode === "login" ? "signup" : "login")
+        }
+      >
+        {mode === "login"
+          ? "Need an account?"
+          : "Already have one?"}
+      </button>
+
+    </div>
+  </Phone>
+)
+```
+
 }
 
 function Signup({ go, flash }) {
