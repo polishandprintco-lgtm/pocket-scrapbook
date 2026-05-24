@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { auth, db, storage } from "./firebase";
-
+import { auth, db } from "./firebase";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -10,21 +9,16 @@ import {
   updateProfile,
   signOut
 } from "firebase/auth";
-
 import {
   addDoc,
   collection,
   getDocs,
-  query,
   orderBy,
+  query,
   serverTimestamp,
   deleteDoc,
-  doc,
-  updateDoc
+  doc
 } from "firebase/firestore";
-
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-
 import "./style.css";
 
 function App() {
@@ -42,14 +36,12 @@ function App() {
       setUser(u || null);
       setPage(u ? "home" : "welcome");
     });
-
     return () => unsub();
   }, []);
 
   return (
     <div className="appShell">
       {toast && <div className="toast">{toast}</div>}
-
       {page === "welcome" && <Welcome go={setPage} />}
       {page === "login" && <Login go={setPage} flash={flash} />}
       {page === "signup" && <Signup go={setPage} flash={flash} />}
@@ -63,22 +55,13 @@ function Welcome({ go }) {
   return (
     <div className="phone">
       <div className="screen paper auth-page">
-        <div className="auth-logo">💖 Pocket Scrapbook</div>
-
-        <h1>Turn your memories into beautiful stories</h1>
-
-        <p className="auth-sub">
-          Save your sweetest memories, milestones, and magical moments.
-        </p>
-
+        <div className="auth-logo">ScrapFlip</div>
+        <h1>Turn your memories into beautiful stories 💗</h1>
         <div className="hero">🌼 🖼️ 🦋</div>
 
         <div className="auth-card">
           <button onClick={() => go("signup")}>✨ Start Scrapbooking</button>
-
-          <button className="secondary" onClick={() => go("login")}>
-            Login
-          </button>
+          <button className="secondary" onClick={() => go("login")}>Login</button>
         </div>
       </div>
     </div>
@@ -88,7 +71,6 @@ function Welcome({ go }) {
 function Login({ go, flash }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
 
   async function submit() {
     try {
@@ -103,45 +85,17 @@ function Login({ go, flash }) {
   return (
     <div className="phone">
       <div className="screen paper auth-page">
-        <div className="auth-logo">💖 Pocket Scrapbook</div>
-
+        <div className="auth-logo">ScrapFlip</div>
         <h1>Welcome Back ✨</h1>
 
-        <p className="auth-sub">Continue your magical scrapbook journey.</p>
-
         <div className="auth-card">
-          <input
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-
-          <div className="passwordWrap">
-            <input
-              placeholder="Password"
-              type={showPassword ? "text" : "password"}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-
-            <button
-              className="showBtn"
-              onClick={() => setShowPassword(!showPassword)}
-            >
-              {showPassword ? "🙈" : "👁️"}
-            </button>
-          </div>
-
+          <input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
+          <input placeholder="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
           <button onClick={submit}>Login ✨</button>
         </div>
 
-        <button className="text-btn" onClick={() => go("forgot")}>
-          Forgot Password?
-        </button>
-
-        <button className="text-btn" onClick={() => go("signup")}>
-          Need an account?
-        </button>
+        <button className="text-btn" onClick={() => go("forgot")}>Forgot Password?</button>
+        <button className="text-btn" onClick={() => go("signup")}>Need an account?</button>
       </div>
     </div>
   );
@@ -152,30 +106,13 @@ function Signup({ go, flash }) {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirm, setConfirm] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
 
   async function submit() {
     try {
-      if (!name || !username || !email || !password) {
-        throw new Error("Fill in every field.");
-      }
+      if (!name || !username || !email || !password) throw new Error("Fill in every field.");
+      if (password.length < 6) throw new Error("Password must be at least 6 characters.");
 
-      if (password.length < 6) {
-        throw new Error("Password must be at least 6 characters.");
-      }
-
-      if (password !== confirm) {
-        throw new Error("Passwords do not match.");
-      }
-
-      const cred = await createUserWithEmailAndPassword(
-        auth,
-        email.trim(),
-        password
-      );
-
+      const cred = await createUserWithEmailAndPassword(auth, email.trim(), password);
       await updateProfile(cred.user, { displayName: name });
 
       await addDoc(collection(db, "profiles"), {
@@ -196,71 +133,18 @@ function Signup({ go, flash }) {
   return (
     <div className="phone">
       <div className="screen paper auth-page">
-        <div className="auth-logo">🎀 Join Pocket Scrapbook</div>
-
-        <h1>Create Your Dream Scrapbook ✨</h1>
-
-        <p className="auth-sub">
-          Store photos, memories, and magical moments forever.
-        </p>
+        <div className="auth-logo">ScrapFlip</div>
+        <h1>Create Your Account ✨</h1>
 
         <div className="auth-card">
-          <input
-            placeholder="Full Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-
-          <input
-            placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
-
-          <input
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-
-          <div className="passwordWrap">
-            <input
-              placeholder="Password"
-              type={showPassword ? "text" : "password"}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-
-            <button
-              className="showBtn"
-              onClick={() => setShowPassword(!showPassword)}
-            >
-              {showPassword ? "🙈" : "👁️"}
-            </button>
-          </div>
-
-          <div className="passwordWrap">
-            <input
-              placeholder="Confirm Password"
-              type={showConfirm ? "text" : "password"}
-              value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
-            />
-
-            <button
-              className="showBtn"
-              onClick={() => setShowConfirm(!showConfirm)}
-            >
-              {showConfirm ? "🙈" : "👁️"}
-            </button>
-          </div>
-
+          <input placeholder="Full Name" value={name} onChange={(e) => setName(e.target.value)} />
+          <input placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} />
+          <input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
+          <input placeholder="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
           <button onClick={submit}>💖 Create Account</button>
         </div>
 
-        <button className="text-btn" onClick={() => go("login")}>
-          Already have an account?
-        </button>
+        <button className="text-btn" onClick={() => go("login")}>Already have an account?</button>
       </div>
     </div>
   );
@@ -282,63 +166,42 @@ function Forgot({ go, flash }) {
   return (
     <div className="phone">
       <div className="screen paper auth-page">
-        <div className="auth-logo">💌 Reset Password</div>
-
         <h1>Forgot Password?</h1>
-
-        <p className="auth-sub">Enter your email to receive a reset link.</p>
-
         <div className="auth-card">
-          <input
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-
+          <input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
           <button onClick={reset}>Send Reset Link</button>
         </div>
-
-        <button className="text-btn" onClick={() => go("login")}>
-          Back to Login
-        </button>
+        <button className="text-btn" onClick={() => go("login")}>Back to Login</button>
       </div>
     </div>
   );
 }
 
 function Home({ user, flash }) {
-  const [section, setSection] = useState("home");
   const [books, setBooks] = useState([]);
   const [title, setTitle] = useState("");
-  const [search, setSearch] = useState("");
+  const [section, setSection] = useState("home");
   const [activeBook, setActiveBook] = useState(null);
-  const [loadingBooks, setLoadingBooks] = useState(true);
-  const [notifications, setNotifications] = useState(true);
-  const [autoSave, setAutoSave] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
-  const [photoUrl, setPhotoUrl] = useState("");
+  const [openMenuId, setOpenMenuId] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   async function loadBooks() {
     if (!user) return;
 
     try {
-      setLoadingBooks(true);
-
+      setLoading(true);
       const q = query(collection(db, "scrapbooks"), orderBy("createdAt", "desc"));
       const snap = await getDocs(q);
 
       const userBooks = snap.docs
-        .map((document) => ({
-          id: document.id,
-          ...document.data()
-        }))
-        .filter((book) => book.uid === user.uid);
+        .map((d) => ({ id: d.id, ...d.data() }))
+        .filter((b) => b.uid === user.uid);
 
       setBooks(userBooks);
     } catch (e) {
       flash("Could not load scrapbooks: " + e.message);
     } finally {
-      setLoadingBooks(false);
+      setLoading(false);
     }
   }
 
@@ -346,149 +209,78 @@ function Home({ user, flash }) {
     loadBooks();
   }, [user]);
 
-  async function logout() {
-    await signOut(auth);
-    flash("Logged out ✨");
-    window.location.reload();
-  }
-
   async function createBook() {
-    if (!user) {
-      flash("Please login first 💕");
-      return;
-    }
-
     if (!title.trim()) {
       flash("Add a scrapbook title 💕");
       return;
     }
 
     try {
-      const newBookData = {
+      const data = {
         uid: user.uid,
         title: title.trim(),
         pages: 1,
-        emoji: "📔",
+        cover: "📔",
         updated: "just now",
-        createdAt: serverTimestamp(),
-        photoUrl: ""
+        createdAt: serverTimestamp()
       };
 
-      const docRef = await addDoc(collection(db, "scrapbooks"), newBookData);
+      const docRef = await addDoc(collection(db, "scrapbooks"), data);
+      const newBook = { id: docRef.id, ...data };
 
-      const newBook = {
-        id: docRef.id,
-        ...newBookData
-      };
-
-      setBooks((oldBooks) => [newBook, ...oldBooks]);
+      setBooks([newBook, ...books]);
       setTitle("");
-      setPhotoUrl("");
       setActiveBook(newBook);
-      flash("Scrapbook created 💖");
       setSection("editor");
+      flash("Scrapbook created 💖");
     } catch (e) {
       flash("Create error: " + e.message);
     }
   }
 
-  async function deleteBook(bookId) {
+  async function deleteBook(book) {
     try {
-      await deleteDoc(doc(db, "scrapbooks", bookId));
-
-      setBooks((oldBooks) => oldBooks.filter((book) => book.id !== bookId));
-
-      if (activeBook?.id === bookId) {
-        setActiveBook(null);
-        setSection("home");
-      }
-
+      await deleteDoc(doc(db, "scrapbooks", book.id));
+      setBooks(books.filter((b) => b.id !== book.id));
+      setOpenMenuId(null);
       flash("Scrapbook deleted 🗑️");
     } catch (e) {
       flash("Delete failed: " + e.message);
     }
   }
 
-  async function saveBook() {
-    if (!activeBook?.id) {
-      flash("No scrapbook selected.");
-      return;
-    }
-
-    try {
-      await updateDoc(doc(db, "scrapbooks", activeBook.id), {
-        title: activeBook.title,
-        photoUrl: photoUrl || activeBook.photoUrl || "",
-        updated: "just now"
-      });
-
-      setBooks((oldBooks) =>
-        oldBooks.map((book) =>
-          book.id === activeBook.id
-            ? { ...book, photoUrl: photoUrl || activeBook.photoUrl || "", updated: "just now" }
-            : book
-        )
-      );
-
-      flash("Saved 💖");
-    } catch (e) {
-      flash("Save failed: " + e.message);
-    }
+  function exportBook(book) {
+    setOpenMenuId(null);
+    flash(`Exporting ${book.title} soon 💌`);
   }
-
-  async function uploadPhoto(e) {
-    const file = e.target.files?.[0];
-
-    if (!file || !user || !activeBook?.id) return;
-
-    try {
-      const storageRef = ref(
-        storage,
-        `users/${user.uid}/scrapbooks/${activeBook.id}/${Date.now()}-${file.name}`
-      );
-
-      await uploadBytes(storageRef, file);
-
-      const url = await getDownloadURL(storageRef);
-
-      setPhotoUrl(url);
-      setActiveBook((old) => ({ ...old, photoUrl: url }));
-
-      flash("Photo added 📷");
-    } catch (e) {
-      flash("Photo upload failed: " + e.message);
-    }
-  }
-
-  const filteredBooks = books.filter((book) =>
-    book.title?.toLowerCase().includes(search.toLowerCase())
-  );
 
   function openBook(book) {
     setActiveBook(book);
-    setPhotoUrl(book.photoUrl || "");
+    setOpenMenuId(null);
     setSection("editor");
   }
 
-  function BookCard({ book }) {
+  async function logout() {
+    await signOut(auth);
+    flash("Logged out ✨");
+  }
+
+  if (section === "create") {
     return (
-      <div className="bookCard">
-        <div className="bookMain" onClick={() => openBook(book)}>
-          <div className="thumb">
-            {book.photoUrl ? <img src={book.photoUrl} alt="" /> : book.emoji || "📔"}
-          </div>
+      <div className="phone">
+        <div className="screen paper auth-page">
+          <button className="text-btn" onClick={() => setSection("home")}>← Back</button>
+          <h1>Create New Scrapbook</h1>
 
-          <div>
-            <h3>{book.title}</h3>
-            <div className="muted">Updated {book.updated || "just now"}</div>
+          <div className="auth-card">
+            <input
+              placeholder="Scrapbook title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+            <button onClick={createBook}>Create & Start Editing 💖</button>
           </div>
-
-          <strong>{book.pages || 1} Page</strong>
         </div>
-
-        <button className="deleteBtn" onClick={() => deleteBook(book.id)}>
-          Delete 🗑️
-        </button>
       </div>
     );
   }
@@ -497,155 +289,28 @@ function Home({ user, flash }) {
     return (
       <div className="phone">
         <div className="screen paper editorScreen">
-          <div className="top editorTop">
-            <button className="iconBtn" onClick={() => setSection("home")}>
-              ‹
-            </button>
-
-            <b>{activeBook?.title || "Untitled Scrapbook"}</b>
-
-            <button onClick={saveBook}>Save</button>
+          <div className="top">
+            <button className="iconBtn" onClick={() => setSection("home")}>‹</button>
+            <b>{activeBook?.title}</b>
+            <button onClick={() => flash("Saved 💖")}>Save</button>
           </div>
 
           <div className="canvas prettyCanvas">
-            <div className="note editorNote">
+            <div className="note">
               Good times
               <br />
               <small>& tan lines ♡</small>
             </div>
-
-            {(photoUrl || activeBook?.photoUrl) && (
-              <img
-                className="photo"
-                src={photoUrl || activeBook.photoUrl}
-                alt="Uploaded"
-              />
-            )}
-
             <div className="sticker">🌼</div>
             <div className="tape">pink tape</div>
           </div>
 
-          <div className="tools editorTools">
-            <label className="toolButton">
-              📷 Photo
-              <input type="file" accept="image/*" hidden onChange={uploadPhoto} />
-            </label>
-
-            <button onClick={() => flash("Sticker menu coming next ✨")}>
-              ✨ Sticker
-            </button>
-
-            <button onClick={() => flash("Text tool coming next 𝑇")}>
-              𝑇 Text
-            </button>
-
-            <button onClick={() => flash("Backgrounds coming next 🎨")}>
-              🎨 Background
-            </button>
+          <div className="tools">
+            <button>📷 Photo</button>
+            <button>🏷️ Sticker</button>
+            <button>𝑇 Text</button>
+            <button>🎨 Background</button>
           </div>
-
-          <div className="tools editorTools">
-            <button onClick={() => flash("Layers coming next")}>Layers</button>
-            <button onClick={() => flash("Delete coming next")}>Delete</button>
-            <button onClick={() => flash("Duplicate coming next")}>
-              Duplicate
-            </button>
-            <button onClick={() => flash("Forward coming next")}>Forward</button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (section === "create") {
-    return (
-      <div className="phone">
-        <div className="screen paper auth-page">
-          <button className="text-btn" onClick={() => setSection("home")}>
-            ← Back
-          </button>
-
-          <h1>Create Scrapbook ✨</h1>
-          <p className="auth-sub">Name your new memory book.</p>
-
-          <div className="auth-card">
-            <input
-              placeholder="Scrapbook title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-
-            <button onClick={createBook}>Create & Start Editing 💖</button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (section === "search") {
-    return (
-      <div className="phone">
-        <div className="screen paper">
-          <button className="text-btn" onClick={() => setSection("home")}>
-            ← Back
-          </button>
-
-          <h1>Search Scrapbooks 🔍</h1>
-
-          <input
-            placeholder="Search your scrapbooks..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-
-          {filteredBooks.length === 0 ? (
-            <p className="muted">No scrapbooks found yet.</p>
-          ) : (
-            filteredBooks.map((book) => <BookCard key={book.id} book={book} />)
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  if (section === "templates") {
-    const templates = [
-      "Baby Book 🎀",
-      "Wedding 💍",
-      "Travel ✈️",
-      "Family Memories 💖",
-      "Summer Book ☀️"
-    ];
-
-    return (
-      <div className="phone">
-        <div className="screen paper">
-          <button className="text-btn" onClick={() => setSection("home")}>
-            ← Back
-          </button>
-
-          <h1>Templates 📚</h1>
-
-          {templates.map((template) => (
-            <div className="bookCard" key={template}>
-              <div className="thumb">📖</div>
-
-              <div>
-                <h3>{template}</h3>
-                <p className="muted">Ready-made scrapbook layout</p>
-              </div>
-
-              <button
-                onClick={() => {
-                  setTitle(template);
-                  setSection("create");
-                }}
-              >
-                Use
-              </button>
-            </div>
-          ))}
         </div>
       </div>
     );
@@ -655,127 +320,37 @@ function Home({ user, flash }) {
     return (
       <div className="phone">
         <div className="screen paper auth-page">
-          <button className="text-btn" onClick={() => setSection("home")}>
-            ← Back
-          </button>
-
-          <div className="auth-logo">👤 Profile</div>
-
-          <h1>{user?.displayName || "Pocket User"}</h1>
-          <p className="auth-sub">{user?.email}</p>
-
+          <button className="text-btn" onClick={() => setSection("home")}>← Back</button>
+          <h1>Profile</h1>
           <div className="auth-card">
-            <p>
-              Scrapbooks: <b>{books.length}</b>
-            </p>
-            <p>
-              Pages created: <b>{books.length}</b>
-            </p>
-            <p>
-              Theme: <b>Soft Pink</b>
-            </p>
+            <p>{user?.displayName}</p>
+            <p>{user?.email}</p>
+            <p>Scrapbooks: {books.length}</p>
+            <button onClick={logout}>Logout</button>
           </div>
-
-          <button onClick={logout}>Logout</button>
         </div>
       </div>
     );
   }
 
-  if (section === "settings") {
+  const templates = ["Baby Book 🎀", "Travel ✈️", "Summer Book ☀️", "Family Memories 💗"];
+
+  if (section === "templates") {
     return (
       <div className="phone">
-        <div className="screen paper auth-page">
-          <button className="text-btn" onClick={() => setSection("home")}>
-            ← Back
-          </button>
-
-          <div className="auth-logo">⚙️ Settings</div>
-
-          <h1>App Settings ✨</h1>
-
-          <p className="auth-sub">Customize your scrapbook experience.</p>
-
-          <div className="settings-card">
-            <div className="setting-row">
+        <div className="screen paper">
+          <button className="text-btn" onClick={() => setSection("home")}>← Back</button>
+          <h1>Templates</h1>
+          {templates.map((t) => (
+            <div className="bookCard scrapBookRow" key={t}>
+              <div className="bookCover">📖</div>
               <div>
-                <h3>Dark Mode 🌙</h3>
-                <p>Switch between light and dark.</p>
+                <h3>{t}</h3>
+                <p className="muted">Ready-made scrapbook layout</p>
               </div>
-
-              <button
-                onClick={() => {
-                  setDarkMode(!darkMode);
-                  flash(!darkMode ? "Dark mode on 🌙" : "Light mode on ☀️");
-                }}
-              >
-                {darkMode ? "ON" : "OFF"}
-              </button>
+              <button onClick={() => { setTitle(t); setSection("create"); }}>Use</button>
             </div>
-
-            <div className="setting-row">
-              <div>
-                <h3>Notifications 🔔</h3>
-                <p>Enable scrapbook reminders.</p>
-              </div>
-
-              <button
-                onClick={() => {
-                  setNotifications(!notifications);
-                  flash(
-                    !notifications
-                      ? "Notifications on 🔔"
-                      : "Notifications off"
-                  );
-                }}
-              >
-                {notifications ? "ON" : "OFF"}
-              </button>
-            </div>
-
-            <div className="setting-row">
-              <div>
-                <h3>Auto Save 💾</h3>
-                <p>Automatically save scrapbook edits.</p>
-              </div>
-
-              <button
-                onClick={() => {
-                  setAutoSave(!autoSave);
-                  flash(!autoSave ? "Auto save on 💖" : "Auto save off");
-                }}
-              >
-                {autoSave ? "ON" : "OFF"}
-              </button>
-            </div>
-
-            <div className="setting-row">
-              <div>
-                <h3>Profile 👤</h3>
-                <p>Edit your profile details.</p>
-              </div>
-
-              <button onClick={() => setSection("profile")}>Open</button>
-            </div>
-
-            <div className="setting-row">
-              <div>
-                <h3>Templates 📚</h3>
-                <p>Browse scrapbook templates.</p>
-              </div>
-
-              <button onClick={() => setSection("templates")}>Open</button>
-            </div>
-
-            <div className="setting-row">
-              <div>
-                <h3>Logout 🚪</h3>
-                <p>Sign out of Pocket Scrapbook.</p>
-              </div>
-
-              <button onClick={logout}>Logout</button>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
     );
@@ -783,60 +358,100 @@ function Home({ user, flash }) {
 
   return (
     <div className="phone">
-      <div className="screen paper">
-        <div className="top">
-          <button className="iconBtn" onClick={() => setSection("settings")}>
-            ⚙️
-          </button>
+      <div className="screen paper homeLikeScreenshot">
+        <div className="homeHeader">
+          <button className="circleBtn">☰</button>
 
-          <div className="brand">
-            Pocket<span>Scrapbook</span>
+          <div className="headerIcons">
+            <button className="circleBtn">👑</button>
+            <button className="circleBtn" onClick={() => flash("No notifications 🔔")}>🔔</button>
           </div>
-
-          <button
-            className="iconBtn"
-            onClick={() => flash("No new notifications 🔔")}
-          >
-            🔔
-          </button>
         </div>
 
-        <h1>Hi {user?.displayName || "Friend"} 💖</h1>
-        <p className="muted">Ready to save more memories?</p>
+        <div className="brandLogo">
+          Scrap<span>Flip</span>
+        </div>
 
-        <div className="hero">🌼 📸 🦋</div>
+        <p className="homeTagline">
+          Turn your memories into<br />beautiful stories 💗
+        </p>
 
-        <button className="createCard" onClick={() => setSection("create")}>
-          <div style={{ fontSize: 28 }}>➕</div>
-          <h2>Create New Scrapbook</h2>
-          <p>Start a magical story</p>
+        <div className="decorPolaroid">
+          <span className="flower">🌼</span>
+          <div className="miniPhoto">🌅</div>
+          <span className="butterfly">🦋</span>
+          <span className="heart">💗</span>
+        </div>
+
+        <button className="bigCreateCard" onClick={() => setSection("create")}>
+          <div className="bigPlus">＋</div>
+          <div>
+            <h2>Create New Scrapbook</h2>
+            <p>Start a new scrapbook</p>
+          </div>
+          <div className="bookArt">📔</div>
         </button>
 
         <div className="row">
           <h2>My Scrapbooks</h2>
-
-          <button className="text-btn" onClick={() => setSection("search")}>
-            See All
-          </button>
+          <button className="seeAll" onClick={() => flash("Showing all scrapbooks")}>See All ›</button>
         </div>
 
-        {loadingBooks ? (
+        {loading ? (
           <p className="muted">Loading scrapbooks...</p>
         ) : books.length === 0 ? (
           <p className="muted">No scrapbooks yet. Create your first one 💕</p>
         ) : (
-          books.map((book) => <BookCard key={book.id} book={book} />)
+          books.map((book) => (
+            <div className="scrapBookRow" key={book.id}>
+              <div className="bookCover">
+                {book.cover || "📔"}
+              </div>
+
+              <div className="bookInfo" onClick={() => openBook(book)}>
+                <h3>{book.title}</h3>
+                <p>{book.updated || "Updated just now"}</p>
+                <div className="avatarRow">👩🏻 👱🏻‍♀️ <span>+2</span></div>
+              </div>
+
+              <div className="bookMeta">
+                <button
+                  className="dots"
+                  onClick={() =>
+                    setOpenMenuId(openMenuId === book.id ? null : book.id)
+                  }
+                >
+                  ⋯
+                </button>
+
+                <span>{book.pages || 1} Pages</span>
+
+                {openMenuId === book.id && (
+                  <div className="miniMenu">
+                    <button onClick={() => openBook(book)}>Edit</button>
+                    <button onClick={() => exportBook(book)}>Export</button>
+                    <button onClick={() => deleteBook(book)}>Delete</button>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))
         )}
+
+        <div className="shortcutTray">
+          <button onClick={() => setSection("templates")}>📖<br />Templates</button>
+          <button onClick={() => flash("Stickers coming soon ✨")}>🫧<br />Stickers</button>
+          <button onClick={() => flash("Fonts coming soon Aa")}>Aa<br />Fonts</button>
+          <button onClick={() => flash("Backgrounds coming soon 🖼️")}>🖼️<br />Backgrounds</button>
+        </div>
       </div>
 
       <div className="bottom">
-        <button onClick={() => setSection("home")}>🏠</button>
-        <button onClick={() => setSection("search")}>🔍</button>
-        <button className="plus" onClick={() => setSection("create")}>
-          ＋
-        </button>
-        <button onClick={() => setSection("templates")}>📚</button>
-        <button onClick={() => setSection("profile")}>👤</button>
+        <button onClick={() => setSection("home")}>🏠<br />Home</button>
+        <button onClick={() => flash("My Books")}>📖<br />My Books</button>
+        <button className="plus" onClick={() => setSection("create")}>＋</button>
+        <button onClick={() => setSection("templates")}>▦<br />Templates</button>
+        <button onClick={() => setSection("profile")}>♡<br />Profile</button>
       </div>
     </div>
   );
