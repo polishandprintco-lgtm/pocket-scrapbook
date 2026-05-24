@@ -132,7 +132,7 @@ function Login({ go, flash }) {
       flash("Login error: " + e.message);
     }
   }
-  ```jsx
+  
 return (
   <Phone>
     <div className="auth-page">
