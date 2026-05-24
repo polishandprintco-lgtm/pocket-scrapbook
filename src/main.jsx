@@ -556,6 +556,9 @@ function Forgot({ go, flash }) {
 
 function Home({ user, flash }) {
   const [section, setSection] = useState("home");
+  const [books, setBooks] = useState([]);
+  const [title, setTitle] = useState("");
+  const [search, setSearch] = useState("");
 
   async function logout() {
     await signOut(auth);
@@ -563,16 +566,144 @@ function Home({ user, flash }) {
     window.location.reload();
   }
 
+  async function createBook() {
+    if (!title.trim()) {
+      flash("Add a scrapbook title 💕");
+      return;
+    }
+
+    const newBook = {
+      title: title.trim(),
+      pages: 1,
+      emoji: "📔",
+      updated: "just now"
+    };
+
+    setBooks([newBook, ...books]);
+
+    if (user) {
+      await addDoc(collection(db, "scrapbooks"), {
+        uid: user.uid,
+        title: title.trim(),
+        pages: 1,
+        createdAt: serverTimestamp()
+      });
+    }
+
+    setTitle("");
+    flash("Scrapbook created 💖");
+    setSection("home");
+  }
+
+  const filteredBooks = books.filter((book) =>
+    book.title.toLowerCase().includes(search.toLowerCase())
+  );
+
   if (section === "create") {
     return (
       <div className="phone">
         <div className="screen paper auth-page">
           <button className="text-btn" onClick={() => setSection("home")}>← Back</button>
           <h1>Create Scrapbook ✨</h1>
+          <p className="auth-sub">Name your new memory book.</p>
+
           <div className="auth-card">
-            <input placeholder="Scrapbook title" />
-            <button onClick={() => flash("Scrapbook created 💖")}>Create</button>
+            <input
+              placeholder="Scrapbook title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+
+            <button onClick={createBook}>
+              Create 💖
+            </button>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (section === "search") {
+    return (
+      <div className="phone">
+        <div className="screen paper">
+          <button className="text-btn" onClick={() => setSection("home")}>← Back</button>
+          <h1>Search Scrapbooks 🔍</h1>
+
+          <input
+            placeholder="Search your scrapbooks..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+
+          {filteredBooks.length === 0 ? (
+            <p className="muted">No scrapbooks found yet.</p>
+          ) : (
+            filteredBooks.map((book) => (
+              <div className="bookCard" key={book.title}>
+                <div className="thumb">{book.emoji}</div>
+                <div>
+                  <h3>{book.title}</h3>
+                  <div className="muted">Updated {book.updated}</div>
+                </div>
+                <strong>{book.pages} Page</strong>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  if (section === "templates") {
+    const templates = ["Baby Book 🎀", "Wedding 💍", "Travel ✈️", "Family Memories 💖", "Summer Book ☀️"];
+
+    return (
+      <div className="phone">
+        <div className="screen paper">
+          <button className="text-btn" onClick={() => setSection("home")}>← Back</button>
+          <h1>Templates 📚</h1>
+
+          {templates.map((template) => (
+            <div className="bookCard" key={template}>
+              <div className="thumb">📖</div>
+              <div>
+                <h3>{template}</h3>
+                <p className="muted">Ready-made scrapbook layout</p>
+              </div>
+              <button onClick={() => {
+                setTitle(template);
+                setSection("create");
+              }}>
+                Use
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (section === "profile") {
+    return (
+      <div className="phone">
+        <div className="screen paper auth-page">
+          <button className="text-btn" onClick={() => setSection("home")}>← Back</button>
+
+          <div className="auth-logo">👤 Profile</div>
+
+          <h1>{user?.displayName || "Pocket User"}</h1>
+          <p className="auth-sub">{user?.email}</p>
+
+          <div className="auth-card">
+            <p>Scrapbooks: <b>{books.length}</b></p>
+            <p>Pages created: <b>{books.length}</b></p>
+            <p>Theme: <b>Soft Pink</b></p>
+          </div>
+
+          <button onClick={logout}>
+            Logout
+          </button>
         </div>
       </div>
     );
@@ -600,36 +731,38 @@ function Home({ user, flash }) {
 
         <div className="row">
           <h2>My Scrapbooks</h2>
-          <button className="text-btn" onClick={() => flash("My Scrapbooks coming soon 📚")}>See All</button>
+          <button className="text-btn" onClick={() => setSection("search")}>See All</button>
         </div>
 
-        {demoBooks.map((book) => (
-          <div className="bookCard" key={book.title} onClick={() => flash(`Opening ${book.title}`)}>
-            <div className="thumb">{book.emoji}</div>
-            <div>
-              <h3>{book.title}</h3>
-              <div className="muted">Updated {book.updated}</div>
+        {books.length === 0 ? (
+          <p className="muted">No scrapbooks yet. Create your first one 💕</p>
+        ) : (
+          books.map((book) => (
+            <div className="bookCard" key={book.title}>
+              <div className="thumb">{book.emoji}</div>
+              <div>
+                <h3>{book.title}</h3>
+                <div className="muted">Updated {book.updated}</div>
+              </div>
+              <strong>{book.pages} Page</strong>
             </div>
-            <strong>{book.pages} Pages</strong>
-          </div>
-        ))}
+          ))
+        )}
 
         <div className="shortcuts">
-          <button onClick={() => flash("Templates coming soon 📚")}>📚 Templates</button>
+          <button onClick={() => setSection("templates")}>📚 Templates</button>
           <button onClick={() => flash("Stickers coming soon ✨")}>✨ Stickers</button>
           <button onClick={() => flash("Fonts coming soon 🎨")}>🎨 Fonts</button>
           <button onClick={() => flash("Backgrounds coming soon 🖼️")}>🖼️ Backgrounds</button>
         </div>
-
-        <button onClick={logout}>Logout</button>
       </div>
 
       <div className="bottom">
-        <button onClick={() => flash("Home 🏠")}>🏠</button>
-        <button onClick={() => flash("Search coming soon 🔍")}>🔍</button>
+        <button onClick={() => setSection("home")}>🏠</button>
+        <button onClick={() => setSection("search")}>🔍</button>
         <button className="plus" onClick={() => setSection("create")}>＋</button>
-        <button onClick={() => flash("Templates coming soon 📚")}>📚</button>
-        <button onClick={() => flash("Profile coming soon 👤")}>👤</button>
+        <button onClick={() => setSection("templates")}>📚</button>
+        <button onClick={() => setSection("profile")}>👤</button>
       </div>
     </div>
   );
