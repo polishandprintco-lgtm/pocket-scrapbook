@@ -368,7 +368,7 @@ function Home({ user, flash }) {
         </div>
 
         <div className="brandLogo">
-          Scrap<span>Flip</span>
+          Pocket<span>Scrapbook</span>
         </div>
 
         <p className="homeTagline">
