@@ -223,3 +223,68 @@ button,input,select{font:inherit} button{border:0;border-radius:22px;background:
     padding: 24px;
   }
 }
+
+```css
+.auth-page{
+  padding:40px 24px;
+  text-align:center;
+}
+
+.auth-logo{
+  font-size:42px;
+  font-weight:700;
+  margin-bottom:20px;
+  color:#6b4f46;
+}
+
+.auth-page h1{
+  font-size:42px;
+  line-height:1.1;
+  color:#5e463f;
+  margin-bottom:14px;
+}
+
+.auth-sub{
+  color:#8a756d;
+  font-size:18px;
+  margin-bottom:34px;
+}
+
+.auth-card{
+  background:white;
+  border-radius:30px;
+  padding:28px;
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+  box-shadow:0 15px 40px rgba(255,182,193,.18);
+}
+
+.auth-card input{
+  border:none;
+  background:#f7f2ef;
+  padding:18px;
+  border-radius:18px;
+  font-size:17px;
+}
+
+.auth-card button{
+  background:#eba8bc;
+  border:none;
+  color:white;
+  padding:18px;
+  border-radius:22px;
+  font-size:20px;
+  font-weight:700;
+  cursor:pointer;
+  box-shadow:0 10px 30px rgba(235,168,188,.35);
+}
+
+.text-btn{
+  background:none;
+  border:none;
+  margin-top:18px;
+  color:#d67f9c;
+  font-size:16px;
+}
+```
