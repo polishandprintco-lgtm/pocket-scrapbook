@@ -188,8 +188,6 @@ return (
     </div>
   </Phone>
 )
-```
-
 }
 
 function Signup({ go, flash }) {
