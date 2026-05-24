@@ -148,6 +148,7 @@ function Welcome({ go }) {
     </div>
   </Phone>
 );
+}
 
 function Login({ go, flash }) {
   const [email, setEmail] = useState("");
