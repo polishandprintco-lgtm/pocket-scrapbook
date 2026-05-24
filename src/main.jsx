@@ -122,13 +122,16 @@ function Signup({ go, flash }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
+
   async function submit() {
     try {
       if (!name || !username || !email || !password) throw new Error("Fill in every field.");
       if (password.length < 6) throw new Error("Password needs at least 6 characters.");
       if (password !== confirm) throw new Error("Passwords do not match.");
+
       const cred = await createUserWithEmailAndPassword(auth, email.trim(), password);
       await updateProfile(cred.user, { displayName: name });
+
       await addDoc(collection(db, "profiles"), {
         uid: cred.user.uid,
         name,
@@ -136,22 +139,76 @@ function Signup({ go, flash }) {
         email: email.trim(),
         createdAt: serverTimestamp(),
       });
+
       flash("Account created!");
       go("home");
     } catch (e) {
-      console.error("SIGNUP ERROR", e);
       flash("Signup error: " + e.message);
     }
   }
-  return <FormPage title="Sign Up" go={go}>
-    <input placeholder="Full name" value={name} onChange={(e) => setName(e.target.value)} />
-    <input placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} />
-    <input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
-    <input placeholder="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-    <input placeholder="Confirm password" type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} />
-    <button onClick={submit}>Create Account</button>
-    <button className="secondary" onClick={() => go("login")}>Already have an account?</button>
-  </FormPage>;
+
+  return (
+    <main className="signup-page">
+      <section className="signup-brand">
+        <div className="flower-corner">🌸</div>
+        <h1>Pocket <span>Scrapbook</span></h1>
+        <p className="tagline">Turn your memories into beautiful stories 💖</p>
+        <p className="script">Cherish. Create. Remember.</p>
+
+        <div className="polaroid-stack">
+          <div className="tape">♡</div>
+          <div className="photo">🌅</div>
+        </div>
+
+        <div className="feature-paper">
+          <p>📖 Beautiful scrapbooks</p>
+          <p>⭐ Stickers, fonts & templates</p>
+          <p>☁️ Save & share your stories anywhere</p>
+        </div>
+      </section>
+
+      <section className="signup-card">
+        <div className="heart-badge">💗</div>
+        <h2>Create your account</h2>
+        <p>Join Pocket Scrapbook and start preserving your memories ✨</p>
+
+        <label className="pretty-input">👤
+          <input value={name} onChange={e => setName(e.target.value)} placeholder="Full Name" />
+        </label>
+
+        <label className="pretty-input">@ 
+          <input value={username} onChange={e => setUsername(e.target.value)} placeholder="Username" />
+        </label>
+
+        <label className="pretty-input">💌
+          <input value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" />
+        </label>
+
+        <label className="pretty-input">🔒
+          <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Password" />
+        </label>
+
+        <label className="pretty-input">🔐
+          <input type="password" value={confirm} onChange={e => setConfirm(e.target.value)} placeholder="Confirm Password" />
+        </label>
+
+        <div className="password-tips">
+          <p>♡ At least 6 characters</p>
+          <p>♡ Passwords must match</p>
+        </div>
+
+        <button className="create-account-btn" onClick={submit}>✨ Create Account</button>
+
+        <div className="or-line"><span>or</span></div>
+
+        <button className="google-btn">🌈 Continue with Google</button>
+
+        <p className="login-note">
+          Already have an account? <button onClick={() => go("login")}>Log in</button>
+        </p>
+      </section>
+    </main>
+  );
 }
 
 function Forgot({ go, flash }) {
