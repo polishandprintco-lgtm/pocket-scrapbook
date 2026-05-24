@@ -134,7 +134,7 @@ function Login({ go, flash }) {
   }
   
 return (
-  <Phone>
+  <div className="screen paper">
     <div className="auth-page">
 
       <div className="auth-logo">
