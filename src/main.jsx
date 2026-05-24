@@ -555,144 +555,85 @@ function Forgot({ go, flash }) {
 /* ---------------- HOME ---------------- */
 
 function Home({ user, flash }) {
+  const [section, setSection] = useState("home");
 
   async function logout() {
-
     await signOut(auth);
-
     flash("Logged out ✨");
-
     window.location.reload();
+  }
 
+  if (section === "create") {
+    return (
+      <div className="phone">
+        <div className="screen paper auth-page">
+          <button className="text-btn" onClick={() => setSection("home")}>← Back</button>
+          <h1>Create Scrapbook ✨</h1>
+          <div className="auth-card">
+            <input placeholder="Scrapbook title" />
+            <button onClick={() => flash("Scrapbook created 💖")}>Create</button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="phone">
-
       <div className="screen paper">
-
         <div className="top">
-
-          <button className="iconBtn">
-            ☰
-          </button>
-
-          <div className="brand">
-            Pocket
-            <span>Scrapbook</span>
-          </div>
-
-          <button className="iconBtn">
-            🔔
-          </button>
-
+          <button className="iconBtn" onClick={() => flash("Menu coming soon ✨")}>☰</button>
+          <div className="brand">Pocket<span>Scrapbook</span></div>
+          <button className="iconBtn" onClick={() => flash("No new notifications 🔔")}>🔔</button>
         </div>
 
-        <div style={{ marginTop: 20 }}>
+        <h1>Hi {user?.displayName || "Friend"} 💖</h1>
+        <p className="muted">Ready to save more memories?</p>
 
-          <h1>
-            Hi {user?.displayName || "Friend"} 💖
-          </h1>
+        <div className="hero">🌼 📸 🦋</div>
 
-          <p className="muted">
-            Ready to save more memories?
-          </p>
-
-        </div>
-
-        <div className="hero">
-          🌼 📸 🦋
-        </div>
-
-        <button className="createCard">
-
-          <div style={{ fontSize: 28 }}>
-            ➕
-          </div>
-
-          <h2>
-            Create New Scrapbook
-          </h2>
-
-          <p>
-            Start a magical story
-          </p>
-
+        <button className="createCard" onClick={() => setSection("create")}>
+          <div style={{ fontSize: 28 }}>➕</div>
+          <h2>Create New Scrapbook</h2>
+          <p>Start a magical story</p>
         </button>
 
         <div className="row">
-
-          <h2>
-            My Scrapbooks
-          </h2>
-
-          <button className="text-btn">
-            See All
-          </button>
-
+          <h2>My Scrapbooks</h2>
+          <button className="text-btn" onClick={() => flash("My Scrapbooks coming soon 📚")}>See All</button>
         </div>
 
         {demoBooks.map((book) => (
-
-          <div
-            className="bookCard"
-            key={book.title}
-          >
-
-            <div className="thumb">
-              {book.emoji}
-            </div>
-
+          <div className="bookCard" key={book.title} onClick={() => flash(`Opening ${book.title}`)}>
+            <div className="thumb">{book.emoji}</div>
             <div>
-
-              <h3>
-                {book.title}
-              </h3>
-
-              <div className="muted">
-                Updated {book.updated}
-              </div>
-
+              <h3>{book.title}</h3>
+              <div className="muted">Updated {book.updated}</div>
             </div>
-
-            <strong>
-              {book.pages} Pages
-            </strong>
-
+            <strong>{book.pages} Pages</strong>
           </div>
-
         ))}
 
         <div className="shortcuts">
-
-          <button>
-            📚 Templates
-          </button>
-
-          <button>
-            ✨ Stickers
-          </button>
-
-          <button>
-            🎨 Fonts
-          </button>
-
-          <button>
-            🖼️ Backgrounds
-          </button>
-
+          <button onClick={() => flash("Templates coming soon 📚")}>📚 Templates</button>
+          <button onClick={() => flash("Stickers coming soon ✨")}>✨ Stickers</button>
+          <button onClick={() => flash("Fonts coming soon 🎨")}>🎨 Fonts</button>
+          <button onClick={() => flash("Backgrounds coming soon 🖼️")}>🖼️ Backgrounds</button>
         </div>
 
-        <button onClick={logout}>
-          Logout
-        </button>
-
+        <button onClick={logout}>Logout</button>
       </div>
 
+      <div className="bottom">
+        <button onClick={() => flash("Home 🏠")}>🏠</button>
+        <button onClick={() => flash("Search coming soon 🔍")}>🔍</button>
+        <button className="plus" onClick={() => setSection("create")}>＋</button>
+        <button onClick={() => flash("Templates coming soon 📚")}>📚</button>
+        <button onClick={() => flash("Profile coming soon 👤")}>👤</button>
+      </div>
     </div>
   );
 }
-
 createRoot(
   document.getElementById("root")
 ).render(
