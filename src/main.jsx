@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 
@@ -19,7 +18,9 @@ import {
   getDocs,
   orderBy,
   query,
-  serverTimestamp
+  serverTimestamp,
+  deleteDoc,
+  doc
 } from "firebase/firestore";
 
 import "./style.css";
@@ -327,14 +328,17 @@ function Home({ user, flash }) {
     try {
       setLoadingBooks(true);
 
-      const q = query(collection(db, "scrapbooks"), orderBy("createdAt", "desc"));
+      const q = query(
+        collection(db, "scrapbooks"),
+        orderBy("createdAt", "desc")
+      );
 
       const snap = await getDocs(q);
 
       const userBooks = snap.docs
-        .map((doc) => ({
-          id: doc.id,
-          ...doc.data()
+        .map((document) => ({
+          id: document.id,
+          ...document.data()
         }))
         .filter((book) => book.uid === user.uid);
 
@@ -394,6 +398,25 @@ function Home({ user, flash }) {
     }
   }
 
+  async function deleteBook(bookId) {
+    try {
+      await deleteDoc(doc(db, "scrapbooks", bookId));
+
+      setBooks((oldBooks) =>
+        oldBooks.filter((book) => book.id !== bookId)
+      );
+
+      if (activeBook?.id === bookId) {
+        setActiveBook(null);
+        setSection("home");
+      }
+
+      flash("Scrapbook deleted 🗑️");
+    } catch (e) {
+      flash("Delete failed: " + e.message);
+    }
+  }
+
   const filteredBooks = books.filter((book) =>
     book.title?.toLowerCase().includes(search.toLowerCase())
   );
@@ -401,6 +424,33 @@ function Home({ user, flash }) {
   function openBook(book) {
     setActiveBook(book);
     setSection("editor");
+  }
+
+  function BookCard({ book }) {
+    return (
+      <div className="bookCard">
+        <div className="bookMain" onClick={() => openBook(book)}>
+          <div className="thumb">{book.emoji || "📔"}</div>
+
+          <div>
+            <h3>{book.title}</h3>
+
+            <div className="muted">
+              Updated {book.updated || "just now"}
+            </div>
+          </div>
+
+          <strong>{book.pages || 1} Page</strong>
+        </div>
+
+        <button
+          className="deleteBtn"
+          onClick={() => deleteBook(book.id)}
+        >
+          Delete 🗑️
+        </button>
+      </div>
+    );
   }
 
   if (section === "editor") {
@@ -504,23 +554,7 @@ function Home({ user, flash }) {
             <p className="muted">No scrapbooks found yet.</p>
           ) : (
             filteredBooks.map((book) => (
-              <div
-                className="bookCard"
-                key={book.id}
-                onClick={() => openBook(book)}
-              >
-                <div className="thumb">{book.emoji || "📔"}</div>
-
-                <div>
-                  <h3>{book.title}</h3>
-
-                  <div className="muted">
-                    Updated {book.updated || "just now"}
-                  </div>
-                </div>
-
-                <strong>{book.pages || 1} Page</strong>
-              </div>
+              <BookCard key={book.id} book={book} />
             ))
           )}
         </div>
@@ -750,40 +784,8 @@ function Home({ user, flash }) {
         ) : books.length === 0 ? (
           <p className="muted">No scrapbooks yet. Create your first one 💕</p>
         ) : (
-          books.map((book) => (
-            <div
-              className="bookCard"
-              key={book.id}
-              onClick={() => openBook(book)}
-            >
-              <div className="thumb">{book.emoji || "📔"}</div>
-
-              <div>
-                <h3>{book.title}</h3>
-
-                <div className="muted">
-                  Updated {book.updated || "just now"}
-                </div>
-              </div>
-
-              <strong>{book.pages || 1} Page</strong>
-            </div>
-          ))
+          books.map((book) => <BookCard key={book.id} book={book} />)
         )}
-
-        <div className="shortcuts">
-          <button onClick={() => setSection("templates")}>📚 Templates</button>
-
-          <button onClick={() => flash("Stickers coming soon ✨")}>
-            ✨ Stickers
-          </button>
-
-          <button onClick={() => flash("Fonts coming soon 🎨")}>🎨 Fonts</button>
-
-          <button onClick={() => flash("Backgrounds coming soon 🖼️")}>
-            🖼️ Backgrounds
-          </button>
-        </div>
       </div>
 
       <div className="bottom">
