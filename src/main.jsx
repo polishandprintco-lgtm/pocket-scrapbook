@@ -2,10 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 
-import {
-  auth,
-  db
-} from "./firebase";
+import { auth, db } from "./firebase";
 
 import {
   createUserWithEmailAndPassword,
@@ -19,17 +16,10 @@ import {
 import {
   addDoc,
   collection,
-  getDocs,
-  orderBy,
-  query,
   serverTimestamp
 } from "firebase/firestore";
 
 import "./style.css";
-
-/* ---------------------------------- */
-/* DEMO DATA */
-/* ---------------------------------- */
 
 const demoBooks = [
   {
@@ -52,10 +42,6 @@ const demoBooks = [
   }
 ];
 
-/* ---------------------------------- */
-/* APP */
-/* ---------------------------------- */
-
 function App() {
 
   const [page, setPage] = useState("welcome");
@@ -63,11 +49,13 @@ function App() {
   const [user, setUser] = useState(null);
 
   function flash(message) {
+
     setToast(message);
 
     setTimeout(() => {
       setToast("");
     }, 3000);
+
   }
 
   useEffect(() => {
@@ -124,7 +112,6 @@ function App() {
       {page === "home" && (
         <Home
           user={user}
-          go={setPage}
           flash={flash}
         />
       )}
@@ -133,9 +120,7 @@ function App() {
   );
 }
 
-/* ---------------------------------- */
-/* WELCOME */
-/* ---------------------------------- */
+/* ---------------- WELCOME ---------------- */
 
 function Welcome({ go }) {
 
@@ -153,8 +138,8 @@ function Welcome({ go }) {
         </h1>
 
         <p className="auth-sub">
-          Save your sweetest memories, photos, milestones,
-          and magical moments in one cozy scrapbook.
+          Save your sweetest memories,
+          milestones, and magical moments.
         </p>
 
         <div className="hero">
@@ -184,14 +169,13 @@ function Welcome({ go }) {
   );
 }
 
-/* ---------------------------------- */
-/* LOGIN */
-/* ---------------------------------- */
+/* ---------------- LOGIN ---------------- */
 
 function Login({ go, flash }) {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   async function submit() {
 
@@ -203,13 +187,11 @@ function Login({ go, flash }) {
         password
       );
 
-      flash("Logged in successfully 💖");
+      flash("Logged in 💖");
 
       go("home");
 
     } catch (e) {
-
-      console.error(e);
 
       flash(
         "Login error: " + e.message
@@ -233,8 +215,7 @@ function Login({ go, flash }) {
         </h1>
 
         <p className="auth-sub">
-          Save memories, milestones,
-          and magical moments forever.
+          Continue your magical scrapbook journey.
         </p>
 
         <div className="auth-card">
@@ -247,18 +228,33 @@ function Login({ go, flash }) {
             }
           />
 
-          <input
-            placeholder="Password"
-            type="password"
-            value={password}
-            onChange={(e) =>
-              setPassword(e.target.value)
-            }
-          />
+          <div className="passwordWrap">
 
-          <button
-            onClick={submit}
-          >
+            <input
+              placeholder="Password"
+              type={
+                showPassword
+                  ? "text"
+                  : "password"
+              }
+              value={password}
+              onChange={(e) =>
+                setPassword(e.target.value)
+              }
+            />
+
+            <button
+              className="showBtn"
+              onClick={() =>
+                setShowPassword(!showPassword)
+              }
+            >
+              {showPassword ? "🙈" : "👁️"}
+            </button>
+
+          </div>
+
+          <button onClick={submit}>
             Login ✨
           </button>
 
@@ -284,9 +280,7 @@ function Login({ go, flash }) {
   );
 }
 
-/* ---------------------------------- */
-/* SIGNUP */
-/* ---------------------------------- */
+/* ---------------- SIGNUP ---------------- */
 
 function Signup({ go, flash }) {
 
@@ -295,6 +289,12 @@ function Signup({ go, flash }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
+
+  const [showPassword, setShowPassword] =
+    useState(false);
+
+  const [showConfirm, setShowConfirm] =
+    useState(false);
 
   async function submit() {
 
@@ -354,8 +354,6 @@ function Signup({ go, flash }) {
 
     } catch (e) {
 
-      console.error(e);
-
       flash(
         "Signup error: " + e.message
       );
@@ -378,8 +376,8 @@ function Signup({ go, flash }) {
         </h1>
 
         <p className="auth-sub">
-          Keep all your memories,
-          photos, and favorite moments safe.
+          Store photos, memories,
+          and magical moments forever.
         </p>
 
         <div className="auth-card">
@@ -408,27 +406,59 @@ function Signup({ go, flash }) {
             }
           />
 
-          <input
-            placeholder="Password"
-            type="password"
-            value={password}
-            onChange={(e) =>
-              setPassword(e.target.value)
-            }
-          />
+          <div className="passwordWrap">
 
-          <input
-            placeholder="Confirm Password"
-            type="password"
-            value={confirm}
-            onChange={(e) =>
-              setConfirm(e.target.value)
-            }
-          />
+            <input
+              placeholder="Password"
+              type={
+                showPassword
+                  ? "text"
+                  : "password"
+              }
+              value={password}
+              onChange={(e) =>
+                setPassword(e.target.value)
+              }
+            />
 
-          <button
-            onClick={submit}
-          >
+            <button
+              className="showBtn"
+              onClick={() =>
+                setShowPassword(!showPassword)
+              }
+            >
+              {showPassword ? "🙈" : "👁️"}
+            </button>
+
+          </div>
+
+          <div className="passwordWrap">
+
+            <input
+              placeholder="Confirm Password"
+              type={
+                showConfirm
+                  ? "text"
+                  : "password"
+              }
+              value={confirm}
+              onChange={(e) =>
+                setConfirm(e.target.value)
+              }
+            />
+
+            <button
+              className="showBtn"
+              onClick={() =>
+                setShowConfirm(!showConfirm)
+              }
+            >
+              {showConfirm ? "🙈" : "👁️"}
+            </button>
+
+          </div>
+
+          <button onClick={submit}>
             💖 Create Account
           </button>
 
@@ -447,9 +477,7 @@ function Signup({ go, flash }) {
   );
 }
 
-/* ---------------------------------- */
-/* FORGOT */
-/* ---------------------------------- */
+/* ---------------- FORGOT ---------------- */
 
 function Forgot({ go, flash }) {
 
@@ -464,9 +492,7 @@ function Forgot({ go, flash }) {
         email.trim()
       );
 
-      flash(
-        "Password reset email sent 💌"
-      );
+      flash("Reset email sent 💌");
 
       go("login");
 
@@ -494,8 +520,7 @@ function Forgot({ go, flash }) {
         </h1>
 
         <p className="auth-sub">
-          Enter your email to receive
-          a password reset link.
+          Enter your email to receive a reset link.
         </p>
 
         <div className="auth-card">
@@ -508,9 +533,7 @@ function Forgot({ go, flash }) {
             }
           />
 
-          <button
-            onClick={reset}
-          >
+          <button onClick={reset}>
             Send Reset Link
           </button>
 
@@ -529,20 +552,17 @@ function Forgot({ go, flash }) {
   );
 }
 
-/* ---------------------------------- */
-/* HOME */
-/* ---------------------------------- */
+/* ---------------- HOME ---------------- */
 
-function Home({
-  user,
-  flash
-}) {
+function Home({ user, flash }) {
 
   async function logout() {
 
     await signOut(auth);
 
     flash("Logged out ✨");
+
+    window.location.reload();
 
   }
 
@@ -559,9 +579,7 @@ function Home({
 
           <div className="brand">
             Pocket
-            <span>
-              Scrapbook
-            </span>
+            <span>Scrapbook</span>
           </div>
 
           <button className="iconBtn">
@@ -570,11 +588,7 @@ function Home({
 
         </div>
 
-        <div
-          style={{
-            marginTop: 20
-          }}
-        >
+        <div style={{ marginTop: 20 }}>
 
           <h1>
             Hi {user?.displayName || "Friend"} 💖
@@ -592,11 +606,7 @@ function Home({
 
         <button className="createCard">
 
-          <div
-            style={{
-              fontSize: 28
-            }}
-          >
+          <div style={{ fontSize: 28 }}>
             ➕
           </div>
 
@@ -605,7 +615,7 @@ function Home({
           </h2>
 
           <p>
-            Start a new magical story
+            Start a magical story
           </p>
 
         </button>
@@ -673,34 +683,8 @@ function Home({
 
         </div>
 
-        <button
-          onClick={logout}
-        >
+        <button onClick={logout}>
           Logout
-        </button>
-
-      </div>
-
-      <div className="bottom">
-
-        <button>
-          🏠
-        </button>
-
-        <button>
-          🔍
-        </button>
-
-        <button className="plus">
-          ＋
-        </button>
-
-        <button>
-          📚
-        </button>
-
-        <button>
-          👤
         </button>
 
       </div>
@@ -708,10 +692,6 @@ function Home({
     </div>
   );
 }
-
-/* ---------------------------------- */
-/* RENDER */
-/* ---------------------------------- */
 
 createRoot(
   document.getElementById("root")
