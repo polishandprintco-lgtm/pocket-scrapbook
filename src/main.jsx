@@ -103,7 +103,7 @@ function Welcome({ go }) {
       </div>
 
       <button onClick={() => go("signup")}>
-        Get Started
+        Get Started 
       </button>
 
       <button
