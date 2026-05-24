@@ -408,3 +408,219 @@ select{
   border-radius:999px;
   cursor:pointer;
 }
+.homeLikeScreenshot{
+  padding-top:28px;
+}
+
+.homeHeader{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.headerIcons{
+  display:flex;
+  gap:10px;
+}
+
+.circleBtn{
+  width:52px;
+  height:52px;
+  border-radius:50%;
+  background:white;
+  color:#5A463A;
+  box-shadow:0 8px 22px rgba(90,70,58,.08);
+  padding:0;
+}
+
+.brandLogo{
+  margin-top:28px;
+  font-size:58px;
+  font-family:cursive;
+  color:#4d392f;
+}
+
+.brandLogo span{
+  color:#e8a7b8;
+}
+
+.homeTagline{
+  font-size:20px;
+  font-weight:600;
+  line-height:1.4;
+  color:#5A463A;
+}
+
+.decorPolaroid{
+  height:130px;
+  position:relative;
+}
+
+.miniPhoto{
+  position:absolute;
+  right:70px;
+  top:0;
+  background:white;
+  padding:14px 18px 24px;
+  font-size:48px;
+  transform:rotate(8deg);
+  box-shadow:0 10px 20px #0001;
+}
+
+.flower{
+  position:absolute;
+  right:210px;
+  top:40px;
+  font-size:34px;
+}
+
+.butterfly{
+  position:absolute;
+  right:20px;
+  top:40px;
+  font-size:28px;
+}
+
+.heart{
+  position:absolute;
+  right:90px;
+  top:92px;
+}
+
+.bigCreateCard{
+  width:100%;
+  background:#f7dbe3;
+  color:#5A463A;
+  border:2px dashed #efbfd0;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  border-radius:28px;
+  padding:24px;
+  margin:18px 0 26px;
+  box-shadow:0 12px 28px #00000010;
+}
+
+.bigPlus{
+  width:62px;
+  height:62px;
+  border-radius:50%;
+  background:#e96d9b;
+  color:white;
+  display:grid;
+  place-items:center;
+  font-size:44px;
+}
+
+.bookArt{
+  font-size:44px;
+}
+
+.seeAll{
+  background:transparent;
+  color:#e96d9b;
+  box-shadow:none;
+}
+
+.scrapBookRow{
+  position:relative;
+  background:white;
+  border-radius:22px;
+  padding:14px;
+  display:grid;
+  grid-template-columns:120px 1fr auto;
+  gap:14px;
+  align-items:center;
+  box-shadow:0 10px 26px #00000010;
+  margin:12px 0;
+}
+
+.bookCover{
+  height:82px;
+  border-radius:14px;
+  background:#d8c8ed;
+  display:grid;
+  place-items:center;
+  font-size:34px;
+}
+
+.bookInfo h3{
+  margin:0;
+}
+
+.bookInfo p{
+  margin:4px 0;
+  color:#8a756d;
+}
+
+.avatarRow{
+  font-size:14px;
+}
+
+.avatarRow span{
+  background:#d8c8ed;
+  border-radius:12px;
+  padding:3px 7px;
+}
+
+.bookMeta{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:14px;
+}
+
+.bookMeta span{
+  background:#f8eadf;
+  padding:8px 12px;
+  border-radius:12px;
+  font-weight:700;
+  font-size:13px;
+}
+
+.dots{
+  background:white;
+  color:#5A463A;
+  box-shadow:none;
+  font-size:28px;
+  padding:0 8px;
+}
+
+.miniMenu{
+  position:absolute;
+  right:12px;
+  top:44px;
+  background:white;
+  border-radius:16px;
+  box-shadow:0 16px 30px #0002;
+  z-index:10;
+  display:flex;
+  flex-direction:column;
+  padding:8px;
+}
+
+.miniMenu button{
+  background:transparent;
+  color:#5A463A;
+  box-shadow:none;
+  text-align:left;
+  padding:10px 16px;
+}
+
+.shortcutTray{
+  background:white;
+  border-radius:22px;
+  padding:14px;
+  display:flex;
+  justify-content:space-around;
+  box-shadow:0 10px 26px #00000010;
+  margin-top:20px;
+}
+
+.shortcutTray button{
+  background:transparent;
+  color:#5A463A;
+  box-shadow:none;
+  font-size:14px;
+}
