@@ -55,8 +55,7 @@ function Welcome({ go }) {
   return (
     <div className="phone">
       <div className="screen paper auth-page">
-        <div className="auth-logo">ScrapFlip</div>
-        <h1>Turn your memories into beautiful stories 💗</h1>
+<div className="auth-logo">Pocket Scrapbook</div>        <h1>Turn your memories into beautiful stories 💗</h1>
         <div className="hero">🌼 🖼️ 🦋</div>
 
         <div className="auth-card">
@@ -85,7 +84,7 @@ function Login({ go, flash }) {
   return (
     <div className="phone">
       <div className="screen paper auth-page">
-        <div className="auth-logo">ScrapFlip</div>
+        <div className="auth-logo">Pocket Scrapbook</div>
         <h1>Welcome Back ✨</h1>
 
         <div className="auth-card">
@@ -133,7 +132,7 @@ function Signup({ go, flash }) {
   return (
     <div className="phone">
       <div className="screen paper auth-page">
-        <div className="auth-logo">ScrapFlip</div>
+        <div className="auth-logo">Pocket Scrapbook</div>
         <h1>Create Your Account ✨</h1>
 
         <div className="auth-card">
