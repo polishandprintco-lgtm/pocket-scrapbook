@@ -95,16 +95,19 @@ function Welcome({ go }) {
       </h1>
 
       <p className="muted">
-        A cozy place for photos, stickers, pages, and keepsakes.
-      </p>
+  Save your sweetest memories, photos, milestones, and moments in one magical scrapbook.
+</p>
 
       <div className="hero">
         🌼 🖼️ 🦋
       </div>
 
-      <button onClick={() => go("signup")}>
-        Get Started 
-      </button>
+     <button
+  className="hero-btn"
+  onClick={() => go("signup")}
+>
+  ✨ Start Scrapbooking
+</button>
 
       <button
         className="secondary"
