@@ -122,72 +122,84 @@ function Welcome({ go }) {
 function Login({ go, flash }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
   async function submit() {
     try {
-      await signInWithEmailAndPassword(auth, email.trim(), password);
-      flash("Logged in!");
+      await signInWithEmailAndPassword(
+        auth,
+        email.trim(),
+        password
+      );
+
+      flash("Logged in successfully 💖");
       go("home");
+
     } catch (e) {
       console.error(e);
       flash("Login error: " + e.message);
     }
   }
-  
-return (
-  <div className="screen paper">
-    <div className="auth-page">
 
-      <div className="auth-logo">
-        💖 Pocket Scrapbook
-      </div>
+  return (
+    <div className="screen paper">
 
-      <h1>
-        {mode === "login"
-          ? "Welcome Back ✨"
-          : "Create Your Scrapbook 💕"}
-      </h1>
+      <div className="auth-page">
 
-      <p className="auth-sub">
-        Save memories, photos, milestones, and magical moments.
-      </p>
+        <div className="auth-logo">
+          💖 Pocket Scrapbook
+        </div>
 
-      <div className="auth-card">
+        <h1>
+          Welcome Back ✨
+        </h1>
 
-        <input
-          placeholder="Email"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-        />
+        <p className="auth-sub">
+          Save memories, photos, milestones, and magical moments.
+        </p>
 
-        <input
-          placeholder="Password"
-          type="password"
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-        />
+        <div className="auth-card">
 
-        <button onClick={submit}>
-          {mode === "login"
-            ? "Login ✨"
-            : "Create Account 💖"}
+          <input
+            placeholder="Email"
+            value={email}
+            onChange={(e) =>
+              setEmail(e.target.value)
+            }
+          />
+
+          <input
+            placeholder="Password"
+            type="password"
+            value={password}
+            onChange={(e) =>
+              setPassword(e.target.value)
+            }
+          />
+
+          <button onClick={submit}>
+            Login ✨
+          </button>
+
+        </div>
+
+        <button
+          className="text-btn"
+          onClick={() => go("forgot")}
+        >
+          Forgot Password?
+        </button>
+
+        <button
+          className="text-btn"
+          onClick={() => go("signup")}
+        >
+          Need an account?
         </button>
 
       </div>
 
-      <button
-        className="text-btn"
-        onClick={() =>
-          go(mode === "login" ? "signup" : "login")
-        }
-      >
-        {mode === "login"
-          ? "Need an account?"
-          : "Already have one?"}
-      </button>
-
     </div>
-  </Phone>
-)
+  );
 }
 
 function Signup({ go, flash }) {
