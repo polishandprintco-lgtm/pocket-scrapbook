@@ -85,69 +85,35 @@ function App() {
 
 function Welcome({ go }) {
   return (
-  <Phone>
-    <div className="signup-page">
+    <div className="screen center paper">
+      <div className="logo bounce">
+        💗 Pocket Scrapbook
+      </div>
 
-      <section className="signup-brand">
-        <div className="flower-corner">🌸</div>
+      <h1>
+        Turn your memories into beautiful stories
+      </h1>
 
-        <h1>
-          Pocket <span>Scrapbook</span>
-        </h1>
+      <p className="muted">
+        A cozy place for photos, stickers, pages, and keepsakes.
+      </p>
 
-        <p className="tagline">
-          Turn your memories into beautiful stories 💖
-        </p>
+      <div className="hero">
+        🌼 🖼️ 🦋
+      </div>
 
-        <p className="script">
-          Cherish. Create. Remember.
-        </p>
+      <button onClick={() => go("signup")}>
+        Get Started
+      </button>
 
-        <div className="polaroid-stack">
-          <div className="tape">♡</div>
-          <div className="photo">🌅</div>
-        </div>
-
-        <div className="feature-paper">
-          <p>📖 Beautiful scrapbook pages</p>
-          <p>⭐ Cute stickers & templates</p>
-          <p>☁️ Save memories forever</p>
-        </div>
-      </section>
-
-      <section className="signup-card">
-
-        <div className="heart-badge">💗</div>
-
-        <h2>Create Your Story</h2>
-
-        <p>
-          Start your scrapbook journey today ✨
-        </p>
-
-        <button
-          className="create-account-btn"
-          onClick={() => go("signup")}
-        >
-          ✨ Create Account
-        </button>
-
-        <div className="or-line">
-          <span>or</span>
-        </div>
-
-        <button
-          className="google-btn"
-          onClick={() => go("login")}
-        >
-          💌 Login
-        </button>
-
-      </section>
-
+      <button
+        className="secondary"
+        onClick={() => go("login")}
+      >
+        Login
+      </button>
     </div>
-  </Phone>
-);
+  );
 }
 
 function Login({ go, flash }) {
