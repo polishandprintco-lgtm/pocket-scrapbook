@@ -1108,4 +1108,4 @@ function Home({ user, flash }) {
   );
 }
 
-createRoot(document.getElementById("root")).render(<App /
+createRoot(document.getElementById("root")).render(<App />);
