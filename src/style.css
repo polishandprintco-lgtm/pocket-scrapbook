@@ -1036,3 +1036,172 @@ select{
   grid-template-columns:repeat(5,1fr) !important;
   align-items:stretch !important;
 }
+.bgGrid{
+  background:
+    linear-gradient(#eadfcf 1px, transparent 1px),
+    linear-gradient(90deg, #eadfcf 1px, transparent 1px),
+    #f8efdf !important;
+  background-size:28px 28px !important;
+}
+
+.bgDots{
+  background:
+    radial-gradient(#efb7c9 2.5px, transparent 2.5px),
+    #fff6f8 !important;
+  background-size:24px 24px !important;
+}
+
+.bgPaper{
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      #fffdf8 0px,
+      #fffdf8 28px,
+      #d8ebff 29px,
+      #d8ebff 30px
+    ) !important;
+}
+
+.bgLavender{
+  background:
+    linear-gradient(135deg, #eee5ff, #fff8fc) !important;
+}
+
+.bgFloral{
+  background:
+    radial-gradient(circle at 18% 22%, #ffd7e5 0 10px, transparent 11px),
+    radial-gradient(circle at 78% 30%, #dff3d8 0 12px, transparent 13px),
+    radial-gradient(circle at 35% 80%, #fff0b8 0 10px, transparent 11px),
+    radial-gradient(circle at 70% 75%, #f9c7d7 0 8px, transparent 9px),
+    #fffaf5 !important;
+}
+
+.paperLayer,
+.layerOne,
+.layerTwo,
+.pinkTape,
+.quoteCard,
+.photoFrame,
+.beachPhoto,
+.daisy,
+.heartPatch,
+.sideLeaf,
+.captionPaper,
+.shortcutTray{
+  display:none !important;
+}
+
+.toolPanel.fixedTools{
+  display:grid !important;
+  grid-template-columns:repeat(5,1fr) !important;
+  align-items:stretch !important;
+}
+
+.toolPanel label{
+  height:100%;
+  width:100%;
+  background:white;
+  color:#4d392f;
+  box-shadow:none;
+  border-radius:0;
+  padding:12px 6px;
+  display:flex !important;
+  flex-direction:column;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:4px;
+  font-size:20px;
+  font-weight:800;
+  text-align:center;
+  margin:0 !important;
+}
+
+.toolPanel label span{
+  display:block;
+  font-size:11px;
+  font-weight:800;
+}
+
+.editableItem{
+  position:absolute;
+  touch-action:none;
+  cursor:grab;
+  z-index:5;
+}
+
+.editableItem img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+  pointer-events:none;
+}
+
+.selectedEditableItem{
+  outline:3px solid #ef77a3;
+}
+
+.editableSticker{
+  width:100%;
+  height:100%;
+  display:grid;
+  place-items:center;
+  line-height:1;
+  pointer-events:none;
+}
+
+.editableText{
+  width:100%;
+  height:100%;
+  white-space:pre-wrap;
+  display:grid;
+  place-items:center;
+  text-align:center;
+  pointer-events:none;
+}
+
+.doodleSvg{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  pointer-events:auto;
+  z-index:3;
+}
+
+.resizeHandle{
+  position:absolute;
+  width:18px;
+  height:18px;
+  border:3px solid #ef77a3;
+  border-radius:50%;
+  background:white;
+  padding:0;
+  box-shadow:none;
+  z-index:20;
+}
+
+.resizeHandle.tl{left:-11px;top:-11px;cursor:nwse-resize}
+.resizeHandle.tr{right:-11px;top:-11px;cursor:nesw-resize}
+.resizeHandle.bl{left:-11px;bottom:-11px;cursor:nesw-resize}
+.resizeHandle.br{right:-11px;bottom:-11px;cursor:nwse-resize}
+
+.fontControls{
+  display:flex;
+  gap:8px;
+  overflow-x:auto;
+  margin-top:10px;
+}
+
+.fontControls button{
+  white-space:nowrap;
+  padding:10px 14px;
+  border-radius:16px;
+}
+
+.deletePageBtn{
+  min-width:110px;
+  height:54px;
+  border-radius:16px;
+  background:#ffd9df;
+  color:#8b4b58
