@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { auth, db, storage } from "./firebase";
-
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -10,7 +9,6 @@ import {
   updateProfile,
   signOut
 } from "firebase/auth";
-
 import {
   addDoc,
   collection,
@@ -22,7 +20,6 @@ import {
   doc,
   updateDoc
 } from "firebase/firestore";
-
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import "./style.css";
 
@@ -63,7 +60,6 @@ function Welcome({ go }) {
         <div className="auth-logo">Pocket Scrapbook</div>
         <h1>Turn your memories into beautiful stories 💗</h1>
         <div className="hero">🌼 🖼️ 🦋</div>
-
         <div className="auth-card">
           <button onClick={() => go("signup")}>✨ Start Scrapbooking</button>
           <button className="secondary" onClick={() => go("login")}>Login</button>
@@ -92,13 +88,11 @@ function Login({ go, flash }) {
       <div className="screen paper auth-page">
         <div className="auth-logo">Pocket Scrapbook</div>
         <h1>Welcome Back ✨</h1>
-
         <div className="auth-card">
           <input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
           <input placeholder="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
           <button onClick={submit}>Login ✨</button>
         </div>
-
         <button className="text-btn" onClick={() => go("forgot")}>Forgot Password?</button>
         <button className="text-btn" onClick={() => go("signup")}>Need an account?</button>
       </div>
@@ -140,7 +134,6 @@ function Signup({ go, flash }) {
       <div className="screen paper auth-page">
         <div className="auth-logo">Pocket Scrapbook</div>
         <h1>Create Your Account ✨</h1>
-
         <div className="auth-card">
           <input placeholder="Full Name" value={name} onChange={(e) => setName(e.target.value)} />
           <input placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} />
@@ -148,7 +141,6 @@ function Signup({ go, flash }) {
           <input placeholder="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
           <button onClick={submit}>💖 Create Account</button>
         </div>
-
         <button className="text-btn" onClick={() => go("login")}>Already have an account?</button>
       </div>
     </div>
@@ -192,19 +184,17 @@ function Home({ user, flash }) {
   const [currentPage, setCurrentPage] = useState(0);
   const [selectedItemId, setSelectedItemId] = useState(null);
   const [dragging, setDragging] = useState(null);
+  const [resizing, setResizing] = useState(null);
 
   async function loadBooks() {
     if (!user) return;
-
     try {
       setLoading(true);
       const q = query(collection(db, "scrapbooks"), orderBy("createdAt", "desc"));
       const snap = await getDocs(q);
-
       const userBooks = snap.docs
         .map((d) => ({ id: d.id, ...d.data() }))
         .filter((b) => b.uid === user.uid);
-
       setBooks(userBooks);
     } catch (e) {
       flash("Could not load scrapbooks: " + e.message);
@@ -288,6 +278,10 @@ function Home({ user, flash }) {
     setBooks((old) => old.map((b) => (b.id === nextBook.id ? nextBook : b)));
   }
 
+  function currentItems() {
+    return activeBook?.pagesData?.[currentPage]?.items || [];
+  }
+
   function updateCurrentPageItems(nextItems) {
     const pagesData = [...(activeBook.pagesData || [{ items: [] }])];
     pagesData[currentPage] = { ...(pagesData[currentPage] || {}), items: nextItems };
@@ -298,10 +292,6 @@ function Home({ user, flash }) {
       pages: pagesData.length,
       updated: "just now"
     });
-  }
-
-  function currentItems() {
-    return activeBook?.pagesData?.[currentPage]?.items || [];
   }
 
   async function saveBook() {
@@ -352,40 +342,16 @@ function Home({ user, flash }) {
     }
   }
 
-  function selectItem(id) {
-    setSelectedItemId(id);
-  }
-
-  function selectedItem() {
-    return currentItems().find((item) => item.id === selectedItemId);
-  }
-
   function moveSelected(dx, dy) {
     if (!selectedItemId) return;
 
-    const nextItems = currentItems().map((item) =>
-      item.id === selectedItemId
-        ? { ...item, x: item.x + dx, y: item.y + dy }
-        : item
+    updateCurrentPageItems(
+      currentItems().map((item) =>
+        item.id === selectedItemId
+          ? { ...item, x: item.x + dx, y: item.y + dy }
+          : item
+      )
     );
-
-    updateCurrentPageItems(nextItems);
-  }
-
-  function resizeSelected(amount) {
-    if (!selectedItemId) return;
-
-    const nextItems = currentItems().map((item) =>
-      item.id === selectedItemId
-        ? {
-            ...item,
-            w: Math.max(60, item.w + amount),
-            h: Math.max(80, item.h + amount)
-          }
-        : item
-    );
-
-    updateCurrentPageItems(nextItems);
   }
 
   function deleteSelected() {
@@ -401,20 +367,14 @@ function Home({ user, flash }) {
 
   function addPage() {
     const pagesData = [...(activeBook.pagesData || [{ items: [] }]), { items: [] }];
-
-    updateActiveBook({
-      ...activeBook,
-      pagesData,
-      pages: pagesData.length,
-      updated: "just now"
-    });
-
+    updateActiveBook({ ...activeBook, pagesData, pages: pagesData.length, updated: "just now" });
     setCurrentPage(pagesData.length - 1);
     setSelectedItemId(null);
   }
 
   function handlePointerDown(e, item) {
     const rect = e.currentTarget.parentElement.getBoundingClientRect();
+
     setSelectedItemId(item.id);
     setDragging({
       id: item.id,
@@ -423,41 +383,73 @@ function Home({ user, flash }) {
     });
   }
 
+  function startResize(e, item, corner) {
+    e.stopPropagation();
+
+    setSelectedItemId(item.id);
+    setResizing({
+      id: item.id,
+      corner,
+      startX: e.clientX,
+      startY: e.clientY,
+      item: { ...item }
+    });
+  }
+
   function handlePointerMove(e) {
-    if (!dragging) return;
-
     const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left - dragging.offsetX;
-    const y = e.clientY - rect.top - dragging.offsetY;
 
-    const nextItems = currentItems().map((item) =>
-      item.id === dragging.id ? { ...item, x, y } : item
-    );
+    if (dragging) {
+      const x = e.clientX - rect.left - dragging.offsetX;
+      const y = e.clientY - rect.top - dragging.offsetY;
 
-    updateCurrentPageItems(nextItems);
+      updateCurrentPageItems(
+        currentItems().map((item) =>
+          item.id === dragging.id ? { ...item, x, y } : item
+        )
+      );
+    }
+
+    if (resizing) {
+      const dx = e.clientX - resizing.startX;
+      const dy = e.clientY - resizing.startY;
+
+      updateCurrentPageItems(
+        currentItems().map((item) => {
+          if (item.id !== resizing.id) return item;
+
+          let next = { ...resizing.item };
+
+          if (resizing.corner.includes("r")) next.w = Math.max(60, resizing.item.w + dx);
+          if (resizing.corner.includes("l")) {
+            next.w = Math.max(60, resizing.item.w - dx);
+            next.x = resizing.item.x + dx;
+          }
+          if (resizing.corner.includes("b")) next.h = Math.max(80, resizing.item.h + dy);
+          if (resizing.corner.includes("t")) {
+            next.h = Math.max(80, resizing.item.h - dy);
+            next.y = resizing.item.y + dy;
+          }
+
+          return next;
+        })
+      );
+    }
   }
 
   function handlePointerUp() {
     setDragging(null);
+    setResizing(null);
   }
 
   if (section === "create") {
     return (
       <div className="phone">
         <div className="screen paper auth-page">
-          <button className="text-btn" onClick={() => setSection("home")}>
-            ← Back
-          </button>
-
+          <button className="text-btn" onClick={() => setSection("home")}>← Back</button>
           <h1>Create New Scrapbook</h1>
-
           <div className="auth-card">
-            <input
-              placeholder="Scrapbook title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-
+            <input placeholder="Scrapbook title" value={title} onChange={(e) => setTitle(e.target.value)} />
             <button onClick={createBook}>Create & Start Editing 💖</button>
           </div>
         </div>
@@ -489,7 +481,6 @@ function Home({ user, flash }) {
           >
             <div className="paperLayer layerOne"></div>
             <div className="paperLayer layerTwo"></div>
-
             <div className="pinkTape">pink tape</div>
 
             <div className="quoteCard">
@@ -501,11 +492,7 @@ function Home({ user, flash }) {
             {currentItems().map((item) => (
               <div
                 key={item.id}
-                className={
-                  selectedItemId === item.id
-                    ? "draggablePhoto selectedDragPhoto"
-                    : "draggablePhoto"
-                }
+                className={selectedItemId === item.id ? "draggablePhoto selectedDragPhoto" : "draggablePhoto"}
                 style={{
                   left: item.x,
                   top: item.y,
@@ -514,15 +501,16 @@ function Home({ user, flash }) {
                   transform: `rotate(${item.rotate || 0}deg)`
                 }}
                 onPointerDown={(e) => handlePointerDown(e, item)}
-                onClick={() => selectItem(item.id)}
+                onClick={() => setSelectedItemId(item.id)}
               >
                 <img src={item.url} alt="" />
+
                 {selectedItemId === item.id && (
                   <>
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                    <span></span>
+                    <button className="resizeHandle tl" onPointerDown={(e) => startResize(e, item, "tl")}></button>
+                    <button className="resizeHandle tr" onPointerDown={(e) => startResize(e, item, "tr")}></button>
+                    <button className="resizeHandle bl" onPointerDown={(e) => startResize(e, item, "bl")}></button>
+                    <button className="resizeHandle br" onPointerDown={(e) => startResize(e, item, "br")}></button>
                   </>
                 )}
               </div>
@@ -535,7 +523,6 @@ function Home({ user, flash }) {
             <div className="daisy">🌼</div>
             <div className="heartPatch">♡</div>
             <div className="sideLeaf">🌿</div>
-
             <div className="captionPaper">
               collect<br />beautiful<br />moments ♡
             </div>
@@ -559,8 +546,6 @@ function Home({ user, flash }) {
             <button onClick={() => moveSelected(-10, 0)}>←</button>
             <button onClick={() => moveSelected(10, 0)}>→</button>
             <button onClick={() => moveSelected(0, 10)}>↓</button>
-            <button onClick={() => resizeSelected(15)}>Bigger</button>
-            <button onClick={() => resizeSelected(-15)}>Smaller</button>
             <button onClick={deleteSelected}>Delete</button>
           </div>
 
@@ -578,7 +563,6 @@ function Home({ user, flash }) {
                 <small>{index + 1}</small>
               </div>
             ))}
-
             <button className="addPageBtn" onClick={addPage}>＋</button>
           </div>
         </div>
@@ -592,7 +576,6 @@ function Home({ user, flash }) {
         <div className="screen paper auth-page">
           <button className="text-btn" onClick={() => setSection("home")}>← Back</button>
           <h1>Profile</h1>
-
           <div className="auth-card">
             <p>{user?.displayName}</p>
             <p>{user?.email}</p>
@@ -612,19 +595,14 @@ function Home({ user, flash }) {
         <div className="screen paper">
           <button className="text-btn" onClick={() => setSection("home")}>← Back</button>
           <h1>Templates</h1>
-
           {templates.map((t) => (
             <div className="bookCard scrapBookRow" key={t}>
               <div className="bookCover">📖</div>
-
               <div>
                 <h3>{t}</h3>
                 <p className="muted">Ready-made scrapbook layout</p>
               </div>
-
-              <button onClick={() => { setTitle(t); setSection("create"); }}>
-                Use
-              </button>
+              <button onClick={() => { setTitle(t); setSection("create"); }}>Use</button>
             </div>
           ))}
         </div>
@@ -637,16 +615,13 @@ function Home({ user, flash }) {
       <div className="screen paper homeLikeScreenshot">
         <div className="homeHeader">
           <button className="circleBtn">☰</button>
-
           <div className="headerIcons">
             <button className="circleBtn">👑</button>
             <button className="circleBtn" onClick={() => flash("No notifications 🔔")}>🔔</button>
           </div>
         </div>
 
-        <div className="brandLogo">
-          Pocket<span>Scrapbook</span>
-        </div>
+        <div className="brandLogo">Pocket<span>Scrapbook</span></div>
 
         <p className="homeTagline">
           Turn your memories into<br />beautiful stories 💗
@@ -681,28 +656,19 @@ function Home({ user, flash }) {
           books.map((book) => (
             <div className="scrapBookRow" key={book.id}>
               <div className="bookCover">{book.cover || "📔"}</div>
-
               <div className="bookInfo" onClick={() => openBook(book)}>
                 <h3>{book.title}</h3>
                 <p>{book.updated || "Updated just now"}</p>
-
-                <div className="avatarRow">
-                  👩🏻 👱🏻‍♀️ <span>+2</span>
-                </div>
+                <div className="avatarRow">👩🏻 👱🏻‍♀️ <span>+2</span></div>
               </div>
-
               <div className="bookMeta">
                 <button
                   className="dots"
-                  onClick={() =>
-                    setOpenMenuId(openMenuId === book.id ? null : book.id)
-                  }
+                  onClick={() => setOpenMenuId(openMenuId === book.id ? null : book.id)}
                 >
                   ⋯
                 </button>
-
                 <span>{book.pages || 1} Pages</span>
-
                 {openMenuId === book.id && (
                   <div className="miniMenu">
                     <button onClick={() => openBook(book)}>Edit</button>
