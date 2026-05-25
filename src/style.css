@@ -1006,3 +1006,33 @@ select{
   background:#ffd9df;
   color:#8b4b58;
 }
+.toolPanel label{
+  height:100%;
+  width:100%;
+  background:white;
+  color:#4d392f;
+  box-shadow:none;
+  border-radius:0;
+  padding:12px 6px;
+  display:flex !important;
+  flex-direction:column;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:4px;
+  font-size:20px;
+  font-weight:800;
+  text-align:center;
+  margin:0 !important;
+}
+
+.toolPanel label span{
+  display:block;
+  font-size:11px;
+  font-weight:800;
+}
+
+.toolPanel{
+  display:grid !important;
+  grid-template-columns:repeat(5,1fr) !important;
+  align-items:stretch !important;
+}
