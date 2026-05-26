@@ -1231,7 +1231,20 @@ function Home({ user, flash }) {
         </div>
       </div>
     );
+  function rotateSelected(amount) {
+  if (!selectedItemId) {
+    flash("Tap something first.");
+    return;
   }
+
+  updateCurrentItems(
+    currentItems().map((item) =>
+      item.id === selectedItemId
+        ? { ...item, rotate: (item.rotate || 0) + amount }
+        : item
+    )
+  );
+}
 
   if (section === "settings") {
     return (
@@ -1421,7 +1434,8 @@ function Home({ user, flash }) {
                     <button onClick={() => openBook(book)}>Edit</button>
                     <button onClick={() => exportBook(book)}>Export</button>
                     <button onClick={() => deleteBook(book)}>Delete</button>
-                  </div>
+                  <button onClick={() => rotateSelected(-10)}>⟲ Rotate</button>
+<button onClick={() => rotateSelected(10)}>⟳ Rotate</button>
                 )}
               </div>
             </div>
