@@ -1007,9 +1007,13 @@ function Home({ user, flash }) {
             Page {currentPage + 1} / {getPages().length}
           </div>
 
-          <div className={`scrapCanvas ${currentPageData().background || "bgGrid"}`}>
-            {currentItems().map((item) => renderItem(item))}
-          </div>
+          className={`scrapCanvas ${
+  activeBook?.templateType === "babyBoy"
+    ? "bgBabyBluePlaid"
+    : activeBook?.templateType === "babyGirl"
+    ? "bgBabyPinkPlaid"
+    : currentPageData().background || "bgGrid"
+}`}
 
           <div className="fontControls">
             <button
