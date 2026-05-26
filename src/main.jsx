@@ -822,7 +822,23 @@ function Home({ user, flash }) {
     setSelectedItemId(null);
     flash("Page deleted 🗑️");
   }
+function rotateSelected(amount) {
+  if (!selectedItemId) {
+    flash("Tap something first.");
+    return;
+  }
 
+  updateCurrentItems(
+    currentItems().map((item) =>
+      item.id === selectedItemId
+        ? {
+            ...item,
+            rotate: (item.rotate || 0) + amount
+          }
+        : item
+    )
+  );
+}
   function handlePointerDown(e, item) {
     if (e.target.classList.contains("resizeHandle")) return;
 
@@ -1231,20 +1247,7 @@ function Home({ user, flash }) {
         </div>
       </div>
     );
-  function rotateSelected(amount) {
-  if (!selectedItemId) {
-    flash("Tap something first.");
-    return;
   }
-
-  updateCurrentItems(
-    currentItems().map((item) =>
-      item.id === selectedItemId
-        ? { ...item, rotate: (item.rotate || 0) + amount }
-        : item
-    )
-  );
-}
 
   if (section === "settings") {
     return (
@@ -1429,19 +1432,17 @@ function Home({ user, flash }) {
 
                 <span>{book.pages || 1} Pages</span>
 
-                {{openMenuId === book.id && (
-  <div className="miniMenu">
-    <button onClick={() => openBook(book)}>Edit</button>
-
-    <button onClick={() => exportBook(book)}>
-      Export
-    </button>
-
-    <button onClick={() => deleteBook(book)}>
-      Delete
-    </button>
-  </div>
-)}
+                {openMenuId === book.id && (
+                  <div className="miniMenu">
+                    <button onClick={() => openBook(book)}>Edit</button>
+                    <button onClick={() => exportBook(book)}>Export</button>
+                    <button onClick={() => deleteBook(book)}>Delete</button>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))
+        )}
       </div>
 
       <div className="bottom">
@@ -1471,7 +1472,4 @@ function Home({ user, flash }) {
   );
 }
 
-createRoot(document.getElementById("root")).render(
-  <App />
-  );
-
+createRoot(document.getElementById("root")).render(<App />);
