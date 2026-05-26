@@ -1023,121 +1023,119 @@ function Home({ user, flash }) {
   if (section === "flipbook") {
   return (
     <div className="phone">
-      <div className="screen flipbookRealScreen">
+      <div
+        style={{
+          minHeight: "100vh",
+          background: "#d8bfa2",
+          padding: "16px"
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "18px"
+          }}
+        >
+          <button onClick={() => setSection("editor")}>‹</button>
 
-        <div className="flipbookTopBar">
-          <button
-            className="flipTopBtn"
-            onClick={() => setSection("editor")}
-          >
-            ←
-          </button>
-
-          <div className="flipbookTitleWrap">
-            <h2>{activeBook?.title || "My Scrapbook"}</h2>
-            <p>{getPages().length} pages</p>
+          <div style={{ textAlign: "center" }}>
+            <h2 style={{ margin: 0 }}>{activeBook?.title || "My Scrapbook"}</h2>
+            <p style={{ margin: 0 }}>{getPages().length} pages</p>
           </div>
 
-          <div className="flipTopRight">
-            <button className="flipTopBtn">♫</button>
+          <button onClick={() => exportBook(activeBook)}>⋯</button>
+        </div>
 
-            <button
-              className="flipTopBtn"
-              onClick={() => exportBook(activeBook)}
-            >
-              ⋯
-            </button>
+        <div
+          style={{
+            display: "flex",
+            height: "430px",
+            width: "100%",
+            margin: "0 auto",
+            boxShadow: "0 16px 35px rgba(0,0,0,.22)"
+          }}
+        >
+          <div
+            style={{
+              width: "42%",
+              background: "#fffaf3",
+              borderRadius: "12px 0 0 12px",
+              padding: "70px 20px",
+              fontFamily: "Georgia",
+              fontSize: "17px",
+              lineHeight: "1.7"
+            }}
+          >
+            Memories
+            <br />
+            are proof
+            <br />
+            beautiful
+            <br />
+            moments
+            <br />
+            matter ♡
+          </div>
+
+          <div
+            className={currentPageData().background || "bgGrid"}
+            style={{
+              width: "58%",
+              height: "430px",
+              position: "relative",
+              overflow: "hidden",
+              borderRadius: "0 12px 12px 0"
+            }}
+          >
+            {currentItems().map((item) => renderItem(item, true))}
           </div>
         </div>
 
-        <div className="flipbookWoodBg">
+        <div
+          style={{
+            margin: "18px auto",
+            background: "#fff7ef",
+            borderRadius: "999px",
+            padding: "8px 18px",
+            width: "fit-content",
+            fontWeight: "800"
+          }}
+        >
+          {currentPage + 1} / {getPages().length}
+        </div>
 
-          <div className="flipbookBookReal">
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            gap: "14px",
+            background: "#fff7ef",
+            borderRadius: "24px",
+            padding: "14px"
+          }}
+        >
+          <button onClick={() => setCurrentPage(0)}>▦ Thumbnails</button>
 
-            <div className="leftPaperPage">
-              <div className="paperShadow"></div>
+          <button onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}>
+            ←
+          </button>
 
-              <div className="leftPaperText">
-                Memories
-                <br />
-                are proof
-                <br />
-                beautiful
-                <br />
-                moments
-                <br />
-                matter ♡
-              </div>
-            </div>
+          <button
+            onClick={() =>
+              setCurrentPage(Math.min(getPages().length - 1, currentPage + 1))
+            }
+          >
+            →
+          </button>
 
-            <div
-              className={`rightPaperPage ${
-                currentPageData().background || "bgGrid"
-              }`}
-            >
-              {currentItems().map((item) => renderItem(item, true))}
-            </div>
-          </div>
-
-          <div className="flipPageNumber">
-            {currentPage + 1} / {getPages().length}
-          </div>
-
-          <div className="flipBottomBar">
-
-            <button className="flipMiniBtn">
-              ▦
-              <span>Thumbnails</span>
-            </button>
-
-            <button
-              className="flipArrowBtn"
-              onClick={() =>
-                setCurrentPage(Math.max(0, currentPage - 1))
-              }
-            >
-              ←
-            </button>
-
-            <button
-              className="flipArrowBtn"
-              onClick={() =>
-                setCurrentPage(
-                  Math.min(getPages().length - 1, currentPage + 1)
-                )
-              }
-            >
-              →
-            </button>
-
-            <button className="flipMiniBtn">
-              ▶
-              <span>Autoplay</span>
-            </button>
-          </div>
-
-          <div className="flipThumbRow">
-            {getPages().map((page, index) => (
-              <div
-                key={index}
-                className={
-                  index === currentPage
-                    ? "flipThumbCard activeFlipThumbCard"
-                    : "flipThumbCard"
-                }
-                onClick={() => setCurrentPage(index)}
-              >
-                <div className={page.background}></div>
-              </div>
-            ))}
-          </div>
-
+          <button onClick={() => flash("Autoplay coming soon")}>▶ Autoplay</button>
         </div>
       </div>
     </div>
   );
 }
-
 
   if (section === "editor") {
     return (
