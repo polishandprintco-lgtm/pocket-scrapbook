@@ -1059,7 +1059,7 @@ function Home({ user, flash }) {
         >
           <div
             style={{
-              width: "42%",
+              width: "34%",
               background: "#fffaf3",
               borderRadius: "12px 0 0 12px",
               padding: "70px 20px",
@@ -1082,7 +1082,7 @@ function Home({ user, flash }) {
           <div
             className={currentPageData().background || "bgGrid"}
             style={{
-              width: "58%",
+              width: "66%",
               height: "430px",
               position: "relative",
               overflow: "hidden",
