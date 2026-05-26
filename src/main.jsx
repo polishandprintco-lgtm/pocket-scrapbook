@@ -1143,7 +1143,6 @@ function Home({ user, flash }) {
       </div>
     </div>
   );
-}
 
   if (section === "editor") {
     return (
