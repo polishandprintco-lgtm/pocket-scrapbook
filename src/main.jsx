@@ -1143,10 +1143,12 @@ function Home({ user, flash }) {
       </div>
     </div>
   );
-
+}
 
   if (section === "editor") {
     return (
+      } 
+      
       <div className="phone">
         <div className="screen paper editorScreenPretty">
           <div className="editorHeaderPretty">
