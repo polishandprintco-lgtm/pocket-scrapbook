@@ -1021,78 +1021,123 @@ function Home({ user, flash }) {
   }
 
   if (section === "flipbook") {
-    return (
-      <div className="phone">
-        <div className="screen paper flipbookScreen">
-          <div className="flipbookTop">
-            <button className="plainIcon" onClick={() => setSection("editor")}>
-              ‹
-            </button>
+  return (
+    <div className="phone">
+      <div className="screen flipbookRealScreen">
 
-            <div>
-              <h2>{activeBook?.title || "Flipbook"}</h2>
-              <p>{getPages().length} pages</p>
-            </div>
+        <div className="flipbookTopBar">
+          <button
+            className="flipTopBtn"
+            onClick={() => setSection("editor")}
+          >
+            ←
+          </button>
 
-            <button className="plainIcon" onClick={() => exportBook(activeBook)}>
+          <div className="flipbookTitleWrap">
+            <h2>{activeBook?.title || "My Scrapbook"}</h2>
+            <p>{getPages().length} pages</p>
+          </div>
+
+          <div className="flipTopRight">
+            <button className="flipTopBtn">♫</button>
+
+            <button
+              className="flipTopBtn"
+              onClick={() => exportBook(activeBook)}
+            >
               ⋯
             </button>
           </div>
+        </div>
 
-          <div className="flipbookBook">
-            <div className="bookLeftPage">
-              <div className="bookCurl"></div>
+        <div className="flipbookWoodBg">
+
+          <div className="flipbookBookReal">
+
+            <div className="leftPaperPage">
+              <div className="paperShadow"></div>
+
+              <div className="leftPaperText">
+                Memories
+                <br />
+                are proof
+                <br />
+                beautiful
+                <br />
+                moments
+                <br />
+                matter ♡
+              </div>
             </div>
 
-            <div className={`flipbookCanvas ${currentPageData().background || "bgGrid"}`}>
+            <div
+              className={`rightPaperPage ${
+                currentPageData().background || "bgGrid"
+              }`}
+            >
               {currentItems().map((item) => renderItem(item, true))}
             </div>
           </div>
 
-          <div className="flipPageCount">
+          <div className="flipPageNumber">
             {currentPage + 1} / {getPages().length}
           </div>
 
-          <div className="flipControls">
-            <button onClick={() => setCurrentPage(0)}>▦<br />Thumbnails</button>
+          <div className="flipBottomBar">
+
+            <button className="flipMiniBtn">
+              ▦
+              <span>Thumbnails</span>
+            </button>
 
             <button
-              className="flipArrow"
-              onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
+              className="flipArrowBtn"
+              onClick={() =>
+                setCurrentPage(Math.max(0, currentPage - 1))
+              }
             >
               ←
             </button>
 
             <button
-              className="flipArrow"
+              className="flipArrowBtn"
               onClick={() =>
-                setCurrentPage(Math.min(getPages().length - 1, currentPage + 1))
+                setCurrentPage(
+                  Math.min(getPages().length - 1, currentPage + 1)
+                )
               }
             >
               →
             </button>
 
-            <button onClick={() => flash("Autoplay coming soon ▶")}>
-              ▶<br />Autoplay
+            <button className="flipMiniBtn">
+              ▶
+              <span>Autoplay</span>
             </button>
           </div>
 
-          <div className="flipThumbs">
+          <div className="flipThumbRow">
             {getPages().map((page, index) => (
               <div
                 key={index}
-                className={index === currentPage ? "flipThumb activeFlipThumb" : "flipThumb"}
+                className={
+                  index === currentPage
+                    ? "flipThumbCard activeFlipThumbCard"
+                    : "flipThumbCard"
+                }
                 onClick={() => setCurrentPage(index)}
               >
-                <div className={page.background || "bgGrid"}></div>
-                <small>{index + 1}</small>
+                <div className={page.background}></div>
               </div>
             ))}
           </div>
+
         </div>
       </div>
-    );
-  }
+    </div>
+  );
+}
+
 
   if (section === "editor") {
     return (
