@@ -568,6 +568,130 @@ function Home({ user, flash }) {
     setSelectedItemId(null);
     flash("Page deleted 🗑️");
   }
+function babyGirlPage(monthText, caption, photoCount = 1) {
+  const items = [
+    {
+      id: `title-${Date.now()}-${Math.random()}`,
+      type: "text",
+      text: monthText,
+      x: 20,
+      y: 25,
+      w: 105,
+      h: 70,
+      fontSize: 24,
+      fontFamily: "Georgia",
+      color: "#4d392f"
+    },
+    {
+      id: `bow-${Date.now()}-${Math.random()}`,
+      type: "sticker",
+      text: "🎀",
+      x: 18,
+      y: 5,
+      w: 42,
+      h: 42,
+      fontSize: 34
+    },
+    {
+      id: `flower-${Date.now()}-${Math.random()}`,
+      type: "sticker",
+      text: "🌸",
+      x: 285,
+      y: 285,
+      w: 48,
+      h: 48,
+      fontSize: 38
+    },
+    {
+      id: `heart-${Date.now()}-${Math.random()}`,
+      type: "sticker",
+      text: "💗",
+      x: 45,
+      y: 340,
+      w: 48,
+      h: 48,
+      fontSize: 36
+    },
+    {
+      id: `caption-${Date.now()}-${Math.random()}`,
+      type: "text",
+      text: caption,
+      x: 190,
+      y: 340,
+      w: 130,
+      h: 55,
+      fontSize: 16,
+      fontFamily: "Georgia",
+      color: "#6b4f43"
+    }
+  ];
+
+  for (let i = 0; i < photoCount; i++) {
+    items.push({
+      id: `photo-box-${Date.now()}-${Math.random()}-${i}`,
+      type: "text",
+      text: "Add Photo",
+      x: i === 0 ? 125 : 225,
+      y: i === 0 ? 120 : 165,
+      w: 145,
+      h: 155,
+      fontSize: 18,
+      fontFamily: "Georgia",
+      color: "#b88999",
+      rotate: i === 0 ? -3 : 4
+    });
+  }
+
+  return {
+    background: "bgBabyPinkPlaid",
+    items
+  };
+}
+
+async function createBabyFirstYearTemplate() {
+  try {
+    const pagesData = [
+      babyGirlPage("baby's\nfirst year ♡", "our little girl", 2),
+      babyGirlPage("hello\nworld ♡", "the day you were born", 1),
+      babyGirlPage("tiny hands\nbig love ♡", "so much love", 1),
+      babyGirlPage("1\nmonth", "you are so loved", 1),
+      babyGirlPage("2\nmonths", "growing so fast ♡", 2),
+      babyGirlPage("3\nmonths", "sweet girl ♡", 1),
+      babyGirlPage("4\nmonths", "so happy ♡", 1),
+      babyGirlPage("5\nmonths", "little beauty ♡", 2),
+      babyGirlPage("6\nmonths", "little blessing ♡", 1),
+      babyGirlPage("7\nmonths", "cutest smile ♡", 2),
+      babyGirlPage("8\nmonths", "learning & growing ♡", 1),
+      babyGirlPage("9\nmonths", "so curious ♡", 2),
+      babyGirlPage("10\nmonths", "so much joy ♡", 2),
+      babyGirlPage("11\nmonths", "almost one! ♡", 2),
+      babyGirlPage("12\nmonths", "what a year ♡", 2),
+      babyGirlPage("one year\nof you ♡", "our greatest blessing ♡", 1)
+    ];
+
+    const data = {
+      uid: user.uid,
+      title: "Baby’s First Year (Girl)",
+      pages: pagesData.length,
+      cover: "🎀",
+      updated: "just now",
+      createdAt: serverTimestamp(),
+      pagesData
+    };
+
+    const docRef = await addDoc(collection(db, "scrapbooks"), data);
+    const newBook = { id: docRef.id, ...data };
+
+    setBooks([newBook, ...books]);
+    setActiveBook(newBook);
+    setCurrentPage(0);
+    setSelectedItemId(null);
+    setSection("editor");
+    flash("Baby’s First Year template created 🎀");
+  } catch (e) {
+    flash("Template error: " + e.message);
+  }
+}
 
   function handlePointerDown(e, item) {
     if (e.target.classList.contains("resizeHandle")) return;
@@ -1055,7 +1179,19 @@ function Home({ user, flash }) {
                 <h3>{book.title}</h3>
                 <p>{book.updated || "Updated just now"}</p>
               </div>
+<button
+  className="bigCreateCard"
+  onClick={createBabyFirstYearTemplate}
+>
+  <div className="bigPlus">🎀</div>
 
+  <div>
+    <h2>Baby’s First Year Girl</h2>
+    <p>Create all 16 editable pages</p>
+  </div>
+
+  <div className="bookArt">📔</div>
+</button>
               <div className="bookMeta">
                 <button
                   className="dots"
