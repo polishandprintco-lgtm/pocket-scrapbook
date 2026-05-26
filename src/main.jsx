@@ -1047,7 +1047,7 @@ function Home({ user, flash }) {
 
           <button onClick={() => exportBook(activeBook)}>⋯</button>
         </div>
-
+}
         <div
           style={{
             display: "flex",
