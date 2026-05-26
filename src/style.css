@@ -88,3 +88,12 @@ input{width:100%;border:none;background:#fff;border-radius:18px;padding:16px;col
     #eef7ff !important;
   background-size:42px 42px,42px 42px,14px 14px,14px 14px !important;
 }
+.scrapCanvas.bgBabyBluePlaid{
+  background:
+    linear-gradient(90deg, rgba(130,180,230,.28) 50%, transparent 50%),
+    linear-gradient(rgba(130,180,230,.28) 50%, transparent 50%),
+    linear-gradient(90deg, rgba(55,120,200,.20) 1px, transparent 1px),
+    linear-gradient(rgba(55,120,200,.20) 1px, transparent 1px),
+    #eaf5ff !important;
+  background-size:42px 42px,42px 42px,14px 14px,14px 14px !important;
+}
