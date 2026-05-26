@@ -184,6 +184,32 @@ function App() {
     </div>
   );
 }
+useEffect(() => {
+  function handleKeyDown(e) {
+    if (
+      (e.key === "Delete" || e.key === "Backspace") &&
+      selectedItemId
+    ) {
+      e.preventDefault();
+
+      updateCurrentItems(
+        currentItems().filter(
+          (item) => item.id !== selectedItemId
+        )
+      );
+
+      setSelectedItemId(null);
+
+      flash("Deleted 🗑️");
+    }
+  }
+
+  window.addEventListener("keydown", handleKeyDown);
+
+  return () => {
+    window.removeEventListener("keydown", handleKeyDown);
+  };
+}, [selectedItemId, activeBook, currentPage]);
 
 function Welcome({ go }) {
   return (
@@ -562,6 +588,33 @@ async function uploadPhotoToPlaceholder(e, placeholderId) {
     setBackgroundMenuOpen(false);
     flash("Background changed 🎨");
   }
+const BACKGROUNDS = [
+  {
+    id: "pinkPlaid",
+    className: "bgBabyPinkPlaid",
+    label: "Pink Plaid"
+  },
+  {
+    id: "bluePlaid",
+    className: "bgBabyBluePlaid",
+    label: "Blue Plaid"
+  },
+  {
+    id: "dots",
+    className: "bgGrid",
+    label: "Dots"
+  },
+  {
+    id: "paper",
+    className: "bgPaper",
+    label: "Paper"
+  },
+  {
+    id: "pink",
+    className: "bgSoftPink",
+    label: "Soft Pink"
+  }
+];
 
   function templateDefaultBg() {
     if (activeBook?.templateType === "babyBoy") return "bgBabyBluePlaid";
@@ -1086,6 +1139,23 @@ function StickerPicker() {
     setSelectedItemId(null);
     flash("Deleted 🗑️");
   }
+function rotateSelected(amount) {
+  if (!selectedItemId) {
+    flash("Tap something first.");
+    return;
+  }
+
+  updateCurrentItems(
+    currentItems().map((item) =>
+      item.id === selectedItemId
+        ? {
+            ...item,
+            rotate: (item.rotate || 0) + amount
+          }
+        : item
+    )
+  );
+}
 
   function changeSelectedFontSize(amount) {
     if (!selectedItemId) {
@@ -1518,10 +1588,26 @@ function rotateSelected(amount) {
     <span>Text</span>
   </button>
 
+  <div className="backgroundPickerWrap">
   <button onClick={() => setBackgroundMenuOpen(!backgroundMenuOpen)}>
     🎨
     <span>Background</span>
   </button>
+
+  {backgroundMenuOpen && (
+    <div className="backgroundPicker">
+      {BACKGROUNDS.map((bg) => (
+        <button
+          key={bg.id}
+          className={`backgroundOption ${bg.className}`}
+          onClick={() => changeBackground(bg.className)}
+        >
+          {bg.label}
+        </button>
+      ))}
+    </div>
+  )}
+</div>
 
   <button onClick={deleteSelected}>
     🗑️
