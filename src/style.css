@@ -446,3 +446,90 @@ input{width:100%;border:none;background:#fff;border-radius:18px;padding:16px;col
 .activeFlipThumbCard{
   border-color:#ef8eb1;
 }
+.flipbookRealScreen{
+  background:#dfc8ad !important;
+  min-height:100vh !important;
+  padding:0 !important;
+  overflow:auto !important;
+}
+
+.flipbookTopBar{
+  height:70px !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:space-between !important;
+  padding:12px 18px !important;
+  background:#f8efe7 !important;
+}
+
+.flipbookWoodBg{
+  background:#d9bfa3 !important;
+  min-height:calc(100vh - 70px) !important;
+  padding:24px 14px !important;
+}
+
+.flipbookBookReal{
+  width:100% !important;
+  height:430px !important;
+  display:flex !important;
+  flex-direction:row !important;
+  align-items:stretch !important;
+  justify-content:center !important;
+  gap:0 !important;
+  margin:0 auto 18px !important;
+  position:relative !important;
+}
+
+.leftPaperPage{
+  width:42% !important;
+  height:100% !important;
+  background:#fffaf3 !important;
+  position:relative !important;
+  border-radius:8px 0 0 8px !important;
+  overflow:hidden !important;
+  box-shadow:0 12px 30px rgba(0,0,0,.18) !important;
+}
+
+.rightPaperPage{
+  width:48% !important;
+  height:100% !important;
+  position:relative !important;
+  border-radius:0 8px 8px 0 !important;
+  overflow:hidden !important;
+  box-shadow:0 12px 30px rgba(0,0,0,.18) !important;
+}
+
+.leftPaperText{
+  padding:70px 22px !important;
+  font-size:17px !important;
+  line-height:1.7 !important;
+  font-family:Georgia, serif !important;
+}
+
+.flipBottomBar{
+  display:flex !important;
+  flex-direction:row !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:12px !important;
+  background:#fff7ef !important;
+  padding:12px !important;
+  border-radius:22px !important;
+}
+
+.flipThumbRow{
+  display:flex !important;
+  flex-direction:row !important;
+  gap:10px !important;
+  overflow-x:auto !important;
+  margin-top:18px !important;
+}
+
+.flipbookCanvas,
+.rightPaperPage .editableItem{
+  position:absolute !important;
+}
+
+.rightPaperPage .editableItem{
+  cursor:default !important;
+}
