@@ -1044,7 +1044,6 @@ function Home({ user, flash }) {
             <h2 style={{ margin: 0 }}>{activeBook?.title || "My Scrapbook"}</h2>
             <p style={{ margin: 0 }}>{getPages().length} pages</p>
           </div>
-
           <button onClick={() => exportBook(activeBook)}>⋯</button>
         </div>
 
