@@ -1206,10 +1206,23 @@ function rotateSelected(amount) {
             </div>
           )}
 
-          <div className="fontControls">
-            <button onClick={() => changeSelectedFontSize(-4)}>A-</button>
-            <button onClick={() => changeSelectedFontSize(4)}>A+</button>
-          </div>
+         <div className="fontControls">
+  <button onClick={() => changeSelectedFontSize(-4)}>
+    A-
+  </button>
+
+  <button onClick={() => changeSelectedFontSize(4)}>
+    A+
+  </button>
+
+  <button onClick={() => rotateSelected(-10)}>
+    ⟲ Rotate
+  </button>
+
+  <button onClick={() => rotateSelected(10)}>
+    ⟳ Rotate
+  </button>
+</div>
 
           <div className="fontControls">
             {["🍼", "🧸", "⭐", "🌙", "🛏️", "👶", "🦋", "💗"].map((sticker) => (
