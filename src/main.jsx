@@ -1434,8 +1434,8 @@ function Home({ user, flash }) {
                     <button onClick={() => openBook(book)}>Edit</button>
                     <button onClick={() => exportBook(book)}>Export</button>
                     <button onClick={() => deleteBook(book)}>Delete</button>
-                  <button onClick={() => rotateSelected(-10)}>⟲ Rotate</button>
-<button onClick={() => rotateSelected(10)}>⟳ Rotate</button>
+                    <button onClick={() => rotateSelected(-10)}>⟲ Rotate</button>
+                    <button onClick={() => rotateSelected(10)}>⟳ Rotate</button>
                 )
               </div>
             </div>
