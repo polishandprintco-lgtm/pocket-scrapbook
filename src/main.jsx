@@ -26,11 +26,13 @@ import {
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import "./style.css";
 
-function id() {
-  return crypto?.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
+function makeId() {
+  return crypto?.randomUUID
+    ? crypto.randomUUID()
+    : `${Date.now()}-${Math.random()}`;
 }
 
-function blankPage(bg = "bgBabyBluePlaid") {
+function blankPage(bg = "bgGrid") {
   return {
     background: bg,
     items: []
@@ -44,7 +46,7 @@ function babyPage(title, caption, photoCount = 1, gender = "girl") {
 
   const items = [
     {
-      id: id(),
+      id: makeId(),
       type: "text",
       text: title,
       x: 22,
@@ -56,7 +58,7 @@ function babyPage(title, caption, photoCount = 1, gender = "girl") {
       color: "#4d392f"
     },
     {
-      id: id(),
+      id: makeId(),
       type: "sticker",
       text: mainSticker,
       x: 18,
@@ -66,7 +68,7 @@ function babyPage(title, caption, photoCount = 1, gender = "girl") {
       fontSize: 34
     },
     {
-      id: id(),
+      id: makeId(),
       type: "sticker",
       text: "🍼",
       x: 280,
@@ -76,7 +78,7 @@ function babyPage(title, caption, photoCount = 1, gender = "girl") {
       fontSize: 34
     },
     {
-      id: id(),
+      id: makeId(),
       type: "sticker",
       text: "🌙",
       x: 288,
@@ -86,7 +88,7 @@ function babyPage(title, caption, photoCount = 1, gender = "girl") {
       fontSize: 38
     },
     {
-      id: id(),
+      id: makeId(),
       type: "sticker",
       text: "⭐",
       x: 48,
@@ -96,7 +98,7 @@ function babyPage(title, caption, photoCount = 1, gender = "girl") {
       fontSize: 34
     },
     {
-      id: id(),
+      id: makeId(),
       type: "text",
       text: caption,
       x: 185,
@@ -111,7 +113,7 @@ function babyPage(title, caption, photoCount = 1, gender = "girl") {
 
   for (let i = 0; i < photoCount; i++) {
     items.push({
-      id: id(),
+      id: makeId(),
       type: "placeholder",
       text: "Add Photo",
       x: i === 0 ? 120 : 225,
@@ -125,9 +127,13 @@ function babyPage(title, caption, photoCount = 1, gender = "girl") {
   }
 
   return {
-  background: gender === "boy" ? "bgBabyBluePlaid" : "bgBabyPinkPlaid",
-  items
-};
+    background: bg,
+    items
+  };
+}
+
+function cloneBook(book) {
+  return JSON.parse(JSON.stringify(book));
 }
 
 function App() {
@@ -375,13 +381,14 @@ function Home({ user, flash }) {
   const [activeBook, setActiveBook] = useState(null);
   const [openMenuId, setOpenMenuId] = useState(null);
   const [editorMenuOpen, setEditorMenuOpen] = useState(false);
+  const [backgroundMenuOpen, setBackgroundMenuOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
   const [selectedItemId, setSelectedItemId] = useState(null);
   const [dragging, setDragging] = useState(null);
   const [resizing, setResizing] = useState(null);
-  const [drawing, setDrawing] = useState(false);
-  const [mode, setMode] = useState("select");
+  const [undoStack, setUndoStack] = useState([]);
+  const [redoStack, setRedoStack] = useState([]);
 
   async function loadBooks() {
     if (!user) return;
@@ -426,16 +433,26 @@ function Home({ user, flash }) {
     return currentPageData().items || [];
   }
 
-  function updateActiveBook(nextBook) {
+  function applyBook(nextBook) {
     setActiveBook(nextBook);
-    setBooks((old) => old.map((b) => (b.id === nextBook.id ? nextBook : b)));
+    setBooks((old) =>
+      old.map((b) => (b.id === nextBook.id ? nextBook : b))
+    );
   }
 
-  function updateCurrentPage(nextPage) {
+  function rememberUndo() {
+    if (!activeBook) return;
+    setUndoStack((old) => [cloneBook(activeBook), ...old].slice(0, 30));
+    setRedoStack([]);
+  }
+
+  function updateCurrentPage(nextPage, remember = true) {
+    if (remember) rememberUndo();
+
     const pagesData = [...getPages()];
     pagesData[currentPage] = nextPage;
 
-    updateActiveBook({
+    applyBook({
       ...activeBook,
       pagesData,
       pages: pagesData.length,
@@ -443,11 +460,42 @@ function Home({ user, flash }) {
     });
   }
 
-  function updateCurrentItems(nextItems) {
-    updateCurrentPage({
-      ...currentPageData(),
-      items: nextItems
-    });
+  function updateCurrentItems(nextItems, remember = true) {
+    updateCurrentPage(
+      {
+        ...currentPageData(),
+        items: nextItems
+      },
+      remember
+    );
+  }
+
+  function undo() {
+    if (!undoStack.length || !activeBook) {
+      flash("Nothing to undo");
+      return;
+    }
+
+    const previous = undoStack[0];
+    setRedoStack((old) => [cloneBook(activeBook), ...old].slice(0, 30));
+    setUndoStack((old) => old.slice(1));
+    applyBook(previous);
+    setCurrentPage(Math.min(currentPage, previous.pagesData.length - 1));
+    setSelectedItemId(null);
+  }
+
+  function redo() {
+    if (!redoStack.length || !activeBook) {
+      flash("Nothing to redo");
+      return;
+    }
+
+    const next = redoStack[0];
+    setUndoStack((old) => [cloneBook(activeBook), ...old].slice(0, 30));
+    setRedoStack((old) => old.slice(1));
+    applyBook(next);
+    setCurrentPage(Math.min(currentPage, next.pagesData.length - 1));
+    setSelectedItemId(null);
   }
 
   function changeBackground(backgroundClass) {
@@ -456,12 +504,13 @@ function Home({ user, flash }) {
       background: backgroundClass
     });
 
+    setBackgroundMenuOpen(false);
     flash("Background changed 🎨");
   }
 
   function templateDefaultBg() {
-    if (activeBook?.templateType === "babyGirl") return "bgBabyPinkPlaid";
     if (activeBook?.templateType === "babyBoy") return "bgBabyBluePlaid";
+    if (activeBook?.templateType === "babyGirl") return "bgBabyPinkPlaid";
     return currentPageData().background || "bgGrid";
   }
 
@@ -489,6 +538,8 @@ function Home({ user, flash }) {
       setBooks([newBook, ...books]);
       setTitle("");
       setActiveBook(newBook);
+      setUndoStack([]);
+      setRedoStack([]);
       setCurrentPage(0);
       setSelectedItemId(null);
       setSection("editor");
@@ -537,6 +588,8 @@ function Home({ user, flash }) {
 
       setBooks([newBook, ...books]);
       setActiveBook(newBook);
+      setUndoStack([]);
+      setRedoStack([]);
       setCurrentPage(0);
       setSelectedItemId(null);
       setSection("editor");
@@ -581,6 +634,8 @@ function Home({ user, flash }) {
       templateType: book.templateType || "blank"
     });
 
+    setUndoStack([]);
+    setRedoStack([]);
     setCurrentPage(0);
     setSelectedItemId(null);
     setOpenMenuId(null);
@@ -610,6 +665,8 @@ function Home({ user, flash }) {
     if (!file || !activeBook?.id || !user) return;
 
     try {
+      rememberUndo();
+
       const storageRef = ref(
         storage,
         `users/${user.uid}/scrapbooks/${activeBook.id}/${Date.now()}-${file.name}`
@@ -619,7 +676,7 @@ function Home({ user, flash }) {
       const url = await getDownloadURL(storageRef);
 
       const newItem = {
-        id: id(),
+        id: makeId(),
         type: "photo",
         url,
         x: 55,
@@ -629,9 +686,8 @@ function Home({ user, flash }) {
         rotate: 0
       };
 
-      updateCurrentItems([...currentItems(), newItem]);
+      updateCurrentItems([...currentItems(), newItem], false);
       setSelectedItemId(newItem.id);
-      setMode("select");
       flash("Photo added 📷");
     } catch (e) {
       flash("Photo upload failed: " + e.message);
@@ -643,7 +699,7 @@ function Home({ user, flash }) {
     if (!text) return;
 
     const newItem = {
-      id: id(),
+      id: makeId(),
       type: "text",
       text,
       x: 90,
@@ -658,7 +714,6 @@ function Home({ user, flash }) {
 
     updateCurrentItems([...currentItems(), newItem]);
     setSelectedItemId(newItem.id);
-    setMode("select");
   }
 
   function addSticker() {
@@ -670,7 +725,7 @@ function Home({ user, flash }) {
     if (!sticker) return;
 
     const newItem = {
-      id: id(),
+      id: makeId(),
       type: "sticker",
       text: sticker,
       x: 135,
@@ -687,7 +742,7 @@ function Home({ user, flash }) {
 
   function addBabySticker(sticker) {
     const newItem = {
-      id: id(),
+      id: makeId(),
       type: "sticker",
       text: sticker,
       x: 135,
@@ -732,7 +787,9 @@ function Home({ user, flash }) {
   function addPage() {
     const pagesData = [...getPages(), blankPage(templateDefaultBg())];
 
-    updateActiveBook({
+    rememberUndo();
+
+    applyBook({
       ...activeBook,
       pagesData,
       pages: pagesData.length,
@@ -751,9 +808,10 @@ function Home({ user, flash }) {
       return;
     }
 
+    rememberUndo();
     pagesData.splice(currentPage, 1);
 
-    updateActiveBook({
+    applyBook({
       ...activeBook,
       pagesData,
       pages: pagesData.length,
@@ -770,6 +828,8 @@ function Home({ user, flash }) {
 
     const rect = e.currentTarget.parentElement.getBoundingClientRect();
 
+    rememberUndo();
+
     setSelectedItemId(item.id);
     setDragging({
       id: item.id,
@@ -781,6 +841,8 @@ function Home({ user, flash }) {
   function startResize(e, item, corner) {
     e.stopPropagation();
 
+    rememberUndo();
+
     setSelectedItemId(item.id);
     setResizing({
       id: item.id,
@@ -789,23 +851,6 @@ function Home({ user, flash }) {
       startY: e.clientY,
       item: { ...item }
     });
-  }
-
-  function startDoodle(e) {
-    if (mode !== "doodle") return;
-
-    const rect = e.currentTarget.getBoundingClientRect();
-
-    const newItem = {
-      id: id(),
-      type: "doodle",
-      points: [{ x: e.clientX - rect.left, y: e.clientY - rect.top }],
-      color: "#5A463A"
-    };
-
-    updateCurrentItems([...currentItems(), newItem]);
-    setSelectedItemId(newItem.id);
-    setDrawing(true);
   }
 
   function handleCanvasMove(e) {
@@ -818,7 +863,8 @@ function Home({ user, flash }) {
       updateCurrentItems(
         currentItems().map((item) =>
           item.id === dragging.id ? { ...item, x, y } : item
-        )
+        ),
+        false
       );
     }
 
@@ -848,23 +894,8 @@ function Home({ user, flash }) {
           }
 
           return next;
-        })
-      );
-    }
-
-    if (drawing && selectedItemId) {
-      updateCurrentItems(
-        currentItems().map((item) =>
-          item.id === selectedItemId && item.type === "doodle"
-            ? {
-                ...item,
-                points: [
-                  ...(item.points || []),
-                  { x: e.clientX - rect.left, y: e.clientY - rect.top }
-                ]
-              }
-            : item
-        )
+        }),
+        false
       );
     }
   }
@@ -872,11 +903,10 @@ function Home({ user, flash }) {
   function stopActions() {
     setDragging(null);
     setResizing(null);
-    setDrawing(false);
   }
 
-  function renderItem(item) {
-    const selected = selectedItemId === item.id;
+  function renderItem(item, preview = false) {
+    const selected = !preview && selectedItemId === item.id;
 
     if (item.type === "doodle") {
       const d = (item.points || [])
@@ -887,7 +917,7 @@ function Home({ user, flash }) {
         <svg
           key={item.id}
           className="doodleSvg"
-          onClick={() => setSelectedItemId(item.id)}
+          onClick={() => !preview && setSelectedItemId(item.id)}
         >
           <path
             d={d}
@@ -905,7 +935,7 @@ function Home({ user, flash }) {
         key={item.id}
         className={`editableItem ${selected ? "selectedEditableItem" : ""} ${
           item.type === "placeholder" ? "photoPlaceholder" : ""
-        }`}
+        } ${preview ? "flipItem" : ""}`}
         style={{
           left: item.x,
           top: item.y,
@@ -913,8 +943,8 @@ function Home({ user, flash }) {
           height: item.h,
           transform: `rotate(${item.rotate || 0}deg)`
         }}
-        onPointerDown={(e) => handlePointerDown(e, item)}
-        onClick={() => setSelectedItemId(item.id)}
+        onPointerDown={(e) => !preview && handlePointerDown(e, item)}
+        onClick={() => !preview && setSelectedItemId(item.id)}
       >
         {item.type === "photo" && <img src={item.url} alt="" />}
 
@@ -993,45 +1023,71 @@ function Home({ user, flash }) {
   if (section === "flipbook") {
     return (
       <div className="phone">
-        <div className="screen paper editorScreenPretty">
-          <div className="editorHeaderPretty">
+        <div className="screen paper flipbookScreen">
+          <div className="flipbookTop">
             <button className="plainIcon" onClick={() => setSection("editor")}>
               ‹
             </button>
 
-            <b>Flipbook Preview</b>
+            <div>
+              <h2>{activeBook?.title || "Flipbook"}</h2>
+              <p>{getPages().length} pages</p>
+            </div>
 
-            <button className="savePill" onClick={() => exportBook(activeBook)}>
-              Export
+            <button className="plainIcon" onClick={() => exportBook(activeBook)}>
+              ⋯
             </button>
           </div>
 
-          <div className="pageCounter">
-            Page {currentPage + 1} / {getPages().length}
+          <div className="flipbookBook">
+            <div className="bookLeftPage">
+              <div className="bookCurl"></div>
+            </div>
+
+            <div className={`flipbookCanvas ${currentPageData().background || "bgGrid"}`}>
+              {currentItems().map((item) => renderItem(item, true))}
+            </div>
           </div>
 
-          className={`scrapCanvas ${
-  activeBook?.templateType === "babyBoy"
-    ? "bgBabyBluePlaid"
-    : activeBook?.templateType === "babyGirl"
-    ? "bgBabyPinkPlaid"
-    : currentPageData().background || "bgGrid"
-}`}
+          <div className="flipPageCount">
+            {currentPage + 1} / {getPages().length}
+          </div>
 
-          <div className="fontControls">
+          <div className="flipControls">
+            <button onClick={() => setCurrentPage(0)}>▦<br />Thumbnails</button>
+
             <button
+              className="flipArrow"
               onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
             >
-              Previous
+              ←
             </button>
 
             <button
+              className="flipArrow"
               onClick={() =>
                 setCurrentPage(Math.min(getPages().length - 1, currentPage + 1))
               }
             >
-              Next
+              →
             </button>
+
+            <button onClick={() => flash("Autoplay coming soon ▶")}>
+              ▶<br />Autoplay
+            </button>
+          </div>
+
+          <div className="flipThumbs">
+            {getPages().map((page, index) => (
+              <div
+                key={index}
+                className={index === currentPage ? "flipThumb activeFlipThumb" : "flipThumb"}
+                onClick={() => setCurrentPage(index)}
+              >
+                <div className={page.background || "bgGrid"}></div>
+                <small>{index + 1}</small>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -1047,8 +1103,8 @@ function Home({ user, flash }) {
               ‹
             </button>
 
-            <button className="plainIcon">↶</button>
-            <button className="plainIcon faded">↷</button>
+            <button className="plainIcon" onClick={undo}>↶</button>
+            <button className="plainIcon" onClick={redo}>↷</button>
 
             <button className="savePill" onClick={saveBook}>
               Save
@@ -1087,7 +1143,6 @@ function Home({ user, flash }) {
 
           <div
             className={`scrapCanvas ${currentPageData().background || "bgGrid"}`}
-            onPointerDown={startDoodle}
             onPointerMove={handleCanvasMove}
             onPointerUp={stopActions}
             onPointerLeave={stopActions}
@@ -1112,9 +1167,9 @@ function Home({ user, flash }) {
               <span>Text</span>
             </button>
 
-            <button onClick={() => setMode(mode === "doodle" ? "select" : "doodle")}>
-              ✎
-              <span>Doodle</span>
+            <button onClick={() => setBackgroundMenuOpen(!backgroundMenuOpen)}>
+              🎨
+              <span>Background</span>
             </button>
 
             <button onClick={deleteSelected}>
@@ -1123,16 +1178,21 @@ function Home({ user, flash }) {
             </button>
           </div>
 
+          {backgroundMenuOpen && (
+            <div className="backgroundMenu">
+              <button onClick={() => changeBackground("bgGrid")}>Grid</button>
+              <button onClick={() => changeBackground("bgDots")}>Dots</button>
+              <button onClick={() => changeBackground("bgPaper")}>Paper</button>
+              <button onClick={() => changeBackground("bgLavender")}>Lavender</button>
+              <button onClick={() => changeBackground("bgFloral")}>Floral</button>
+              <button onClick={() => changeBackground("bgBabyPinkPlaid")}>Pink Plaid</button>
+              <button onClick={() => changeBackground("bgBabyBluePlaid")}>Blue Plaid</button>
+            </div>
+          )}
+
           <div className="fontControls">
             <button onClick={() => changeSelectedFontSize(-4)}>A-</button>
             <button onClick={() => changeSelectedFontSize(4)}>A+</button>
-            <button onClick={() => changeBackground("bgGrid")}>Grid</button>
-            <button onClick={() => changeBackground("bgDots")}>Dots</button>
-            <button onClick={() => changeBackground("bgPaper")}>Paper</button>
-            <button onClick={() => changeBackground("bgLavender")}>Lavender</button>
-            <button onClick={() => changeBackground("bgFloral")}>Floral</button>
-            <button onClick={() => changeBackground("bgBabyPinkPlaid")}>Pink Plaid</button>
-            <button onClick={() => changeBackground("bgBabyBluePlaid")}>Blue Plaid</button>
           </div>
 
           <div className="fontControls">
@@ -1396,4 +1456,4 @@ function Home({ user, flash }) {
   );
 }
 
-createRoot(document.getElementById("root")).render(<App />);
+createRoot(document.getElementById("root")).render(<A
