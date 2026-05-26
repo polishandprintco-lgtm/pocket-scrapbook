@@ -279,7 +279,9 @@ input{width:100%;border:none;background:#fff;border-radius:18px;padding:16px;col
 }
 
 .activeFlipThumb{
-  border-color:#e9
+  border-color:#e96d9b;
+  }
+                 
 .flipbookRealScreen{
   background:#e8ddd4;
   height:100%;
