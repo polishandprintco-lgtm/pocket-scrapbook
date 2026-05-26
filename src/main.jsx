@@ -432,6 +432,43 @@ function Home({ user, flash }) {
       setLoading(false);
     }
   }
+async function uploadPhotoToPlaceholder(e, placeholderId) {
+  const file = e.target.files?.[0];
+
+  if (!file || !activeBook?.id || !user) return;
+
+  try {
+    rememberUndo();
+
+    const storageRef = ref(
+      storage,
+      `users/${user.uid}/scrapbooks/${activeBook.id}/${Date.now()}-${file.name}`
+    );
+
+    await uploadBytes(storageRef, file);
+    const url = await getDownloadURL(storageRef);
+
+    updateCurrentItems(
+      currentItems().map((item) =>
+        item.id === placeholderId
+          ? {
+              ...item,
+              type: "photo",
+              url,
+              text: "",
+              rotate: item.rotate || 0
+            }
+          : item
+      ),
+      false
+    );
+
+    setSelectedItemId(placeholderId);
+    flash("Photo added 💖");
+  } catch (e) {
+    flash("Photo upload failed: " + e.message);
+  }
+}
 
   useEffect(() => {
     loadBooks();
