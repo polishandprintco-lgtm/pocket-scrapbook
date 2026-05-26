@@ -297,7 +297,8 @@ function Home({ user, flash }) {
   const [resizing, setResizing] = useState(null);
   const [undoStack, setUndoStack] = useState([]);
   const [redoStack, setRedoStack] = useState([]);
-
+  const [hasSubscription, setHasSubscription] = useState(false);
+  
   const STICKERS = [
     { id: "bow", text: "🎀" },
     { id: "bear", text: "🧸" },
@@ -1502,26 +1503,77 @@ function Home({ user, flash }) {
 
           <h1>Templates</h1>
 
-          <button className="templateHomeCard" onClick={() => createBabyTemplate("girl")}>
-            <div className="templateIcon">🎀</div>
-            <div>
-              <h2>Baby’s First Year Girl</h2>
-              <p>Pink plaid, 16 editable pages</p>
-            </div>
-          </button>
+          <button
+  className="templateHomeCard"
+  onClick={() => {
+    if (!hasSubscription) {
+      setSection("subscription");
+      return;
+    }
 
-          <button className="templateHomeCard" onClick={() => createBabyTemplate("boy")}>
-            <div className="templateIcon">🧸</div>
-            <div>
-              <h2>Baby’s First Year Boy</h2>
-              <p>Blue plaid, 16 editable pages</p>
-            </div>
-          </button>
-        </div>
-      </div>
-    );
-  }
+    createBabyTemplate("girl");
+  }}
+>
+  <div className="templateIcon">🎀</div>
+  <div>
+    <h2>Baby’s First Year Girl</h2>
+    <p>Premium template</p>
+  </div>
+</button>
 
+<button
+  className="templateHomeCard"
+  onClick={() => {
+    if (!hasSubscription) {
+      setSection("subscription");
+      return;
+    }
+
+    createBabyTemplate("boy");
+  }}
+>
+  <div className="templateIcon">🧸</div>
+  <div>
+    <h2>Baby’s First Year Boy</h2>
+    <p>Premium template</p>
+  </div>
+</button>
+
+ <button
+  className="templateHomeCard"
+  onClick={() => {
+    if (!hasSubscription) {
+      setSection("subscription");
+      return;
+    }
+
+    createBabyTemplate("girl");
+  }}
+>
+  <div className="templateIcon">🎀</div>
+  <div>
+    <h2>Baby’s First Year Girl</h2>
+    <p>Premium template</p>
+  </div>
+</button>
+
+<button
+  className="templateHomeCard"
+  onClick={() => {
+    if (!hasSubscription) {
+      setSection("subscription");
+      return;
+    }
+
+    createBabyTemplate("boy");
+  }}
+>
+  <div className="templateIcon">🧸</div>
+  <div>
+    <h2>Baby’s First Year Boy</h2>
+    <p>Premium template</p>
+  </div>
+</button>         
   return (
     <div className="phone">
       <div className="screen paper homeLikeScreenshot">
