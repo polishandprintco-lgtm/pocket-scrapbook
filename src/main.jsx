@@ -723,66 +723,21 @@ function Home({ user, flash }) {
 // =======================
 
 const STICKERS = [
-  {
-    id: "pinkBow",
-    type: "image",
-    src: "https://i.imgur.com/u6rlQbB.png",
-    name: "Pink Bow"
-  },
-  {
-    id: "babyBottle",
-    type: "image",
-    src: "https://i.imgur.com/4ZQZ4xQ.png",
-    name: "Bottle"
-  },
-  {
-    id: "teddyBear",
-    type: "image",
-    src: "https://i.imgur.com/V1X6F6m.png",
-    name: "Teddy"
-  },
-  {
-    id: "moon",
-    type: "image",
-    src: "https://i.imgur.com/o8Q9Q7T.png",
-    name: "Moon"
-  },
-  {
-    id: "star",
-    type: "image",
-    src: "https://i.imgur.com/JYQ7mKx.png",
-    name: "Star"
-  },
-  {
-    id: "flower",
-    type: "image",
-    src: "https://i.imgur.com/5w6XGkl.png",
-    name: "Flower"
-  },
-  {
-    id: "heart",
-    type: "image",
-    src: "https://i.imgur.com/EC4R6Wk.png",
-    name: "Heart"
-  },
-  {
-    id: "bunny",
-    type: "image",
-    src: "https://i.imgur.com/kL7W2Qp.png",
-    name: "Bunny"
-  },
-  {
-    id: "pacifier",
-    type: "image",
-    src: "https://i.imgur.com/7Q0LQwL.png",
-    name: "Pacifier"
-  },
-  {
-    id: "crib",
-    type: "image",
-    src: "https://i.imgur.com/6G4s7cH.png",
-    name: "Crib"
-  }
+  { id: "bow", text: "🎀" },
+  { id: "bear", text: "🧸" },
+  { id: "bottle", text: "🍼" },
+  { id: "moon", text: "🌙" },
+  { id: "star", text: "⭐" },
+  { id: "heart", text: "💗" },
+  { id: "flower", text: "🌸" },
+  { id: "butterfly", text: "🦋" },
+  { id: "baby", text: "👶" },
+  { id: "rabbit", text: "🐰" },
+  { id: "toy", text: "🪀" },
+  { id: "duck", text: "🦆" },
+  { id: "cloud", text: "☁️" },
+  { id: "sparkle", text: "✨" },
+  { id: "gift", text: "🎁" }
 ];
 
 
@@ -792,18 +747,14 @@ const STICKERS = [
 
 function addSticker(sticker) {
   const newSticker = {
-    id: crypto.randomUUID(),
-
+    id: makeId(),
     type: "sticker",
-
-    src: sticker.src,
-
+    text: sticker.text,
     x: 120,
     y: 120,
-
-    w: 90,
-    h: 90,
-
+    w: 80,
+    h: 80,
+    fontSize: 52,
     rotate: 0
   };
 
@@ -811,7 +762,10 @@ function addSticker(sticker) {
     ...currentItems(),
     newSticker
   ]);
+
+  setSelectedItemId(newSticker.id);
 }
+ 
 
 
 // =======================
@@ -827,11 +781,9 @@ function StickerPicker() {
           className="stickerButton"
           onClick={() => addSticker(sticker)}
         >
-          <img
-            src={sticker.src}
-            alt={sticker.name}
-            className="stickerPreview"
-          />
+          <span style={{ fontSize: 38 }}>
+            {sticker.text}
+          </span>
         </button>
       ))}
     </div>
