@@ -1021,133 +1021,81 @@ function Home({ user, flash }) {
   }
 
   if (section === "flipbook") {
-  return (
-    <div className="phone">
-      <div
-        style={{
-          minHeight: "100vh",
-          background: "#d8bfa2",
-          padding: "16px"
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "18px"
-          }}
-        >
-          <button onClick={() => setSection("editor")}>‹</button>
+    return (
+      <div className="phone">
+        <div className="screen paper flipbookScreen">
+          <div className="flipbookTop">
+            <button className="plainIcon" onClick={() => setSection("editor")}>
+              ‹
+            </button>
 
-          <div style={{ textAlign: "center" }}>
-            <h2 style={{ margin: 0 }}>{activeBook?.title || "My Scrapbook"}</h2>
-            <p style={{ margin: 0 }}>{getPages().length} pages</p>
-          </div>
-          <button onClick={() => exportBook(activeBook)}>⋯</button>
-        </div>
+            <div>
+              <h2>{activeBook?.title || "Flipbook"}</h2>
+              <p>{getPages().length} pages</p>
+            </div>
 
-        <div
-          style={{
-            display: "flex",
-            height: "430px",
-            width: "100%",
-            margin: "0 auto",
-            boxShadow: "0 16px 35px rgba(0,0,0,.22)"
-          }}
-        >
-          <div
-            style={{
-              width: "34%",
-              background: "#fffaf3",
-              borderRadius: "12px 0 0 12px",
-              padding: "70px 20px",
-              fontFamily: "Georgia",
-              fontSize: "17px",
-              lineHeight: "1.7"
-            }}
-          >
-            Memories
-            <br />
-            are proof
-            <br />
-            beautiful
-            <br />
-            moments
-            <br />
-            matter ♡
+            <button className="plainIcon" onClick={() => exportBook(activeBook)}>
+              ⋯
+            </button>
           </div>
 
-          <div
-  className={currentPageData().background || "bgGrid"}
-  style={{
-    width: "66%",
-    height: "430px",
-    position: "relative",
-    overflow: "hidden",
-    borderRadius: "0 12px 12px 0"
-  }}
->
-  <div
-    style={{
-      width: "430px",
-      height: "430px",
-      position: "relative",
-      transform: "scale(0.62)",
-      transformOrigin: "top left"
-    }}
-  >
-    {currentItems().map((item) => renderItem(item, true))}
-  </div>
-</div>
+          <div className="flipbookBook">
+            <div className="bookLeftPage">
+              <div className="bookCurl"></div>
+            </div>
 
-        <div
-          style={{
-            margin: "18px auto",
-            background: "#fff7ef",
-            borderRadius: "999px",
-            padding: "8px 18px",
-            width: "fit-content",
-            fontWeight: "800"
-          }}
-        >
-          {currentPage + 1} / {getPages().length}
-        </div>
+            <div className={`flipbookCanvas ${currentPageData().background || "bgGrid"}`}>
+              {currentItems().map((item) => renderItem(item, true))}
+            </div>
+          </div>
 
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            gap: "14px",
-            background: "#fff7ef",
-            borderRadius: "24px",
-            padding: "14px"
-          }}
-        >
-          <button onClick={() => setCurrentPage(0)}>▦ Thumbnails</button>
+          <div className="flipPageCount">
+            {currentPage + 1} / {getPages().length}
+          </div>
 
-          <button onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}>
-            ←
-          </button>
+          <div className="flipControls">
+            <button onClick={() => setCurrentPage(0)}>▦<br />Thumbnails</button>
 
-          <button
-            onClick={() =>
-              setCurrentPage(Math.min(getPages().length - 1, currentPage + 1))
-            }
-          >
-            →
-          </button>
+            <button
+              className="flipArrow"
+              onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
+            >
+              ←
+            </button>
 
-          <button onClick={() => flash("Autoplay coming soon")}>▶ Autoplay</button>
+            <button
+              className="flipArrow"
+              onClick={() =>
+                setCurrentPage(Math.min(getPages().length - 1, currentPage + 1))
+              }
+            >
+              →
+            </button>
+
+            <button onClick={() => flash("Autoplay coming soon ▶")}>
+              ▶<br />Autoplay
+            </button>
+          </div>
+
+          <div className="flipThumbs">
+            {getPages().map((page, index) => (
+              <div
+                key={index}
+                className={index === currentPage ? "flipThumb activeFlipThumb" : "flipThumb"}
+                onClick={() => setCurrentPage(index)}
+              >
+                <div className={page.background || "bgGrid"}></div>
+                <small>{index + 1}</small>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
-    </div>
-  );
-      
+    );
+  }
+
   if (section === "editor") {
     return (
-      } 
-      
       <div className="phone">
         <div className="screen paper editorScreenPretty">
           <div className="editorHeaderPretty">
@@ -1508,5 +1456,7 @@ function Home({ user, flash }) {
   );
 }
 
-createRoot(document.getElementById("root")).render(<App />,);
-                                            
+createRoot(document.getElementById("root")).render(
+  <App />
+  );
+
