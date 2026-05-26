@@ -39,75 +39,91 @@ function blankPage(bg = "bgGrid") {
   };
 }
 
-function babyPage(title, caption, photoCount = 1, gender = "girl") {
+function babyPage(title, caption, photoCount = 1, gender = "girl", pageNum = 1) {
   const bg = gender === "boy" ? "bgBabyBluePlaid" : "bgBabyPinkPlaid";
   const accent = gender === "boy" ? "#7ba7d9" : "#e96d9b";
-  const mainSticker = gender === "boy" ? "🧸" : "🎀";
 
   const items = [
     {
       id: makeId(),
       type: "text",
       text: title,
-      x: 22,
+      x: 28,
       y: 24,
-      w: 125,
-      h: 78,
+      w: 120,
+      h: 80,
       fontSize: 24,
       fontFamily: "Georgia",
-      color: "#4d392f"
-    },
-    {
-      id: makeId(),
-      type: "sticker",
-      text: mainSticker,
-      x: 18,
-      y: 5,
-      w: 45,
-      h: 45,
-      fontSize: 34
-    },
-    {
-      id: makeId(),
-      type: "sticker",
-      text: "🍼",
-      x: 280,
-      y: 38,
-      w: 44,
-      h: 44,
-      fontSize: 34
-    },
-    {
-      id: makeId(),
-      type: "sticker",
-      text: "🌙",
-      x: 288,
-      y: 270,
-      w: 48,
-      h: 48,
-      fontSize: 38
-    },
-    {
-      id: makeId(),
-      type: "sticker",
-      text: "⭐",
-      x: 48,
-      y: 340,
-      w: 45,
-      h: 45,
-      fontSize: 34
+      color: "#2f211c",
+      rotate: -4
     },
     {
       id: makeId(),
       type: "text",
       text: caption,
-      x: 185,
-      y: 340,
-      w: 145,
-      h: 58,
-      fontSize: 16,
+      x: 210,
+      y: 350,
+      w: 135,
+      h: 50,
+      fontSize: 15,
       fontFamily: "Georgia",
-      color: "#6b4f43"
+      color: "#5a4038",
+      rotate: -2
+    },
+    {
+      id: makeId(),
+      type: "sticker",
+      text: "🎀",
+      x: 18,
+      y: 8,
+      w: 50,
+      h: 50,
+      fontSize: 38,
+      rotate: -12
+    },
+    {
+      id: makeId(),
+      type: "sticker",
+      text: "♡",
+      x: 300,
+      y: 38,
+      w: 50,
+      h: 50,
+      fontSize: 38,
+      rotate: 8
+    },
+    {
+      id: makeId(),
+      type: "sticker",
+      text: "🌸",
+      x: 315,
+      y: 280,
+      w: 55,
+      h: 55,
+      fontSize: 38,
+      rotate: 0
+    },
+    {
+      id: makeId(),
+      type: "sticker",
+      text: "🌿",
+      x: 40,
+      y: 300,
+      w: 60,
+      h: 60,
+      fontSize: 42,
+      rotate: -10
+    },
+    {
+      id: makeId(),
+      type: "sticker",
+      text: "💗",
+      x: 35,
+      y: 360,
+      w: 52,
+      h: 52,
+      fontSize: 38,
+      rotate: -4
     }
   ];
 
@@ -116,13 +132,13 @@ function babyPage(title, caption, photoCount = 1, gender = "girl") {
       id: makeId(),
       type: "placeholder",
       text: "Add Photo",
-      x: i === 0 ? 120 : 225,
-      y: i === 0 ? 125 : 175,
-      w: 145,
-      h: 155,
-      fontSize: 18,
+      x: i === 0 ? 120 : 235,
+      y: i === 0 ? 130 : 185,
+      w: i === 0 ? 145 : 120,
+      h: i === 0 ? 150 : 130,
+      fontSize: 16,
       color: accent,
-      rotate: i === 0 ? -3 : 4
+      rotate: i === 0 ? -5 : 5
     });
   }
 
@@ -552,54 +568,269 @@ function Home({ user, flash }) {
   }
 
   async function createBabyTemplate(gender) {
-    try {
-      const isBoy = gender === "boy";
+  try {
+    const isBoy = gender === "boy";
+    const bg = isBoy ? "bgBabyBluePlaid" : "bgBabyPinkPlaid";
 
-      const pagesData = [
-        babyPage("baby's\nfirst year ♡", isBoy ? "our little boy" : "our little girl", 2, gender),
-        babyPage("hello\nworld ♡", "the day you were born", 1, gender),
-        babyPage("tiny hands\nbig love ♡", "so much love", 1, gender),
-        babyPage("1\nmonth", "you are so loved", 1, gender),
-        babyPage("2\nmonths", "growing so fast ♡", 2, gender),
-        babyPage("3\nmonths", isBoy ? "sweet boy ♡" : "sweet girl ♡", 1, gender),
-        babyPage("4\nmonths", "so happy ♡", 1, gender),
-        babyPage("5\nmonths", "little blessing ♡", 2, gender),
-        babyPage("6\nmonths", "little love ♡", 1, gender),
-        babyPage("7\nmonths", "cutest smile ♡", 2, gender),
-        babyPage("8\nmonths", "learning & growing ♡", 1, gender),
-        babyPage("9\nmonths", "so curious ♡", 2, gender),
-        babyPage("10\nmonths", "so much joy ♡", 2, gender),
-        babyPage("11\nmonths", "almost one! ♡", 2, gender),
-        babyPage("12\nmonths", "what a year ♡", 2, gender),
-        babyPage("one year\nof you ♡", "our greatest blessing ♡", 1, gender)
-      ];
+    const t = (text, x, y, w = 120, h = 40, fontSize = 20) => ({
+      id: makeId(),
+      type: "text",
+      text,
+      x,
+      y,
+      w,
+      h,
+      fontSize,
+      fontFamily: "Georgia",
+      color: "#4d392f",
+      rotate: 0
+    });
 
-      const data = {
-        uid: user.uid,
-        title: isBoy ? "Baby’s First Year (Boy)" : "Baby’s First Year (Girl)",
-        pages: pagesData.length,
-        cover: isBoy ? "🧸" : "🎀",
-        updated: "just now",
-        createdAt: serverTimestamp(),
-        templateType: isBoy ? "babyBoy" : "babyGirl",
-        pagesData
-      };
+    const s = (text, x, y, size = 34, rotate = 0) => ({
+      id: makeId(),
+      type: "sticker",
+      text,
+      x,
+      y,
+      w: size + 14,
+      h: size + 14,
+      fontSize: size,
+      rotate
+    });
 
-      const docRef = await addDoc(collection(db, "scrapbooks"), data);
-      const newBook = { id: docRef.id, ...data };
+    const p = (x, y, w = 130, h = 150, rotate = 0) => ({
+      id: makeId(),
+      type: "placeholder",
+      text: "Add Photo",
+      x,
+      y,
+      w,
+      h,
+      fontSize: 18,
+      color: isBoy ? "#7ba7d9" : "#e96d9b",
+      rotate
+    });
 
-      setBooks([newBook, ...books]);
-      setActiveBook(newBook);
-      setUndoStack([]);
-      setRedoStack([]);
-      setCurrentPage(0);
-      setSelectedItemId(null);
-      setSection("editor");
-      flash(`${data.title} created 💖`);
-    } catch (e) {
-      flash("Template error: " + e.message);
-    }
+    const note = (text, x, y, w = 120, h = 50, rotate = 0) => ({
+      id: makeId(),
+      type: "text",
+      text,
+      x,
+      y,
+      w,
+      h,
+      fontSize: 15,
+      fontFamily: "Georgia",
+      color: "#7a5a4f",
+      rotate
+    });
+
+    const page = (items) => ({
+      background: bg,
+      items
+    });
+
+    const pagesData = [
+      page([
+        s("🎀", 10, 10, 42, -10),
+        t("baby's\nfirst year\n♡", 55, 40, 150, 100, 26),
+        note(isBoy ? "our little boy" : "our little girl", 245, 95, 120, 40, -2),
+        p(35, 170, 135, 155, -2),
+        p(210, 170, 95, 110, 5),
+        note("so much\nlove\n♡", 230, 290, 100, 65, -2),
+        s("♡", 45, 330, 34),
+        s("🌸", 345, 250, 34),
+        s("🌿", 350, 320, 32)
+      ]),
+
+      page([
+        s("🎀", 15, 15, 42, -10),
+        t("hello\nworld\n♡", 45, 50, 130, 90, 24),
+        note("the day\nyou were born ♡", 185, 160, 140, 55),
+        t("date: __________", 45, 235, 180, 24, 13),
+        t("time: __________", 45, 260, 180, 24, 13),
+        t("weight: ________", 45, 285, 180, 24, 13),
+        t("length: ________", 45, 310, 180, 24, 13),
+        p(215, 45, 155, 185, 3),
+        s("🌿", 300, 280, 34),
+        s("♡", 345, 320, 32)
+      ]),
+
+      page([
+        s("🎀", 12, 12, 42, -10),
+        t("tiny\nhands\nbig\nlove\n♡", 45, 85, 110, 140, 22),
+        p(190, 55, 165, 210, -3),
+        s("♡", 325, 265, 38),
+        s("🌸", 70, 260, 32),
+        s("🌿", 65, 300, 36)
+      ]),
+
+      page([
+        s("🎀", 15, 15, 42, -10),
+        t("1\nmonth", 50, 50, 90, 75, 25),
+        p(225, 45, 145, 150, 0),
+        note("you are\nso loved\n♡", 140, 205, 110, 70),
+        t("______________", 230, 265, 130, 30, 14),
+        t("______________", 230, 295, 130, 30, 14),
+        s("🌸", 35, 250, 34),
+        s("🌿", 35, 305, 34),
+        s("♡", 315, 320, 28)
+      ]),
+
+      page([
+        s("🎀", 15, 15, 42, -10),
+        t("2\nmonths", 45, 55, 100, 75, 25),
+        p(160, 95, 115, 135, -3),
+        p(245, 80, 115, 135, 4),
+        note("growing\nso fast ♡", 165, 285, 150, 50),
+        s("♡", 40, 260, 36),
+        s("🌿", 340, 260, 34)
+      ]),
+
+      page([
+        s("🎀", 15, 15, 42, -10),
+        t("3\nmonths", 45, 55, 100, 75, 25),
+        p(220, 70, 145, 150, 0),
+        note(isBoy ? "sweet boy ♡" : "sweet girl ♡", 230, 290, 130, 45),
+        s("🧸", 100, 215, 45),
+        s("🧸", 75, 250, 32),
+        s("♡", 330, 65, 32),
+        s("🌿", 330, 255, 34)
+      ]),
+
+      page([
+        s("🎀", 15, 15, 42, -10),
+        t("4\nmonths", 45, 55, 100, 75, 25),
+        p(185, 80, 145, 150, 0),
+        note("so happy ♡", 195, 290, 140, 45),
+        s("♡", 50, 260, 38),
+        s("🍼", 330, 90, 36),
+        s("🌿", 340, 250, 34)
+      ]),
+
+      page([
+        s("🎀", 15, 15, 42, -10),
+        t("5\nmonths", 45, 55, 100, 75, 25),
+        p(120, 200, 120, 140, -4),
+        p(255, 105, 125, 145, 2),
+        s("♡", 235, 290, 40),
+        s("🌸", 350, 90, 36),
+        s("🌿", 340, 220, 34)
+      ]),
+
+      page([
+        s("🎀", 15, 15, 42, -10),
+        t("6\nmonths", 45, 55, 100, 75, 25),
+        p(125, 120, 175, 150, 0),
+        note("little\nblessing\n♡", 45, 290, 110, 70),
+        s("🐰", 315, 170, 52),
+        s("🌸", 45, 345, 34)
+      ]),
+
+      page([
+        s("🎀", 15, 15, 42, -10),
+        t("7\nmonths", 45, 55, 100, 75, 25),
+        p(155, 90, 115, 145, 0),
+        p(285, 90, 115, 145, 0),
+        note("cutest\nsmile ♡", 300, 290, 100, 55),
+        s("♡", 90, 295, 36),
+        s("♡", 160, 310, 36),
+        s("♡", 225, 310, 36),
+        s("🌿", 335, 235, 34)
+      ]),
+
+      page([
+        s("🎀", 15, 15, 42, -10),
+        t("8\nmonths", 45, 55, 100, 75, 25),
+        p(160, 90, 120, 155, -4),
+        t("______________", 285, 90, 120, 25, 14),
+        t("______________", 285, 120, 120, 25, 14),
+        t("______________", 285, 150, 120, 25, 14),
+        note("learning\n& growing ♡", 290, 285, 110, 55),
+        s("🌸", 55, 280, 38),
+        s("♡", 55, 340, 32)
+      ]),
+
+      page([
+        s("🎀", 15, 15, 42, -10),
+        t("9\nmonths", 45, 55, 100, 75, 25),
+        p(180, 105, 140, 150, 0),
+        p(325, 115, 105, 115, 3),
+        note("so\ncurious\n♡", 340, 285, 95, 60),
+        s("♡", 115, 300, 38),
+        s("🌿", 75, 235, 34)
+      ]),
+
+      page([
+        s("🎀", 15, 15, 42, -10),
+        t("10\nmonths", 45, 55, 110, 75, 25),
+        p(155, 115, 125, 165, 4),
+        t("______________", 300, 105, 120, 25, 14),
+        t("______________", 300, 140, 120, 25, 14),
+        t("______________", 300, 175, 120, 25, 14),
+        note("so much\njoy ♡", 65, 310, 105, 55),
+        s("🌸", 35, 330, 34),
+        s("♡", 300, 70, 32)
+      ]),
+
+      page([
+        s("🎀", 15, 15, 42, -10),
+        t("11\nmonths", 45, 55, 110, 75, 25),
+        p(155, 105, 145, 180, -4),
+        p(310, 115, 120, 145, 4),
+        note("almost\none! ♡", 330, 310, 95, 55),
+        s("♡", 290, 330, 32)
+      ]),
+
+      page([
+        s("🎀", 15, 15, 42, -10),
+        t("12\nmonths", 45, 55, 110, 75, 25),
+        p(170, 105, 120, 160, 0),
+        t("______________", 305, 90, 120, 25, 14),
+        t("______________", 305, 125, 120, 25, 14),
+        t("______________", 305, 160, 120, 25, 14),
+        note("what a\nyear ♡", 310, 310, 95, 55),
+        s("🌸", 50, 330, 34),
+        s("♡", 300, 70, 32)
+      ]),
+
+      page([
+        s("🎀", 15, 15, 42, -10),
+        t("one\nyear\nof you\n♡", 60, 80, 120, 140, 24),
+        p(235, 105, 160, 190, -3),
+        note("our greatest\nblessing ♡", 295, 320, 130, 50),
+        s("♡", 80, 300, 42),
+        s("🌿", 205, 260, 34),
+        s("♡", 350, 70, 30)
+      ])
+    ];
+
+    const data = {
+      uid: user.uid,
+      title: isBoy ? "Baby’s First Year (Boy)" : "Baby’s First Year (Girl)",
+      pages: pagesData.length,
+      cover: isBoy ? "🧸" : "🎀",
+      updated: "just now",
+      createdAt: serverTimestamp(),
+      templateType: isBoy ? "babyBoy" : "babyGirl",
+      pagesData
+    };
+
+    const docRef = await addDoc(collection(db, "scrapbooks"), data);
+    const newBook = { id: docRef.id, ...data };
+
+    setBooks([newBook, ...books]);
+    setActiveBook(newBook);
+    setUndoStack([]);
+    setRedoStack([]);
+    setCurrentPage(0);
+    setSelectedItemId(null);
+    setSection("editor");
+    flash(`${data.title} created 💖`);
+  } catch (e) {
+    flash("Template error: " + e.message);
   }
+}
 
   async function deleteBook(book) {
     try {
