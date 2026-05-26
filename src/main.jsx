@@ -1436,7 +1436,7 @@ function Home({ user, flash }) {
                     <button onClick={() => deleteBook(book)}>Delete</button>
                   <button onClick={() => rotateSelected(-10)}>⟲ Rotate</button>
 <button onClick={() => rotateSelected(10)}>⟳ Rotate</button>
-                )}
+                )
               </div>
             </div>
           ))
