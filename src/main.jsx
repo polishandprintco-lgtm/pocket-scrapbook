@@ -462,6 +462,32 @@ async function uploadPhotoToPlaceholder(e, placeholderId) {
       ),
       false
     );
+useEffect(() => {
+  function handleKeyDown(e) {
+    if (
+      (e.key === "Delete" || e.key === "Backspace") &&
+      selectedItemId
+    ) {
+      e.preventDefault();
+
+      updateCurrentItems(
+        currentItems().filter(
+          (item) => item.id !== selectedItemId
+        )
+      );
+
+      setSelectedItemId(null);
+
+      flash("Deleted 🗑️");
+    }
+  }
+
+  window.addEventListener("keydown", handleKeyDown);
+
+  return () => {
+    window.removeEventListener("keydown", handleKeyDown);
+  };
+}, [selectedItemId, activeBook, currentPage]);
 
     setSelectedItemId(placeholderId);
     flash("Photo added 💖");
