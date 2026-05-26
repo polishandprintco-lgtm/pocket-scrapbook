@@ -124,7 +124,7 @@ function babyPage(title, caption, photoCount = 1, gender = "girl") {
     });
   }
 
-  return { background: bg, items };
+  return { background: gender === "boy" ? "bgBabyBluePlaid", items };
 }
 
 function App() {
