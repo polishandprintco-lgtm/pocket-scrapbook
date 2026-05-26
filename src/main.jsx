@@ -30,7 +30,7 @@ function id() {
   return crypto?.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
 }
 
-function blankPage(bg = "bgGrid") {
+function blankPage(bg = "bgBabyBluePlaid") {
   return {
     background: bg,
     items: []
