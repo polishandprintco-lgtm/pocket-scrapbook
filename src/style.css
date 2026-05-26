@@ -1205,6 +1205,8 @@ select{
   border-radius:16px;
   background:#ffd9df;
   color:#8b4b58
+  }
+
 .bgBabyPinkPlaid{
   background:
     linear-gradient(90deg, rgba(255,160,190,.18) 50%, transparent 50%),
