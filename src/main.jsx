@@ -140,7 +140,7 @@ function App() {
   const [page, setPage] = useState("welcome");
   const [toast, setToast] = useState("");
   const [user, setUser] = useState(null);
-  const [showStickerPicker, setShowStickerPicker] = useState(false);
+
 
   function flash(message) {
     setToast(message);
@@ -390,6 +390,7 @@ function Home({ user, flash }) {
   const [resizing, setResizing] = useState(null);
   const [undoStack, setUndoStack] = useState([]);
   const [redoStack, setRedoStack] = useState([]);
+  const [showStickerPicker, setShowStickerPicker] = useState(false);
 
   async function loadBooks() {
     if (!user) return;
