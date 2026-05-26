@@ -801,8 +801,8 @@ function addSticker(sticker) {
     x: 120,
     y: 120,
 
-    width: 90,
-    height: 90,
+    w: 90,
+    h: 90,
 
     rotate: 0
   };
@@ -1063,11 +1063,27 @@ function rotateSelected(amount) {
       >
         {item.type === "photo" && <img src={item.url} alt="" />}
 
-        {item.type === "sticker" && (
-          <div className="editableSticker" style={{ fontSize: item.fontSize || 42 }}>
-            {item.text}
-          </div>
-        )}
+        {item.type === "sticker" && item.src && (
+  <img
+    src={item.src}
+    alt=""
+    style={{
+      width: "100%",
+      height: "100%",
+      objectFit: "contain",
+      pointerEvents: "none"
+    }}
+  />
+)}
+
+{item.type === "sticker" && !item.src && (
+  <div
+    className="editableSticker"
+    style={{ fontSize: item.fontSize || 42 }}
+  >
+    {item.text}
+  </div>
+)}
 
         {(item.type === "text" || item.type === "placeholder") && (
           <div
