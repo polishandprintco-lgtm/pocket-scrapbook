@@ -1080,18 +1080,27 @@ function Home({ user, flash }) {
           </div>
 
           <div
-            className={currentPageData().background || "bgGrid"}
-            style={{
-              width: "66%",
-              height: "430px",
-              position: "relative",
-              overflow: "hidden",
-              borderRadius: "0 12px 12px 0"
-            }}
-          >
-            {currentItems().map((item) => renderItem(item, true))}
-          </div>
-        </div>
+  className={currentPageData().background || "bgGrid"}
+  style={{
+    width: "66%",
+    height: "430px",
+    position: "relative",
+    overflow: "hidden",
+    borderRadius: "0 12px 12px 0"
+  }}
+>
+  <div
+    style={{
+      width: "430px",
+      height: "430px",
+      position: "relative",
+      transform: "scale(0.62)",
+      transformOrigin: "top left"
+    }}
+  >
+    {currentItems().map((item) => renderItem(item, true))}
+  </div>
+</div>
 
         <div
           style={{
