@@ -1456,5 +1456,5 @@ function Home({ user, flash }) {
   );
 }
 
-createRoot(document.getElementById("root")).render(<A />,);
+createRoot(document.getElementById("root")).render(<App />,);
                                             
