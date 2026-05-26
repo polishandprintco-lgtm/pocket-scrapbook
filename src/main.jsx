@@ -1429,18 +1429,19 @@ function Home({ user, flash }) {
 
                 <span>{book.pages || 1} Pages</span>
 
-                {openMenuId === book.id && (
-                  <div className="miniMenu">
-                    <button onClick={() => openBook(book)}>Edit</button>
-                    <button onClick={() => exportBook(book)}>Export</button>
-                    <button onClick={() => deleteBook(book)}>Delete</button>
-                    <button onClick={() => rotateSelected(-10)}>⟲ Rotate</button>
-                    <button onClick={() => rotateSelected(10)}>⟳ Rotate</button>
-                )
-              </div>
-            </div>
-          ))
-        )}
+                {{openMenuId === book.id && (
+  <div className="miniMenu">
+    <button onClick={() => openBook(book)}>Edit</button>
+
+    <button onClick={() => exportBook(book)}>
+      Export
+    </button>
+
+    <button onClick={() => deleteBook(book)}>
+      Delete
+    </button>
+  </div>
+)}
       </div>
 
       <div className="bottom">
