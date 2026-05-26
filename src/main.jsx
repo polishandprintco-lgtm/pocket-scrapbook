@@ -140,6 +140,7 @@ function App() {
   const [page, setPage] = useState("welcome");
   const [toast, setToast] = useState("");
   const [user, setUser] = useState(null);
+  const [showStickerPicker, setShowStickerPicker] = useState(false);
 
   function flash(message) {
     setToast(message);
@@ -1263,69 +1264,35 @@ function rotateSelected(amount) {
             {currentItems().map((item) => renderItem(item))}
           </div>
 
-          <div className="toolPanel fixedTools">
-            <label>
-              🖼️
-              <span>Photo</span>
-              <input type="file" accept="image/*" hidden onChange={uploadPhoto} />
-            </label>
+         <div className="toolPanel fixedTools">
+  <label>
+    🖼️
+    <span>Photo</span>
+    <input type="file" accept="image/*" hidden onChange={uploadPhoto} />
+  </label>
 
-            <button
-  onClick={() => setShowStickerPicker(!showStickerPicker)}
->
-  💬
-  <span>Sticker</span>
-</button>
-              💬
-              <span>Sticker</span>
-            </button>
-
-            <button onClick={addText}>
-              𝑇
-              <span>Text</span>
-            </button>
-
-            <button onClick={() => setBackgroundMenuOpen(!backgroundMenuOpen)}>
-              🎨
-              <span>Background</span>
-            </button>
-
-            <button onClick={deleteSelected}>
-              🗑️
-              <span>Delete</span>
-            </button>
-          </div>
-
-          {backgroundMenuOpen && (
-            <div className="backgroundMenu">
-              <button onClick={() => changeBackground("bgGrid")}>Grid</button>
-              <button onClick={() => changeBackground("bgDots")}>Dots</button>
-              <button onClick={() => changeBackground("bgPaper")}>Paper</button>
-              <button onClick={() => changeBackground("bgLavender")}>Lavender</button>
-              <button onClick={() => changeBackground("bgFloral")}>Floral</button>
-              <button onClick={() => changeBackground("bgBabyPinkPlaid")}>Pink Plaid</button>
-              <button onClick={() => changeBackground("bgBabyBluePlaid")}>Blue Plaid</button>
-            </div>
-          )}
-
-         <div className="fontControls">
-  <button onClick={() => changeSelectedFontSize(-4)}>
-    A-
+  <button onClick={() => setShowStickerPicker(!showStickerPicker)}>
+    💬
+    <span>Sticker</span>
   </button>
 
-  <button onClick={() => changeSelectedFontSize(4)}>
-    A+
+  <button onClick={addText}>
+    𝑇
+    <span>Text</span>
   </button>
 
-  <button onClick={() => rotateSelected(-10)}>
-    ⟲ Rotate
+  <button onClick={() => setBackgroundMenuOpen(!backgroundMenuOpen)}>
+    🎨
+    <span>Background</span>
   </button>
 
-  <button onClick={() => rotateSelected(10)}>
-    ⟳ Rotate
+  <button onClick={deleteSelected}>
+    🗑️
+    <span>Delete</span>
   </button>
 </div>
-        {showStickerPicker && <StickerPicker />}
+
+{showStickerPicker && <StickerPicker />}
 
           <div className="fontControls">
             {["🍼", "🧸", "⭐", "🌙", "🛏️", "👶", "🦋", "💗"].map((sticker) => (
