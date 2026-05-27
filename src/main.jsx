@@ -417,7 +417,26 @@ function renameBook() {
                 setScreen("editor");
               }}
             >
-              <div className={`bookThumb bg-${b.background || "cream"}`}></div>
+              <div className={`bookThumb bg-${b.pages?.[0]?.background || b.background || "cream"}`}>
+  {b.pages?.[0]?.elements?.slice(0, 4).map((el) => (
+    <div
+      key={el.id}
+      className="miniElement"
+      style={{
+        left: `${el.x / 4}px`,
+        top: `${el.y / 4}px`,
+        width: `${el.w / 4}px`,
+        height: `${el.h / 4}px`,
+        transform: `rotate(${el.rotate || 0}deg)`,
+        fontSize: `${(el.fontSize || 20) / 4}px`,
+      }}
+    >
+      {el.type === "text" && <span>{el.text}</span>}
+      {el.type === "sticker" && <span>{el.text}</span>}
+      {el.type === "photo" && el.src && <img src={el.src} />}
+    </div>
+  ))}
+</div>
 
               <div>
                 <b>{b.title}</b>
