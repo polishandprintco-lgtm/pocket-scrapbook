@@ -445,26 +445,61 @@ function App() {
         </div>
       )}
 
-      {screen === "profile" && (
-        <div className="panel">
-          <button onClick={() => setScreen("home")}>← Back</button>
+     {screen === "profile" && (
+  <div className="panel">
+    <button onClick={() => setScreen("home")}>← Back</button>
 
-          <div className="profileHeader">
-            <div className="profilePic">💗</div>
-            <h2>{user.email}</h2>
-            <p>Pocket Scrapbook Member</p>
-          </div>
+    <div className="profileHeader">
+      <div className="profilePic">💗</div>
+      <h2>{user.email}</h2>
+      <p>Pocket Scrapbook Member</p>
+    </div>
 
-          <div className="settingsList">
-            <button className="settingsItem">🎨 Theme Settings</button>
-            <button className="settingsItem">🔔 Notifications</button>
-            <button className="settingsItem" onClick={() => setScreen("subscribe")}>👑 Subscription</button>
-            <button className="settingsItem">🔒 Privacy</button>
-            <button className="settingsItem">☁ Backup & Sync</button>
-            <button className="settingsItem logoutBtn" onClick={() => signOut(auth)}>🚪 Log Out</button>
-          </div>
-        </div>
-      )}
+    <div className="settingsList">
+      <button
+        className="settingsItem"
+        onClick={() => alert("Theme settings coming soon.")}
+      >
+        🎨 Theme Settings
+      </button>
+
+      <button
+        className="settingsItem"
+        onClick={() => alert("Notifications coming soon.")}
+      >
+        🔔 Notifications
+      </button>
+
+      <button
+        className="settingsItem"
+        onClick={() => setScreen("subscribe")}
+      >
+        👑 Subscription
+      </button>
+
+      <button
+        className="settingsItem"
+        onClick={() => alert("Privacy settings coming soon.")}
+      >
+        🔒 Privacy
+      </button>
+
+      <button
+        className="settingsItem"
+        onClick={() => alert("Backup & Sync coming soon.")}
+      >
+        ☁ Backup & Sync
+      </button>
+
+      <button
+        className="settingsItem logoutBtn"
+        onClick={() => signOut(auth)}
+      >
+        🚪 Log Out
+      </button>
+    </div>
+  </div>
+)}
 
       {screen === "templates" && (
         <div className="panel">
