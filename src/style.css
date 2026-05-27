@@ -533,3 +533,30 @@ input{width:100%;border:none;background:#fff;border-radius:18px;padding:16px;col
 .rightPaperPage .editableItem{
   cursor:default !important;
 }
+.bgBabyBluePlaid {
+  background-color: #dcecff;
+  background-image:
+    linear-gradient(90deg, rgba(100, 145, 190, 0.22) 1px, transparent 1px),
+    linear-gradient(rgba(100, 145, 190, 0.22) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.55) 8px, transparent 8px),
+    linear-gradient(rgba(255, 255, 255, 0.55) 8px, transparent 8px);
+  background-size:
+    24px 24px,
+    24px 24px,
+    48px 48px,
+    48px 48px;
+}
+
+.bgBabyPinkPlaid {
+  background-color: #ffdce8;
+  background-image:
+    linear-gradient(90deg, rgba(210, 100, 145, 0.22) 1px, transparent 1px),
+    linear-gradient(rgba(210, 100, 145, 0.22) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.55) 8px, transparent 8px),
+    linear-gradient(rgba(255, 255, 255, 0.55) 8px, transparent 8px);
+  background-size:
+    24px 24px,
+    24px 24px,
+    48px 48px,
+    48px 48px;
+}
