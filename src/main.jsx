@@ -534,51 +534,51 @@ function App() {
 
           {books.map((b) => (
             <div
-              className="bookCard"
-              key={b.id}
-              onClick={() => {
-                setBook(b);
-                setPageIndex(0);
-                setScreen("editor");
-              }}
-            >
-              <div className={`bookThumb bg-${b.background || "cream"}`}></div>
-              <div>
-                <b>{b.title}</b>
-                <small>{b.pages?.length || 1} Pages</small>
-              </div>
-              <button
-  onClick={(e) => {
-    e.stopPropagation();
-
-    const choice = window.prompt(
-      "Type one option:\n\nexport\nbaby\ndelete"
-    );
-
-    if (choice === "delete") {
-      const sure = window.confirm(
-        "Are you sure you want to delete this scrapbook?"
-      );
-
-      if (sure) {
-        deleteDoc(doc(db, "users", user.uid, "books", b.id));
-        loadBooks(user.uid);
-      }
-    }
-
-    if (choice === "export") {
-      alert("Export option coming soon.");
-    }
-
-    if (choice === "baby") {
-      setScreen("templates");
-    }
+  className="bookCard"
+  key={b.id}
+  onClick={() => {
+    setBook(b);
+    setPageIndex(0);
+    setScreen("editor");
   }}
 >
-  ⋯
-</button>
-                ⋯
-              </button>
+  <div className={`bookThumb bg-${b.background || "cream"}`}></div>
+
+  <div>
+    <b>{b.title}</b>
+    <small>{b.pages?.length || 1} Pages</small>
+  </div>
+
+  <button
+    onClick={(e) => {
+      e.stopPropagation();
+
+      const choice = window.prompt(
+        "Type one option:\n\nexport\nbaby\ndelete"
+      );
+
+      if (choice === "delete") {
+        const sure = window.confirm(
+          "Are you sure you want to delete this scrapbook?"
+        );
+
+        if (sure) {
+          deleteDoc(doc(db, "users", user.uid, "books", b.id));
+          loadBooks(user.uid);
+        }
+      }
+
+      if (choice === "export") {
+        alert("Export option coming soon.");
+      }
+
+      if (choice === "baby") {
+        setScreen("templates");
+      }
+    }}
+  >
+    ⋯
+  </button>
             </div>
           ))}
 
