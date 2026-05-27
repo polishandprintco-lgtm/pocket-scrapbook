@@ -430,8 +430,6 @@ function App() {
           <p>♡ Cherish every moment</p>
         </div>
 
-        <div className="polaroid left">📷</div>
-        <div className="polaroid right">🌅</div>
         <div className="bow">🎀</div>
         <div className="flower">🌼</div>
       </div>
