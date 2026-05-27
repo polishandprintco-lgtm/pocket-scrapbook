@@ -445,6 +445,8 @@ function renameBook() {
                     📖 View Flipbook
                   </button>
 
+                  <button onClick={renameBook}>Rename</button>
+                  
                   <button onClick={() => alert("Export option coming soon.")}>
                     ⬇️ Export
                   </button>
@@ -705,7 +707,6 @@ function renameBook() {
             <button onClick={() => setPageIndex(Math.min(book.pages.length - 1, pageIndex + 1))}>›</button>
             <button onClick={undo}>Undo</button>
             <button onClick={redo}>Redo</button>
-            <button onClick={renameBook}>Rename</button>
             <button
               onClick={async () => {
                 await saveBook();
