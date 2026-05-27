@@ -560,3 +560,41 @@ input{width:100%;border:none;background:#fff;border-radius:18px;padding:16px;col
     48px 48px,
     48px 48px;
 }
+.scrapCanvas.bgBabyBluePlaid,
+.flipbookCanvas.bgBabyBluePlaid,
+.pageThumb .bgBabyBluePlaid,
+.flipThumb .bgBabyBluePlaid,
+.backgroundOption.bgBabyBluePlaid,
+.bgBabyBluePlaid {
+  background-color: #dcecff !important;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      rgba(91, 132, 178, 0.28) 0px,
+      rgba(91, 132, 178, 0.28) 2px,
+      transparent 2px,
+      transparent 22px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(91, 132, 178, 0.28) 0px,
+      rgba(91, 132, 178, 0.28) 2px,
+      transparent 2px,
+      transparent 22px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.55) 0px,
+      rgba(255, 255, 255, 0.55) 10px,
+      transparent 10px,
+      transparent 44px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.55) 0px,
+      rgba(255, 255, 255, 0.55) 10px,
+      transparent 10px,
+      transparent 44px
+    ) !important;
+  background-size: 44px 44px !important;
+}
