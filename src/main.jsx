@@ -630,7 +630,12 @@ function App() {
 
   return (
     <div className="app">
-      {toast && <div className="toast">{toast}</div>}
+      {toast && (
+  <div className="toastCard">
+    <div className="toastTitle">Pocket Scrapbook</div>
+    <div className="toastMessage">{toast}</div>
+  </div>
+)}
 
       {screen === "home" && (
         <div className="home">
@@ -817,13 +822,13 @@ function App() {
   </button>
 
   <button
-    className="settingsItem"
-    onClick={() => {
-      alert("Privacy: Your scrapbooks are saved to your logged-in account only.");
-    }}
-  >
-    🔒 Privacy
-  </button>
+  className="settingsItem"
+  onClick={() =>
+    setToast("🔒 Your scrapbooks are private and saved securely to your account.")
+  }
+>
+  🔒 Privacy
+</button>
 
   <button
     className="settingsItem"
