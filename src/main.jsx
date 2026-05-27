@@ -476,10 +476,6 @@ function renameBook() {
             <button onClick={createBlankBook}>＋</button>
             <button onClick={() => setScreen("stickers")}>♡ Stickers</button>
             <button onClick={() => setScreen("subscribe")}>👑 Premium</button>
-            <button onClick={undo}>Undo</button>
-            <button onClick={redo}>Redo</button>
-            <button onClick={renameBook}>Rename</button>
-
             <button onClick={() => setScreen("profile")}>👤 Profile</button>
           </nav>
         </div>
@@ -707,6 +703,9 @@ function renameBook() {
             <button onClick={() => setPageIndex(Math.max(0, pageIndex - 1))}>‹</button>
             <span>Page {pageIndex + 1} / {book.pages.length}</span>
             <button onClick={() => setPageIndex(Math.min(book.pages.length - 1, pageIndex + 1))}>›</button>
+            <button onClick={undo}>Undo</button>
+            <button onClick={redo}>Redo</button>
+            <button onClick={renameBook}>Rename</button>
             <button
               onClick={async () => {
                 await saveBook();
