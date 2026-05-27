@@ -554,10 +554,52 @@ function App() {
             <button onClick={createBlankBook}>＋</button>
             <button onClick={() => setScreen("stickers")}>♡ Stickers</button>
             <button onClick={() => setScreen("subscribe")}>👑 Premium</button>
+            <button onClick={() => setScreen("profile")}>👤 Profile</button>
           </nav>
         </div>
       )}
+{screen === "profile" && (
+  <div className="panel">
+    <button onClick={() => setScreen("home")}>← Back</button>
 
+    <div className="profileHeader">
+      <div className="profilePic">💗</div>
+
+      <h2>{user.email}</h2>
+
+      <p>Pocket Scrapbook Member</p>
+    </div>
+
+    <div className="settingsList">
+      <button className="settingsItem">
+        🎨 Theme Settings
+      </button>
+
+      <button className="settingsItem">
+        🔔 Notifications
+      </button>
+
+      <button className="settingsItem">
+        👑 Subscription
+      </button>
+
+      <button className="settingsItem">
+        🔒 Privacy
+      </button>
+
+      <button className="settingsItem">
+        ☁ Backup & Sync
+      </button>
+
+      <button
+        className="settingsItem logoutBtn"
+        onClick={() => signOut(auth)}
+      >
+        🚪 Log Out
+      </button>
+    </div>
+  </div>
+)}
       {screen === "templates" && (
         <div className="panel">
           <button onClick={() => setScreen("home")}>← Back</button>
