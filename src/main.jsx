@@ -1696,8 +1696,7 @@ if (!item || !item.type) return null;
         </div>
       </div>
     );
-  }
-
+  
   if (section === "settings") {
     return (
       <div className="phone">
