@@ -580,41 +580,25 @@ useEffect(() => {
   }
 
   function changeBackground(backgroundClass) {
-    updateCurrentPage({
-      ...currentPageData(),
-      background: backgroundClass
-    });
+  if (!activeBook) return;
 
-    setBackgroundMenuOpen(false);
-    flash("Background changed 🎨");
-  }
-const BACKGROUNDS = [
-  {
-    id: "pinkPlaid",
-    className: "bgBabyPinkPlaid",
-    label: "Pink Plaid"
-  },
-  {
-    id: "bluePlaid",
-    className: "bgBabyBluePlaid",
-    label: "Blue Plaid"
-  },
-  {
-    id: "dots",
-    className: "bgGrid",
-    label: "Dots"
-  },
-  {
-    id: "paper",
-    className: "bgPaper",
-    label: "Paper"
-  },
-  {
-    id: "pink",
-    className: "bgSoftPink",
-    label: "Soft Pink"
-  }
-];
+  const pagesData = [...getPages()];
+
+  pagesData[currentPage] = {
+    ...pagesData[currentPage],
+    background: backgroundClass
+  };
+
+  applyBook({
+    ...activeBook,
+    pagesData,
+    pages: pagesData.length,
+    updated: "just now"
+  });
+
+  setBackgroundMenuOpen(false);
+  flash("Background changed 🎨");
+}
 
   function templateDefaultBg() {
     if (activeBook?.templateType === "babyBoy") return "bgBabyBluePlaid";
