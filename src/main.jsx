@@ -1265,7 +1265,7 @@ function rotateSelected(amount) {
         : item
     )
   );
-}
+}, [selectedItemId, activeBook, currentPage]);
   function handlePointerDown(e, item) {
     if (e.target.classList.contains("resizeHandle")) return;
 
