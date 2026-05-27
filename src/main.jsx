@@ -180,7 +180,8 @@ function App() {
   const [authMode, setAuthMode] = useState("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
+  const [showPassword, setShowPassword] = useState(false);
+  
   const page = book?.pages?.[pageIndex];
 
   useEffect(() => {
@@ -449,17 +450,27 @@ function App() {
           }}
         />
 
-        <input
-          placeholder="Password"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              handleAuth();
-            }
-          }}
-        />
+        <div className="passwordWrap">
+  <input
+    placeholder="Password"
+    type={showPassword ? "text" : "password"}
+    value={password}
+    onChange={(e) => setPassword(e.target.value)}
+    onKeyDown={(e) => {
+      if (e.key === "Enter") {
+        handleAuth();
+      }
+    }}
+  />
+
+  <button
+    type="button"
+    className="showPasswordBtn"
+    onClick={() => setShowPassword(!showPassword)}
+  >
+    {showPassword ? "Hide" : "Show"}
+  </button>
+</div>
 
         <button className="forgotBtn" onClick={resetPassword}>
           Forgot password?
