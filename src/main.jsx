@@ -566,12 +566,13 @@ function App() {
                 {el.type === "photo" && (
   <label className="photoBox">
     {el.src ? (
-      <img
-        src={el.src}
-        style={{
-          objectFit: el.crop || "cover",
-        }}
-      />
+     <img
+  src={el.src}
+  style={{
+    objectFit: el.crop || "cover",
+    objectPosition: `${el.cropX || 50}% ${el.cropY || 50}%`,
+  }}
+/>
     ) : (
       <span>＋ Photo</span>
     )}
@@ -590,6 +591,53 @@ function App() {
 
           <div className="toolbar">
             <button onClick={() => setPageIndex(Math.max(0, pageIndex - 1))}>← Previous</button>
+            <button
+  onClick={() => {
+    if (!selectedId) return alert("Tap a photo first.");
+    const selected = page.elements.find((el) => el.id === selectedId);
+    if (!selected || selected.type !== "photo") return alert("Tap a photo first.");
+
+    updateElement(selectedId, { cropX: (selected.cropX || 50) - 5 });
+  }}
+>
+  Move Photo Left
+</button>
+
+<button
+  onClick={() => {
+    if (!selectedId) return alert("Tap a photo first.");
+    const selected = page.elements.find((el) => el.id === selectedId);
+    if (!selected || selected.type !== "photo") return alert("Tap a photo first.");
+
+    updateElement(selectedId, { cropX: (selected.cropX || 50) + 5 });
+  }}
+>
+  Move Photo Right
+</button>
+
+<button
+  onClick={() => {
+    if (!selectedId) return alert("Tap a photo first.");
+    const selected = page.elements.find((el) => el.id === selectedId);
+    if (!selected || selected.type !== "photo") return alert("Tap a photo first.");
+
+    updateElement(selectedId, { cropY: (selected.cropY || 50) - 5 });
+  }}
+>
+  Move Photo Up
+</button>
+
+<button
+  onClick={() => {
+    if (!selectedId) return alert("Tap a photo first.");
+    const selected = page.elements.find((el) => el.id === selectedId);
+    if (!selected || selected.type !== "photo") return alert("Tap a photo first.");
+
+    updateElement(selectedId, { cropY: (selected.cropY || 50) + 5 });
+  }}
+>
+  Move Photo Down
+</button>
             <button
   onClick={() => {
     if (!selectedId) return alert("Tap a photo first.");
