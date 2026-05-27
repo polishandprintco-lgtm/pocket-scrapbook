@@ -1568,10 +1568,12 @@ function rotateSelected(amount) {
   </button>
 
   <div className="backgroundPickerWrap">
-  <button onClick={() => setBackgroundMenuOpen(!backgroundMenuOpen)}>
-    🎨
-    <span>Background</span>
-  </button>
+ <button
+  onClick={() => setBackgroundMenuOpen((open) => !open)}
+>
+  🎨
+  <span>Background</span>
+</button>
 
   {backgroundMenuOpen && (
     <div className="backgroundPicker">
@@ -1593,7 +1595,20 @@ function rotateSelected(amount) {
     <span>Delete</span>
   </button>
 </div>
-
+backgroundMenuOpen && (
+  <div className="backgroundPicker">
+    {BACKGROUNDS.map((bg) => (
+      <button
+        key={bg.id}
+        type="button"
+        onClick={() => changeBackground(bg.className)}
+      >
+        {bg.label}
+      </button>
+    ))}
+  </div>
+)}
+          
 {showStickerPicker && <StickerPicker />}
 
           <div className="fontControls">
