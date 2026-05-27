@@ -460,13 +460,27 @@ function redo() {
     setSelectedBookMenu(null);
   }}
 >
+ <button
+  onClick={(e) => {
+    e.stopPropagation();
+    renameBook(b);
+    setSelectedBookMenu(null);
+  }}
+>
   ✏️ Rename
 </button>
-                  
-                  <button onClick={() => alert("Export option coming soon.")}>
-                    ⬇️ Export
-                  </button>
 
+<button
+  onClick={() => alert("Export option coming soon.")}
+>
+  ⬇️ Export
+</button>
+
+<button
+  onClick={() => alert("Export option coming soon.")}
+>
+  ⬇️ Export
+</button>
                   <button
                     onClick={async () => {
                       const sure = window.confirm("Are you sure you want to delete this scrapbook?");
