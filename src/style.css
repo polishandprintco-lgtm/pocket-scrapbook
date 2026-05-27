@@ -245,3 +245,182 @@ nav button {
   background: transparent;
   color: #e45d8e;
 }
+.loginPage {
+  min-height: 100vh;
+  max-width: 430px;
+  margin: auto;
+  padding: 22px;
+  background-color: #ffdce7;
+  background-image:
+    linear-gradient(rgba(255,255,255,.35) 2px, transparent 2px),
+    linear-gradient(90deg, rgba(255,255,255,.35) 2px, transparent 2px);
+  background-size: 34px 34px;
+}
+
+.loginHero {
+  position: relative;
+  height: 330px;
+}
+
+.paperTitle {
+  position: absolute;
+  top: 75px;
+  left: 70px;
+  right: 35px;
+  padding: 28px;
+  background: #fff8ef;
+  border-radius: 10px;
+  box-shadow: 0 8px 18px #0002;
+  transform: rotate(-1deg);
+  text-align: center;
+}
+
+.paperTitle h1 {
+  margin: 0;
+  font-family: Georgia, serif;
+  font-size: 48px;
+  font-weight: 400;
+  line-height: .95;
+}
+
+.paperTitle span {
+  font-family: monospace;
+  font-size: 36px;
+  letter-spacing: 3px;
+}
+
+.paperTitle p {
+  background: #efb6c2;
+  padding: 8px;
+  border-radius: 6px;
+  font-family: monospace;
+}
+
+.tape {
+  position: absolute;
+  top: 60px;
+  left: 170px;
+  z-index: 2;
+  background: #e994a7;
+  color: white;
+  padding: 10px 34px;
+  transform: rotate(1deg);
+}
+
+.polaroid {
+  position: absolute;
+  width: 110px;
+  height: 135px;
+  background: white;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 5px 14px #0002;
+  font-size: 42px;
+}
+
+.polaroid.left {
+  left: 10px;
+  top: 150px;
+  transform: rotate(-8deg);
+}
+
+.polaroid.right {
+  right: 8px;
+  top: 120px;
+  transform: rotate(8deg);
+}
+
+.bow {
+  position: absolute;
+  left: 58px;
+  top: 60px;
+  font-size: 58px;
+  z-index: 3;
+}
+
+.flower {
+  position: absolute;
+  right: 22px;
+  top: 220px;
+  font-size: 44px;
+  z-index: 3;
+}
+
+.loginCard {
+  background: #fffdf9;
+  border-radius: 30px;
+  padding: 28px;
+  box-shadow: 0 8px 25px #0002;
+  text-align: center;
+}
+
+.loginCard h2 {
+  margin: 0;
+  font-family: Georgia, serif;
+  font-size: 34px;
+}
+
+.loginCard p {
+  color: #777;
+}
+
+.loginCard input {
+  margin: 9px 0;
+  height: 56px;
+  border-radius: 16px;
+  font-size: 16px;
+}
+
+.forgotBtn {
+  background: transparent;
+  color: #d86f93;
+  display: block;
+  margin-left: auto;
+  padding: 6px;
+}
+
+.loginBtn {
+  width: 100%;
+  height: 58px;
+  margin-top: 8px;
+  background: linear-gradient(90deg, #ec7fa1, #e96f98);
+  color: white;
+  font-size: 18px;
+}
+
+.orLine {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 20px 0;
+  color: #777;
+}
+
+.orLine span {
+  flex: 1;
+  height: 1px;
+  background: #e6d8d8;
+}
+
+.socialBtn {
+  width: 100%;
+  margin: 7px 0;
+  background: white;
+  border: 1px solid #e3d7d7;
+  font-size: 16px;
+}
+
+.switchAuthBtn {
+  background: transparent;
+  color: #d86f93;
+  margin-top: 14px;
+}
+
+.loginFeatures {
+  display: flex;
+  justify-content: space-around;
+  text-align: center;
+  margin-top: 25px;
+  color: #5d4545;
+  font-size: 15px;
+}
