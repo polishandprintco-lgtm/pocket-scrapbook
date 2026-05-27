@@ -555,3 +555,22 @@ nav button {
   width: 100%;
   height: 100%;
 }
+.darkTheme {
+  background: #2b2228;
+  color: #fff;
+}
+
+.darkTheme .app,
+.darkTheme .home,
+.darkTheme .panel,
+.darkTheme .editor {
+  background: #2b2228;
+  color: #fff;
+}
+
+.darkTheme .settingsItem,
+.darkTheme .bookCard,
+.darkTheme .loginCard {
+  background: #3a2d35;
+  color: #fff;
+}
