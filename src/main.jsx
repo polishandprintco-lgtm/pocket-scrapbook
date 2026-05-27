@@ -553,28 +553,30 @@ function App() {
     onClick={(e) => {
       e.stopPropagation();
 
-      const choice = window.prompt(
-        "Type one option:\n\nexport\nbaby\ndelete"
-      );
+      const action = window.confirm(
+  "Press OK to view flipbook.\nPress Cancel for more options."
+);
 
-      if (choice === "delete") {
-        const sure = window.confirm(
-          "Are you sure you want to delete this scrapbook?"
-        );
+if (action) {
+  setScreen("flipbook");
+} else {
+  const secondAction = window.confirm(
+    "Press OK to export.\nPress Cancel to delete scrapbook."
+  );
 
-        if (sure) {
-          deleteDoc(doc(db, "users", user.uid, "books", b.id));
-          loadBooks(user.uid);
-        }
-      }
+  if (secondAction) {
+    alert("Export option coming soon.");
+  } else {
+    const sure = window.confirm(
+      "Are you sure you want to delete this scrapbook?"
+    );
 
-      if (choice === "export") {
-        alert("Export option coming soon.");
-      }
-
-      if (choice === "baby") {
-        setScreen("templates");
-      }
+    if (sure) {
+      deleteDoc(doc(db, "users", user.uid, "books", b.id));
+      loadBooks(user.uid);
+    }
+  }
+}
     }}
   >
     ⋯
