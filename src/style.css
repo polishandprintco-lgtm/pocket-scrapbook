@@ -521,18 +521,43 @@ nav button {
   height: 100%;
   object-fit: cover;
 }
-.toast {
+.toastCard {
   position: fixed;
-  top: 24px;
+  top: 30px;
   left: 50%;
   transform: translateX(-50%);
-  background: #fff8ef;
-  color: #3b2b2b;
-  padding: 14px 22px;
-  border-radius: 18px;
-  box-shadow: 0 8px 24px #0002;
+  background: white;
+  padding: 18px 22px;
+  border-radius: 22px;
+  box-shadow: 0 10px 35px rgba(0,0,0,0.12);
   z-index: 9999;
+  min-width: 300px;
+  max-width: 90%;
+  animation: fadeIn 0.25s ease;
+}
+
+.toastTitle {
   font-weight: 700;
+  font-size: 16px;
+  margin-bottom: 6px;
+  color: #ff4f9a;
+}
+
+.toastMessage {
+  color: #444;
+  line-height: 1.4;
+  font-size: 14px;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
 }
 .bookThumb {
   position: relative;
