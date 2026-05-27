@@ -1607,7 +1607,7 @@ backgroundMenuOpen && (
       </button>
     ))}
   </div>
-)}
+
 {showStickerPicker && <StickerPicker />}
 
           <div className="fontControls">
