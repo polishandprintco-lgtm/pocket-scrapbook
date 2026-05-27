@@ -453,7 +453,6 @@ function redo() {
                     📖 View Flipbook
                   </button>
 
-                  <button
   onClick={(e) => {
     e.stopPropagation();
     renameBook(b);
