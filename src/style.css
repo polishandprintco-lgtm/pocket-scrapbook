@@ -521,3 +521,16 @@ nav button {
   height: 100%;
   object-fit: cover;
 }
+.toast {
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff8ef;
+  color: #3b2b2b;
+  padding: 14px 22px;
+  border-radius: 18px;
+  box-shadow: 0 8px 24px #0002;
+  z-index: 9999;
+  font-weight: 700;
+}
