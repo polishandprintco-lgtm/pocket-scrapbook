@@ -1702,7 +1702,6 @@ function Home({ user, flash }) {
     </div>
   );
 
-
 createRoot(document.getElementById("root")).render(
   <App />
 );
