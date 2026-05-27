@@ -564,16 +564,49 @@ function App() {
                 {el.type === "text" && <div className="viewText">{el.text}</div>}
                 {el.type === "sticker" && <div className="sticker">{el.text}</div>}
                 {el.type === "photo" && (
-                  <div className="photoBox">
-                    {el.src ? <img src={el.src} /> : <span>Photo</span>}
-                  </div>
-                )}
+  <label className="photoBox">
+    {el.src ? (
+      <img
+        src={el.src}
+        style={{
+          objectFit: el.crop || "cover",
+        }}
+      />
+    ) : (
+      <span>＋ Photo</span>
+    )}
+
+    <input
+      hidden
+      type="file"
+      accept="image/*"
+      onChange={(e) => uploadImage(el.id, e.target.files[0])}
+    />
+  </label>
+)}
               </div>
             ))}
           </div>
 
           <div className="toolbar">
             <button onClick={() => setPageIndex(Math.max(0, pageIndex - 1))}>← Previous</button>
+            <button
+  onClick={() => {
+    if (!selectedId) return alert("Tap a photo first.");
+
+    const selected = page.elements.find((el) => el.id === selectedId);
+
+    if (!selected || selected.type !== "photo") {
+      return alert("Tap a photo first.");
+    }
+
+    updateElement(selectedId, {
+      crop: selected.crop === "contain" ? "cover" : "contain",
+    });
+  }}
+>
+  Crop
+</button>
             <button onClick={() => setPageIndex(Math.min(book.pages.length - 1, pageIndex + 1))}>Next →</button>
           </div>
         </div>
