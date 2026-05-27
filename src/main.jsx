@@ -548,12 +548,35 @@ function App() {
                 <small>{b.pages?.length || 1} Pages</small>
               </div>
               <button
-                onClick={async (e) => {
-                  e.stopPropagation();
-                  await deleteDoc(doc(db, "users", user.uid, "books", b.id));
-                  loadBooks(user.uid);
-                }}
-              >
+  onClick={(e) => {
+    e.stopPropagation();
+
+    const choice = window.prompt(
+      "Type one option:\n\nexport\nbaby\ndelete"
+    );
+
+    if (choice === "delete") {
+      const sure = window.confirm(
+        "Are you sure you want to delete this scrapbook?"
+      );
+
+      if (sure) {
+        deleteDoc(doc(db, "users", user.uid, "books", b.id));
+        loadBooks(user.uid);
+      }
+    }
+
+    if (choice === "export") {
+      alert("Export option coming soon.");
+    }
+
+    if (choice === "baby") {
+      setScreen("templates");
+    }
+  }}
+>
+  ⋯
+</button>
                 ⋯
               </button>
             </div>
