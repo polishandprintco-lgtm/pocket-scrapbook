@@ -375,15 +375,10 @@ function redo() {
   setBook(next);
 }
 
-function renameBook() {
-  if (!book) return;
-
-  const newTitle = window.prompt("Rename scrapbook:", book.title || "My Scrapbook");
-
-  if (newTitle && newTitle.trim()) {
-    setBook({ ...book, title: newTitle.trim() });
-    showToast("Scrapbook renamed!");
-  }
+onClick={() => {
+  renameBook(b);
+  setSelectedBookMenu(null);
+}}
 }
   return (
     <div className="app">
