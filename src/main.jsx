@@ -417,28 +417,79 @@ function App() {
     return { x: e.clientX, y: e.clientY };
   }
 
-  if (!user) {
-    return (
-      <div className="authPage">
-        <h1>Pocket Scrapbook 💗</h1>
-        <p>Turn your memories into beautiful stories.</p>
+ if (!user) {
+  return (
+    <div className="loginPage">
+      <div className="loginHero">
+        <div className="tape">● ● ●</div>
+        <div className="paperTitle">
+          <h1>
+            pocket<br />
+            <span>scrapbook</span>
+          </h1>
+          <p>♡ Cherish every moment</p>
+        </div>
 
-        <input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
-        <input
-          placeholder="Password"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+        <div className="polaroid left">📷</div>
+        <div className="polaroid right">🌅</div>
+        <div className="bow">🎀</div>
+        <div className="flower">🌼</div>
+      </div>
 
-        <button onClick={handleAuth}>{authMode === "login" ? "Log In" : "Sign Up"}</button>
-        <button className="linkBtn" onClick={() => setAuthMode(authMode === "login" ? "signup" : "login")}>
-          {authMode === "login" ? "Create account" : "Already have an account?"}
-        </button>
-        <button className="linkBtn" onClick={resetPassword}>Forgot password?</button>
-      </div>
-    );
-  }
+      <div className="loginCard">
+        <h2>♡ Welcome ♡</h2>
+        <p>Capture, create and keep your memories close</p>
+
+        <input
+          placeholder="Email address"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+
+        <input
+          placeholder="Password"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+
+        <button className="forgotBtn" onClick={resetPassword}>
+          Forgot password?
+        </button>
+
+        <button className="loginBtn" onClick={handleAuth}>
+          {authMode === "login" ? "Log In" : "Create Account"}
+        </button>
+
+        <div className="orLine">
+          <span></span>
+          or
+          <span></span>
+        </div>
+
+        <button className="socialBtn">🌈 Continue with Google</button>
+        <button className="socialBtn"> Continue with Apple</button>
+
+        <button
+          className="switchAuthBtn"
+          onClick={() =>
+            setAuthMode(authMode === "login" ? "signup" : "login")
+          }
+        >
+          {authMode === "login"
+            ? "New here? Create an account"
+            : "Already have an account? Log in"}
+        </button>
+      </div>
+
+      <div className="loginFeatures">
+        <div>📖<br />Beautiful<br />Scrapbooks</div>
+        <div>♡<br />Cherished<br />Memories</div>
+        <div>🔒<br />Safe &<br />Private</div>
+      </div>
+    </div>
+  );
+}
 
   return (
     <div className="app">
