@@ -420,7 +420,7 @@ function App() {
   if (!user) {
     return (
       <div className="authPage">
-        <h1>ScrapFlip 💗</h1>
+        <h1>Pocket Scrapbook 💗</h1>
         <p>Turn your memories into beautiful stories.</p>
 
         <input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
@@ -449,7 +449,7 @@ function App() {
             <button onClick={() => signOut(auth)}>Logout</button>
           </div>
 
-          <h1>ScrapFlip💗</h1>
+          <h1>Pocket Scrapbook💗</h1>
           <p>Turn your memories into beautiful stories</p>
 
           <button className="createCard" onClick={createBlankBook}>
