@@ -688,7 +688,14 @@ function App() {
               Page {pageIndex + 1} / {book.pages.length}
             </span>
             <button onClick={() => setPageIndex(Math.min(book.pages.length - 1, pageIndex + 1))}>›</button>
-            <button onClick={() => saveBook()}>Save</button>
+            <button
+  onClick={async () => {
+    await saveBook();
+    alert("Scrapbook saved!");
+  }}
+>
+  Save
+</button>
           </header>
 
           <main
