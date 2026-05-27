@@ -39,6 +39,115 @@ function blankPage(bg = "bgGrid") {
   };
 }
 
+function babyPage(title, caption, photoCount = 1, gender = "girl", pageNum = 1) {
+  const bg = gender === "boy" ? "bgBabyBluePlaid" : "bgBabyPinkPlaid";
+  const accent = gender === "boy" ? "#7ba7d9" : "#e96d9b";
+
+  const items = [
+    {
+      id: makeId(),
+      type: "text",
+      text: title,
+      x: 28,
+      y: 24,
+      w: 120,
+      h: 80,
+      fontSize: 24,
+      fontFamily: "Georgia",
+      color: "#2f211c",
+      rotate: -4
+    },
+    {
+      id: makeId(),
+      type: "text",
+      text: caption,
+      x: 210,
+      y: 350,
+      w: 135,
+      h: 50,
+      fontSize: 15,
+      fontFamily: "Georgia",
+      color: "#5a4038",
+      rotate: -2
+    },
+    {
+      id: makeId(),
+      type: "sticker",
+      text: "🎀",
+      x: 18,
+      y: 8,
+      w: 50,
+      h: 50,
+      fontSize: 38,
+      rotate: -12
+    },
+    {
+      id: makeId(),
+      type: "sticker",
+      text: "♡",
+      x: 300,
+      y: 38,
+      w: 50,
+      h: 50,
+      fontSize: 38,
+      rotate: 8
+    },
+    {
+      id: makeId(),
+      type: "sticker",
+      text: "🌸",
+      x: 315,
+      y: 280,
+      w: 55,
+      h: 55,
+      fontSize: 38,
+      rotate: 0
+    },
+    {
+      id: makeId(),
+      type: "sticker",
+      text: "🌿",
+      x: 40,
+      y: 300,
+      w: 60,
+      h: 60,
+      fontSize: 42,
+      rotate: -10
+    },
+    {
+      id: makeId(),
+      type: "sticker",
+      text: "💗",
+      x: 35,
+      y: 360,
+      w: 52,
+      h: 52,
+      fontSize: 38,
+      rotate: -4
+    }
+  ];
+
+  for (let i = 0; i < photoCount; i++) {
+    items.push({
+      id: makeId(),
+      type: "placeholder",
+      text: "Add Photo",
+      x: i === 0 ? 120 : 235,
+      y: i === 0 ? 130 : 185,
+      w: i === 0 ? 145 : 120,
+      h: i === 0 ? 150 : 130,
+      fontSize: 16,
+      color: accent,
+      rotate: i === 0 ? -5 : 5
+    });
+  }
+
+  return {
+    background: bg,
+    items
+  };
+}
+
 function cloneBook(book) {
   return JSON.parse(JSON.stringify(book));
 }
@@ -47,6 +156,7 @@ function App() {
   const [page, setPage] = useState("welcome");
   const [toast, setToast] = useState("");
   const [user, setUser] = useState(null);
+
 
   function flash(message) {
     setToast(message);
@@ -289,7 +399,6 @@ function Home({ user, flash }) {
   const [openMenuId, setOpenMenuId] = useState(null);
   const [editorMenuOpen, setEditorMenuOpen] = useState(false);
   const [backgroundMenuOpen, setBackgroundMenuOpen] = useState(false);
-  const [showStickerPicker, setShowStickerPicker] = useState(false);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
   const [selectedItemId, setSelectedItemId] = useState(null);
@@ -297,35 +406,7 @@ function Home({ user, flash }) {
   const [resizing, setResizing] = useState(null);
   const [undoStack, setUndoStack] = useState([]);
   const [redoStack, setRedoStack] = useState([]);
-  const [hasSubscription, setHasSubscription] = useState(false);
-  
-  const STICKERS = [
-    { id: "bow", text: "🎀" },
-    { id: "bear", text: "🧸" },
-    { id: "bottle", text: "🍼" },
-    { id: "moon", text: "🌙" },
-    { id: "star", text: "⭐" },
-    { id: "heart", text: "💗" },
-    { id: "flower", text: "🌸" },
-    { id: "butterfly", text: "🦋" },
-    { id: "baby", text: "👶" },
-    { id: "bunny", text: "🐰" },
-    { id: "duck", text: "🦆" },
-    { id: "cloud", text: "☁️" },
-    { id: "sparkle", text: "✨" },
-    { id: "gift", text: "🎁" }
-  ];
-
-  const BACKGROUNDS = [
-    { id: "pinkPlaid", className: "bgBabyPinkPlaid", label: "Pink Plaid" },
-    { id: "bluePlaid", className: "bgBabyBluePlaid", label: "Blue Plaid" },
-    { id: "grid", className: "bgGrid", label: "Grid" },
-    { id: "dots", className: "bgDots", label: "Dots" },
-    { id: "paper", className: "bgPaper", label: "Paper" },
-    { id: "lavender", className: "bgLavender", label: "Lavender" },
-    { id: "floral", className: "bgFloral", label: "Floral" },
-    { id: "softPink", className: "bgSoftPink", label: "Soft Pink" }
-  ];
+  const [showStickerPicker, setShowStickerPicker] = useState(false);
 
   async function loadBooks() {
     if (!user) return;
@@ -351,33 +432,73 @@ function Home({ user, flash }) {
       setLoading(false);
     }
   }
+async function uploadPhotoToPlaceholder(e, placeholderId) {
+  const file = e.target.files?.[0];
+
+  if (!file || !activeBook?.id || !user) return;
+
+  try {
+    rememberUndo();
+
+    const storageRef = ref(
+      storage,
+      `users/${user.uid}/scrapbooks/${activeBook.id}/${Date.now()}-${file.name}`
+    );
+
+    await uploadBytes(storageRef, file);
+    const url = await getDownloadURL(storageRef);
+
+    updateCurrentItems(
+      currentItems().map((item) =>
+        item.id === placeholderId
+          ? {
+              ...item,
+              type: "photo",
+              url,
+              text: "",
+              rotate: item.rotate || 0
+            }
+          : item
+      ),
+      false
+    );
+useEffect(() => {
+  function handleKeyDown(e) {
+    if (
+      (e.key === "Delete" || e.key === "Backspace") &&
+      selectedItemId
+    ) {
+      e.preventDefault();
+
+      updateCurrentItems(
+        currentItems().filter(
+          (item) => item.id !== selectedItemId
+        )
+      );
+
+      setSelectedItemId(null);
+
+      flash("Deleted 🗑️");
+    }
+  }
+
+  window.addEventListener("keydown", handleKeyDown);
+
+  return () => {
+    window.removeEventListener("keydown", handleKeyDown);
+  };
+}, [selectedItemId, activeBook, currentPage]);
+
+    setSelectedItemId(placeholderId);
+    flash("Photo added 💖");
+  } catch (e) {
+    flash("Photo upload failed: " + e.message);
+  }
+}
 
   useEffect(() => {
     loadBooks();
   }, [user]);
-
-  useEffect(() => {
-    function handleKeyDown(e) {
-      if (
-        (e.key === "Delete" || e.key === "Backspace") &&
-        selectedItemId &&
-        section === "editor"
-      ) {
-        e.preventDefault();
-        updateCurrentItems(
-          currentItems().filter((item) => item.id !== selectedItemId)
-        );
-        setSelectedItemId(null);
-        flash("Deleted 🗑️");
-      }
-    }
-
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [selectedItemId, activeBook, currentPage, section]);
 
   function getPages() {
     return activeBook?.pagesData?.length
@@ -467,6 +588,33 @@ function Home({ user, flash }) {
     setBackgroundMenuOpen(false);
     flash("Background changed 🎨");
   }
+const BACKGROUNDS = [
+  {
+    id: "pinkPlaid",
+    className: "bgBabyPinkPlaid",
+    label: "Pink Plaid"
+  },
+  {
+    id: "bluePlaid",
+    className: "bgBabyBluePlaid",
+    label: "Blue Plaid"
+  },
+  {
+    id: "dots",
+    className: "bgGrid",
+    label: "Dots"
+  },
+  {
+    id: "paper",
+    className: "bgPaper",
+    label: "Paper"
+  },
+  {
+    id: "pink",
+    className: "bgSoftPink",
+    label: "Soft Pink"
+  }
+];
 
   function templateDefaultBg() {
     if (activeBook?.templateType === "babyBoy") return "bgBabyBluePlaid";
@@ -510,254 +658,269 @@ function Home({ user, flash }) {
   }
 
   async function createBabyTemplate(gender) {
-    try {
-      const isBoy = gender === "boy";
-      const bg = isBoy ? "bgBabyBluePlaid" : "bgBabyPinkPlaid";
-      const accent = isBoy ? "#7ba7d9" : "#e96d9b";
-      const bow = isBoy ? "🧸" : "🎀";
+  try {
+    const isBoy = gender === "boy";
+    const bg = isBoy ? "bgBabyBluePlaid" : "bgBabyPinkPlaid";
 
-      const t = (text, x, y, w = 120, h = 40, fontSize = 20, rotate = 0) => ({
-        id: makeId(),
-        type: "text",
-        text,
-        x,
-        y,
-        w,
-        h,
-        fontSize,
-        fontFamily: "Georgia",
-        color: "#4d392f",
-        rotate
-      });
+    const t = (text, x, y, w = 120, h = 40, fontSize = 20) => ({
+      id: makeId(),
+      type: "text",
+      text,
+      x,
+      y,
+      w,
+      h,
+      fontSize,
+      fontFamily: "Georgia",
+      color: "#4d392f",
+      rotate: 0
+    });
 
-      const s = (text, x, y, size = 34, rotate = 0) => ({
-        id: makeId(),
-        type: "sticker",
-        text,
-        x,
-        y,
-        w: size + 14,
-        h: size + 14,
-        fontSize: size,
-        rotate
-      });
+    const s = (text, x, y, size = 34, rotate = 0) => ({
+      id: makeId(),
+      type: "sticker",
+      text,
+      x,
+      y,
+      w: size + 14,
+      h: size + 14,
+      fontSize: size,
+      rotate
+    });
 
-      const p = (x, y, w = 130, h = 150, rotate = 0) => ({
-        id: makeId(),
-        type: "placeholder",
-        text: "Add Photo",
-        x,
-        y,
-        w,
-        h,
-        fontSize: 18,
-        color: accent,
-        rotate
-      });
+    const p = (x, y, w = 130, h = 150, rotate = 0) => ({
+      id: makeId(),
+      type: "placeholder",
+      text: "Add Photo",
+      x,
+      y,
+      w,
+      h,
+      fontSize: 18,
+      color: isBoy ? "#7ba7d9" : "#e96d9b",
+      rotate
+    });
 
-      const note = (text, x, y, w = 120, h = 50, rotate = 0) => ({
-        id: makeId(),
-        type: "text",
-        text,
-        x,
-        y,
-        w,
-        h,
-        fontSize: 15,
-        fontFamily: "Georgia",
-        color: "#7a5a4f",
-        rotate
-      });
+    const note = (text, x, y, w = 120, h = 50, rotate = 0) => ({
+      id: makeId(),
+      type: "text",
+      text,
+      x,
+      y,
+      w,
+      h,
+      fontSize: 15,
+      fontFamily: "Georgia",
+      color: "#7a5a4f",
+      rotate
+    });
 
-      const page = (items) => ({
-        background: bg,
-        items
-      });
+    const page = (items) => ({
+      background: bg,
+      items
+    });
 
-      const pagesData = [
-        page([
-          s(bow, 10, 10, 42, -10),
-          t("baby's\nfirst year\n♡", 55, 40, 150, 100, 26),
-          note(isBoy ? "our little boy" : "our little girl", 245, 95, 120, 40, -2),
-          p(35, 170, 135, 155, -2),
-          p(210, 170, 95, 110, 5),
-          note("so much\nlove\n♡", 230, 290, 100, 65, -2),
-          s("♡", 45, 330, 34),
-          s("🌸", 345, 250, 34),
-          s("🌿", 350, 320, 32)
-        ]),
-        page([
-          s(bow, 15, 15, 42, -10),
-          t("hello\nworld\n♡", 45, 50, 130, 90, 24),
-          note("the day\nyou were born ♡", 185, 160, 140, 55),
-          t("date: __________", 45, 235, 180, 24, 13),
-          t("time: __________", 45, 260, 180, 24, 13),
-          t("weight: ________", 45, 285, 180, 24, 13),
-          t("length: ________", 45, 310, 180, 24, 13),
-          p(215, 45, 155, 185, 3),
-          s("🌿", 300, 280, 34),
-          s("♡", 345, 320, 32)
-        ]),
-        page([
-          s(bow, 12, 12, 42, -10),
-          t("tiny\nhands\nbig\nlove\n♡", 45, 85, 110, 140, 22),
-          p(190, 55, 165, 210, -3),
-          s("♡", 325, 265, 38),
-          s("🌸", 70, 260, 32),
-          s("🌿", 65, 300, 36)
-        ]),
-        page([
-          s(bow, 15, 15, 42, -10),
-          t("1\nmonth", 50, 50, 90, 75, 25),
-          p(225, 45, 145, 150, 0),
-          note("you are\nso loved\n♡", 140, 205, 110, 70),
-          t("______________", 230, 265, 130, 30, 14),
-          t("______________", 230, 295, 130, 30, 14),
-          s("🌸", 35, 250, 34),
-          s("🌿", 35, 305, 34),
-          s("♡", 315, 320, 28)
-        ]),
-        page([
-          s(bow, 15, 15, 42, -10),
-          t("2\nmonths", 45, 55, 100, 75, 25),
-          p(160, 95, 115, 135, -3),
-          p(245, 80, 115, 135, 4),
-          note("growing\nso fast ♡", 165, 285, 150, 50),
-          s("♡", 40, 260, 36),
-          s("🌿", 340, 260, 34)
-        ]),
-        page([
-          s(bow, 15, 15, 42, -10),
-          t("3\nmonths", 45, 55, 100, 75, 25),
-          p(220, 70, 145, 150, 0),
-          note(isBoy ? "sweet boy ♡" : "sweet girl ♡", 230, 290, 130, 45),
-          s("🧸", 100, 215, 45),
-          s("♡", 330, 65, 32),
-          s("🌿", 330, 255, 34)
-        ]),
-        page([
-          s(bow, 15, 15, 42, -10),
-          t("4\nmonths", 45, 55, 100, 75, 25),
-          p(185, 80, 145, 150, 0),
-          note("so happy ♡", 195, 290, 140, 45),
-          s("♡", 50, 260, 38),
-          s("🍼", 330, 90, 36),
-          s("🌿", 340, 250, 34)
-        ]),
-        page([
-          s(bow, 15, 15, 42, -10),
-          t("5\nmonths", 45, 55, 100, 75, 25),
-          p(120, 200, 120, 140, -4),
-          p(255, 105, 125, 145, 2),
-          s("♡", 235, 290, 40),
-          s("🌸", 350, 90, 36),
-          s("🌿", 340, 220, 34)
-        ]),
-        page([
-          s(bow, 15, 15, 42, -10),
-          t("6\nmonths", 45, 55, 100, 75, 25),
-          p(125, 120, 175, 150, 0),
-          note("little\nblessing\n♡", 45, 290, 110, 70),
-          s("🐰", 315, 170, 52),
-          s("🌸", 45, 345, 34)
-        ]),
-        page([
-          s(bow, 15, 15, 42, -10),
-          t("7\nmonths", 45, 55, 100, 75, 25),
-          p(155, 90, 115, 145, 0),
-          p(285, 90, 115, 145, 0),
-          note("cutest\nsmile ♡", 300, 290, 100, 55),
-          s("♡", 90, 295, 36),
-          s("♡", 160, 310, 36),
-          s("🌿", 335, 235, 34)
-        ]),
-        page([
-          s(bow, 15, 15, 42, -10),
-          t("8\nmonths", 45, 55, 100, 75, 25),
-          p(160, 90, 120, 155, -4),
-          t("______________", 285, 90, 120, 25, 14),
-          t("______________", 285, 120, 120, 25, 14),
-          t("______________", 285, 150, 120, 25, 14),
-          note("learning\n& growing ♡", 290, 285, 110, 55),
-          s("🌸", 55, 280, 38),
-          s("♡", 55, 340, 32)
-        ]),
-        page([
-          s(bow, 15, 15, 42, -10),
-          t("9\nmonths", 45, 55, 100, 75, 25),
-          p(180, 105, 140, 150, 0),
-          p(325, 115, 105, 115, 3),
-          note("so\ncurious\n♡", 340, 285, 95, 60),
-          s("♡", 115, 300, 38),
-          s("🌿", 75, 235, 34)
-        ]),
-        page([
-          s(bow, 15, 15, 42, -10),
-          t("10\nmonths", 45, 55, 110, 75, 25),
-          p(155, 115, 125, 165, 4),
-          t("______________", 300, 105, 120, 25, 14),
-          t("______________", 300, 140, 120, 25, 14),
-          t("______________", 300, 175, 120, 25, 14),
-          note("so much\njoy ♡", 65, 310, 105, 55),
-          s("🌸", 35, 330, 34),
-          s("♡", 300, 70, 32)
-        ]),
-        page([
-          s(bow, 15, 15, 42, -10),
-          t("11\nmonths", 45, 55, 110, 75, 25),
-          p(155, 105, 145, 180, -4),
-          p(310, 115, 120, 145, 4),
-          note("almost\none! ♡", 330, 310, 95, 55),
-          s("♡", 290, 330, 32)
-        ]),
-        page([
-          s(bow, 15, 15, 42, -10),
-          t("12\nmonths", 45, 55, 110, 75, 25),
-          p(170, 105, 120, 160, 0),
-          t("______________", 305, 90, 120, 25, 14),
-          t("______________", 305, 125, 120, 25, 14),
-          t("______________", 305, 160, 120, 25, 14),
-          note("what a\nyear ♡", 310, 310, 95, 55),
-          s("🌸", 50, 330, 34),
-          s("♡", 300, 70, 32)
-        ]),
-        page([
-          s(bow, 15, 15, 42, -10),
-          t("one\nyear\nof you\n♡", 60, 80, 120, 140, 24),
-          p(235, 105, 160, 190, -3),
-          note("our greatest\nblessing ♡", 295, 320, 130, 50),
-          s("♡", 80, 300, 42),
-          s("🌿", 205, 260, 34),
-          s("♡", 350, 70, 30)
-        ])
-      ];
+    const pagesData = [
+      page([
+        s("🎀", 10, 10, 42, -10),
+        t("baby's\nfirst year\n♡", 55, 40, 150, 100, 26),
+        note(isBoy ? "our little boy" : "our little girl", 245, 95, 120, 40, -2),
+        p(35, 170, 135, 155, -2),
+        p(210, 170, 95, 110, 5),
+        note("so much\nlove\n♡", 230, 290, 100, 65, -2),
+        s("♡", 45, 330, 34),
+        s("🌸", 345, 250, 34),
+        s("🌿", 350, 320, 32)
+      ]),
 
-      const data = {
-        uid: user.uid,
-        title: isBoy ? "Baby’s First Year (Boy)" : "Baby’s First Year (Girl)",
-        pages: pagesData.length,
-        cover: isBoy ? "🧸" : "🎀",
-        updated: "just now",
-        createdAt: serverTimestamp(),
-        templateType: isBoy ? "babyBoy" : "babyGirl",
-        pagesData
-      };
+      page([
+        s("🎀", 15, 15, 42, -10),
+        t("hello\nworld\n♡", 45, 50, 130, 90, 24),
+        note("the day\nyou were born ♡", 185, 160, 140, 55),
+        t("date: __________", 45, 235, 180, 24, 13),
+        t("time: __________", 45, 260, 180, 24, 13),
+        t("weight: ________", 45, 285, 180, 24, 13),
+        t("length: ________", 45, 310, 180, 24, 13),
+        p(215, 45, 155, 185, 3),
+        s("🌿", 300, 280, 34),
+        s("♡", 345, 320, 32)
+      ]),
 
-      const docRef = await addDoc(collection(db, "scrapbooks"), data);
-      const newBook = { id: docRef.id, ...data };
+      page([
+        s("🎀", 12, 12, 42, -10),
+        t("tiny\nhands\nbig\nlove\n♡", 45, 85, 110, 140, 22),
+        p(190, 55, 165, 210, -3),
+        s("♡", 325, 265, 38),
+        s("🌸", 70, 260, 32),
+        s("🌿", 65, 300, 36)
+      ]),
 
-      setBooks([newBook, ...books]);
-      setActiveBook(newBook);
-      setUndoStack([]);
-      setRedoStack([]);
-      setCurrentPage(0);
-      setSelectedItemId(null);
-      setSection("editor");
-      flash(`${data.title} created 💖`);
-    } catch (e) {
-      flash("Template error: " + e.message);
-    }
+      page([
+        s("🎀", 15, 15, 42, -10),
+        t("1\nmonth", 50, 50, 90, 75, 25),
+        p(225, 45, 145, 150, 0),
+        note("you are\nso loved\n♡", 140, 205, 110, 70),
+        t("______________", 230, 265, 130, 30, 14),
+        t("______________", 230, 295, 130, 30, 14),
+        s("🌸", 35, 250, 34),
+        s("🌿", 35, 305, 34),
+        s("♡", 315, 320, 28)
+      ]),
+
+      page([
+        s("🎀", 15, 15, 42, -10),
+        t("2\nmonths", 45, 55, 100, 75, 25),
+        p(160, 95, 115, 135, -3),
+        p(245, 80, 115, 135, 4),
+        note("growing\nso fast ♡", 165, 285, 150, 50),
+        s("♡", 40, 260, 36),
+        s("🌿", 340, 260, 34)
+      ]),
+
+      page([
+        s("🎀", 15, 15, 42, -10),
+        t("3\nmonths", 45, 55, 100, 75, 25),
+        p(220, 70, 145, 150, 0),
+        note(isBoy ? "sweet boy ♡" : "sweet girl ♡", 230, 290, 130, 45),
+        s("🧸", 100, 215, 45),
+        s("🧸", 75, 250, 32),
+        s("♡", 330, 65, 32),
+        s("🌿", 330, 255, 34)
+      ]),
+
+      page([
+        s("🎀", 15, 15, 42, -10),
+        t("4\nmonths", 45, 55, 100, 75, 25),
+        p(185, 80, 145, 150, 0),
+        note("so happy ♡", 195, 290, 140, 45),
+        s("♡", 50, 260, 38),
+        s("🍼", 330, 90, 36),
+        s("🌿", 340, 250, 34)
+      ]),
+
+      page([
+        s("🎀", 15, 15, 42, -10),
+        t("5\nmonths", 45, 55, 100, 75, 25),
+        p(120, 200, 120, 140, -4),
+        p(255, 105, 125, 145, 2),
+        s("♡", 235, 290, 40),
+        s("🌸", 350, 90, 36),
+        s("🌿", 340, 220, 34)
+      ]),
+
+      page([
+        s("🎀", 15, 15, 42, -10),
+        t("6\nmonths", 45, 55, 100, 75, 25),
+        p(125, 120, 175, 150, 0),
+        note("little\nblessing\n♡", 45, 290, 110, 70),
+        s("🐰", 315, 170, 52),
+        s("🌸", 45, 345, 34)
+      ]),
+
+      page([
+        s("🎀", 15, 15, 42, -10),
+        t("7\nmonths", 45, 55, 100, 75, 25),
+        p(155, 90, 115, 145, 0),
+        p(285, 90, 115, 145, 0),
+        note("cutest\nsmile ♡", 300, 290, 100, 55),
+        s("♡", 90, 295, 36),
+        s("♡", 160, 310, 36),
+        s("♡", 225, 310, 36),
+        s("🌿", 335, 235, 34)
+      ]),
+
+      page([
+        s("🎀", 15, 15, 42, -10),
+        t("8\nmonths", 45, 55, 100, 75, 25),
+        p(160, 90, 120, 155, -4),
+        t("______________", 285, 90, 120, 25, 14),
+        t("______________", 285, 120, 120, 25, 14),
+        t("______________", 285, 150, 120, 25, 14),
+        note("learning\n& growing ♡", 290, 285, 110, 55),
+        s("🌸", 55, 280, 38),
+        s("♡", 55, 340, 32)
+      ]),
+
+      page([
+        s("🎀", 15, 15, 42, -10),
+        t("9\nmonths", 45, 55, 100, 75, 25),
+        p(180, 105, 140, 150, 0),
+        p(325, 115, 105, 115, 3),
+        note("so\ncurious\n♡", 340, 285, 95, 60),
+        s("♡", 115, 300, 38),
+        s("🌿", 75, 235, 34)
+      ]),
+
+      page([
+        s("🎀", 15, 15, 42, -10),
+        t("10\nmonths", 45, 55, 110, 75, 25),
+        p(155, 115, 125, 165, 4),
+        t("______________", 300, 105, 120, 25, 14),
+        t("______________", 300, 140, 120, 25, 14),
+        t("______________", 300, 175, 120, 25, 14),
+        note("so much\njoy ♡", 65, 310, 105, 55),
+        s("🌸", 35, 330, 34),
+        s("♡", 300, 70, 32)
+      ]),
+
+      page([
+        s("🎀", 15, 15, 42, -10),
+        t("11\nmonths", 45, 55, 110, 75, 25),
+        p(155, 105, 145, 180, -4),
+        p(310, 115, 120, 145, 4),
+        note("almost\none! ♡", 330, 310, 95, 55),
+        s("♡", 290, 330, 32)
+      ]),
+
+      page([
+        s("🎀", 15, 15, 42, -10),
+        t("12\nmonths", 45, 55, 110, 75, 25),
+        p(170, 105, 120, 160, 0),
+        t("______________", 305, 90, 120, 25, 14),
+        t("______________", 305, 125, 120, 25, 14),
+        t("______________", 305, 160, 120, 25, 14),
+        note("what a\nyear ♡", 310, 310, 95, 55),
+        s("🌸", 50, 330, 34),
+        s("♡", 300, 70, 32)
+      ]),
+
+      page([
+        s("🎀", 15, 15, 42, -10),
+        t("one\nyear\nof you\n♡", 60, 80, 120, 140, 24),
+        p(235, 105, 160, 190, -3),
+        note("our greatest\nblessing ♡", 295, 320, 130, 50),
+        s("♡", 80, 300, 42),
+        s("🌿", 205, 260, 34),
+        s("♡", 350, 70, 30)
+      ])
+    ];
+
+    const data = {
+      uid: user.uid,
+      title: isBoy ? "Baby’s First Year (Boy)" : "Baby’s First Year (Girl)",
+      pages: pagesData.length,
+      cover: isBoy ? "🧸" : "🎀",
+      updated: "just now",
+      createdAt: serverTimestamp(),
+      templateType: isBoy ? "babyBoy" : "babyGirl",
+      pagesData
+    };
+
+    const docRef = await addDoc(collection(db, "scrapbooks"), data);
+    const newBook = { id: docRef.id, ...data };
+
+    setBooks([newBook, ...books]);
+    setActiveBook(newBook);
+    setUndoStack([]);
+    setRedoStack([]);
+    setCurrentPage(0);
+    setSelectedItemId(null);
+    setSection("editor");
+    flash(`${data.title} created 💖`);
+  } catch (e) {
+    flash("Template error: " + e.message);
   }
+}
 
   async function deleteBook(book) {
     try {
@@ -854,44 +1017,6 @@ function Home({ user, flash }) {
     }
   }
 
-  async function uploadPhotoToPlaceholder(e, placeholderId) {
-    const file = e.target.files?.[0];
-
-    if (!file || !activeBook?.id || !user) return;
-
-    try {
-      rememberUndo();
-
-      const storageRef = ref(
-        storage,
-        `users/${user.uid}/scrapbooks/${activeBook.id}/${Date.now()}-${file.name}`
-      );
-
-      await uploadBytes(storageRef, file);
-      const url = await getDownloadURL(storageRef);
-
-      updateCurrentItems(
-        currentItems().map((item) =>
-          item.id === placeholderId
-            ? {
-                ...item,
-                type: "photo",
-                url,
-                text: "",
-                rotate: item.rotate || 0
-              }
-            : item
-        ),
-        false
-      );
-
-      setSelectedItemId(placeholderId);
-      flash("Photo added 💖");
-    } catch (e) {
-      flash("Photo upload failed: " + e.message);
-    }
-  }
-
   function addText() {
     const text = prompt("Enter your text:");
     if (!text) return;
@@ -914,37 +1039,94 @@ function Home({ user, flash }) {
     setSelectedItemId(newItem.id);
   }
 
-  function addSticker(sticker) {
-    const newSticker = {
+ // =======================
+// STICKERS
+// =======================
+
+const STICKERS = [
+  { id: "bow", text: "🎀" },
+  { id: "bear", text: "🧸" },
+  { id: "bottle", text: "🍼" },
+  { id: "moon", text: "🌙" },
+  { id: "star", text: "⭐" },
+  { id: "heart", text: "💗" },
+  { id: "flower", text: "🌸" },
+  { id: "butterfly", text: "🦋" },
+  { id: "baby", text: "👶" },
+  { id: "rabbit", text: "🐰" },
+  { id: "toy", text: "🪀" },
+  { id: "duck", text: "🦆" },
+  { id: "cloud", text: "☁️" },
+  { id: "sparkle", text: "✨" },
+  { id: "gift", text: "🎁" }
+];
+
+
+// =======================
+// ADD STICKER FUNCTION
+// =======================
+
+function addSticker(sticker) {
+  const newSticker = {
+    id: makeId(),
+    type: "sticker",
+    text: sticker.text,
+    x: 120,
+    y: 120,
+    w: 80,
+    h: 80,
+    fontSize: 52,
+    rotate: 0
+  };
+
+  updateCurrentItems([
+    ...currentItems(),
+    newSticker
+  ]);
+
+  setSelectedItemId(newSticker.id);
+}
+ 
+
+
+// =======================
+// STICKER PICKER
+// =======================
+
+function StickerPicker() {
+  return (
+    <div className="stickerGrid">
+      {STICKERS.map((sticker) => (
+        <button
+          key={sticker.id}
+          className="stickerButton"
+          onClick={() => addSticker(sticker)}
+        >
+          <span style={{ fontSize: 38 }}>
+            {sticker.text}
+          </span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+
+  function addBabySticker(sticker) {
+    const newItem = {
       id: makeId(),
       type: "sticker",
-      text: sticker.text,
-      x: 120,
-      y: 120,
-      w: 80,
-      h: 80,
-      fontSize: 52,
+      text: sticker,
+      x: 135,
+      y: 180,
+      w: 55,
+      h: 55,
+      fontSize: 42,
       rotate: 0
     };
 
-    updateCurrentItems([...currentItems(), newSticker]);
-    setSelectedItemId(newSticker.id);
-  }
-
-  function StickerPicker() {
-    return (
-      <div className="stickerGrid">
-        {STICKERS.map((sticker) => (
-          <button
-            key={sticker.id}
-            className="stickerButton"
-            onClick={() => addSticker(sticker)}
-          >
-            <span style={{ fontSize: 38 }}>{sticker.text}</span>
-          </button>
-        ))}
-      </div>
-    );
+    updateCurrentItems([...currentItems(), newItem]);
+    setSelectedItemId(newItem.id);
   }
 
   function deleteSelected() {
@@ -957,24 +1139,23 @@ function Home({ user, flash }) {
     setSelectedItemId(null);
     flash("Deleted 🗑️");
   }
-
-  function rotateSelected(amount) {
-    if (!selectedItemId) {
-      flash("Tap something first.");
-      return;
-    }
-
-    updateCurrentItems(
-      currentItems().map((item) =>
-        item.id === selectedItemId
-          ? {
-              ...item,
-              rotate: (item.rotate || 0) + amount
-            }
-          : item
-      )
-    );
+function rotateSelected(amount) {
+  if (!selectedItemId) {
+    flash("Tap something first.");
+    return;
   }
+
+  updateCurrentItems(
+    currentItems().map((item) =>
+      item.id === selectedItemId
+        ? {
+            ...item,
+            rotate: (item.rotate || 0) + amount
+          }
+        : item
+    )
+  );
+}
 
   function changeSelectedFontSize(amount) {
     if (!selectedItemId) {
@@ -1030,7 +1211,23 @@ function Home({ user, flash }) {
     setSelectedItemId(null);
     flash("Page deleted 🗑️");
   }
+function rotateSelected(amount) {
+  if (!selectedItemId) {
+    flash("Tap something first.");
+    return;
+  }
 
+  updateCurrentItems(
+    currentItems().map((item) =>
+      item.id === selectedItemId
+        ? {
+            ...item,
+            rotate: (item.rotate || 0) + amount
+          }
+        : item
+    )
+  );
+}
   function handlePointerDown(e, item) {
     if (e.target.classList.contains("resizeHandle")) return;
 
@@ -1116,6 +1313,28 @@ function Home({ user, flash }) {
   function renderItem(item, preview = false) {
     const selected = !preview && selectedItemId === item.id;
 
+    if (item.type === "doodle") {
+      const d = (item.points || [])
+        .map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`)
+        .join(" ");
+
+      return (
+        <svg
+          key={item.id}
+          className="doodleSvg"
+          onClick={() => !preview && setSelectedItemId(item.id)}
+        >
+          <path
+            d={d}
+            stroke={item.color || "#5A463A"}
+            strokeWidth="4"
+            fill="none"
+            strokeLinecap="round"
+          />
+        </svg>
+      );
+    }
+
     return (
       <div
         key={item.id}
@@ -1129,47 +1348,34 @@ function Home({ user, flash }) {
           height: item.h,
           transform: `rotate(${item.rotate || 0}deg)`
         }}
-        onPointerDown={(e) => !preview && item.type !== "placeholder" && handlePointerDown(e, item)}
+        onPointerDown={(e) => !preview && handlePointerDown(e, item)}
         onClick={() => !preview && setSelectedItemId(item.id)}
       >
         {item.type === "photo" && <img src={item.url} alt="" />}
 
-        {item.type === "sticker" && (
-          <div
-            className="editableSticker"
-            style={{ fontSize: item.fontSize || 42 }}
-          >
-            {item.text}
-          </div>
-        )}
+        {item.type === "sticker" && item.src && (
+  <img
+    src={item.src}
+    alt=""
+    style={{
+      width: "100%",
+      height: "100%",
+      objectFit: "contain",
+      pointerEvents: "none"
+    }}
+  />
+)}
 
-        {item.type === "placeholder" && !preview && (
-          <label className="clickablePhotoBox">
-            <span>Add Photo</span>
+{item.type === "sticker" && !item.src && (
+  <div
+    className="editableSticker"
+    style={{ fontSize: item.fontSize || 42 }}
+  >
+    {item.text}
+  </div>
+)}
 
-            <input
-              type="file"
-              accept="image/*"
-              hidden
-              onChange={(e) => uploadPhotoToPlaceholder(e, item.id)}
-            />
-          </label>
-        )}
-
-        {item.type === "placeholder" && preview && (
-          <div
-            className="editableText"
-            style={{
-              fontSize: item.fontSize || 18,
-              fontFamily: item.fontFamily || "Georgia",
-              color: item.color || "#e96d9b"
-            }}
-          >
-            Add Photo
-          </div>
-        )}
-
-        {item.type === "text" && (
+        {(item.type === "text" || item.type === "placeholder") && (
           <div
             className="editableText"
             style={{
@@ -1254,8 +1460,14 @@ function Home({ user, flash }) {
             </button>
           </div>
 
-          <div className={`flipbookCanvas ${currentPageData().background || "bgGrid"}`}>
-            {currentItems().map((item) => renderItem(item, true))}
+          <div className="flipbookBook">
+            <div className="bookLeftPage">
+              <div className="bookCurl"></div>
+            </div>
+
+            <div className={`flipbookCanvas ${currentPageData().background || "bgGrid"}`}>
+              {currentItems().map((item) => renderItem(item, true))}
+            </div>
           </div>
 
           <div className="flipPageCount">
@@ -1263,7 +1475,7 @@ function Home({ user, flash }) {
           </div>
 
           <div className="flipControls">
-            <button onClick={() => setCurrentPage(0)}>▦<br />First</button>
+            <button onClick={() => setCurrentPage(0)}>▦<br />Thumbnails</button>
 
             <button
               className="flipArrow"
@@ -1284,6 +1496,19 @@ function Home({ user, flash }) {
             <button onClick={() => flash("Autoplay coming soon ▶")}>
               ▶<br />Autoplay
             </button>
+          </div>
+
+          <div className="flipThumbs">
+            {getPages().map((page, index) => (
+              <div
+                key={index}
+                className={index === currentPage ? "flipThumb activeFlipThumb" : "flipThumb"}
+                onClick={() => setCurrentPage(index)}
+              >
+                <div className={page.background || "bgGrid"}></div>
+                <small>{index + 1}</small>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -1346,57 +1571,58 @@ function Home({ user, flash }) {
             {currentItems().map((item) => renderItem(item))}
           </div>
 
-          <div className="toolPanel fixedTools">
-            <label>
-              🖼️
-              <span>Photo</span>
-              <input type="file" accept="image/*" hidden onChange={uploadPhoto} />
-            </label>
+         <div className="toolPanel fixedTools">
+  <label>
+    🖼️
+    <span>Photo</span>
+    <input type="file" accept="image/*" hidden onChange={uploadPhoto} />
+  </label>
 
-            <button onClick={() => setShowStickerPicker(!showStickerPicker)}>
-              💬
-              <span>Sticker</span>
-            </button>
+  <button onClick={() => setShowStickerPicker(!showStickerPicker)}>
+    💬
+    <span>Sticker</span>
+  </button>
 
-            <button onClick={addText}>
-              𝑇
-              <span>Text</span>
-            </button>
+  <button onClick={addText}>
+    𝑇
+    <span>Text</span>
+  </button>
 
-            <div className="backgroundPickerWrap">
-              <button onClick={() => setBackgroundMenuOpen(!backgroundMenuOpen)}>
-                🎨
-                <span>Background</span>
-              </button>
+  <div className="backgroundPickerWrap">
+  <button onClick={() => setBackgroundMenuOpen(!backgroundMenuOpen)}>
+    🎨
+    <span>Background</span>
+  </button>
 
-              {backgroundMenuOpen && (
-                <div className="backgroundPicker">
-                  {BACKGROUNDS.map((bg) => (
-                    <button
-                      key={bg.id}
-                      className={`backgroundOption ${bg.className}`}
-                      onClick={() => changeBackground(bg.className)}
-                    >
-                      {bg.label}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+  {backgroundMenuOpen && (
+    <div className="backgroundPicker">
+      {BACKGROUNDS.map((bg) => (
+        <button
+          key={bg.id}
+          className={`backgroundOption ${bg.className}`}
+          onClick={() => changeBackground(bg.className)}
+        >
+          {bg.label}
+        </button>
+      ))}
+    </div>
+  )}
+</div>
 
-            <button onClick={deleteSelected}>
-              🗑️
-              <span>Delete</span>
-            </button>
-          </div>
+  <button onClick={deleteSelected}>
+    🗑️
+    <span>Delete</span>
+  </button>
+</div>
 
-          {showStickerPicker && <StickerPicker />}
+{showStickerPicker && <StickerPicker />}
 
           <div className="fontControls">
-            <button onClick={() => changeSelectedFontSize(-4)}>A-</button>
-            <button onClick={() => changeSelectedFontSize(4)}>A+</button>
-            <button onClick={() => rotateSelected(-10)}>⟲ Rotate</button>
-            <button onClick={() => rotateSelected(10)}>⟳ Rotate</button>
+            {["🍼", "🧸", "⭐", "🌙", "🛏️", "👶", "🦋", "💗"].map((sticker) => (
+              <button key={sticker} onClick={() => addBabySticker(sticker)}>
+                {sticker}
+              </button>
+            ))}
           </div>
 
           <div className="pageStrip">
@@ -1503,77 +1729,26 @@ function Home({ user, flash }) {
 
           <h1>Templates</h1>
 
-          <button
-  className="templateHomeCard"
-  onClick={() => {
-    if (!hasSubscription) {
-      setSection("subscription");
-      return;
-    }
+          <button className="templateHomeCard" onClick={() => createBabyTemplate("girl")}>
+            <div className="templateIcon">🎀</div>
+            <div>
+              <h2>Baby’s First Year Girl</h2>
+              <p>Pink plaid, 16 editable pages</p>
+            </div>
+          </button>
 
-    createBabyTemplate("girl");
-  }}
->
-  <div className="templateIcon">🎀</div>
-  <div>
-    <h2>Baby’s First Year Girl</h2>
-    <p>Premium template</p>
-  </div>
-</button>
+          <button className="templateHomeCard" onClick={() => createBabyTemplate("boy")}>
+            <div className="templateIcon">🧸</div>
+            <div>
+              <h2>Baby’s First Year Boy</h2>
+              <p>Blue plaid, 16 editable pages</p>
+            </div>
+          </button>
+        </div>
+      </div>
+    );
+  }
 
-<button
-  className="templateHomeCard"
-  onClick={() => {
-    if (!hasSubscription) {
-      setSection("subscription");
-      return;
-    }
-
-    createBabyTemplate("boy");
-  }}
->
-  <div className="templateIcon">🧸</div>
-  <div>
-    <h2>Baby’s First Year Boy</h2>
-    <p>Premium template</p>
-  </div>
-</button>
-
- <button
-  className="templateHomeCard"
-  onClick={() => {
-    if (!hasSubscription) {
-      setSection("subscription");
-      return;
-    }
-
-    createBabyTemplate("girl");
-  }}
->
-  <div className="templateIcon">🎀</div>
-  <div>
-    <h2>Baby’s First Year Girl</h2>
-    <p>Premium template</p>
-  </div>
-</button>
-
-<button
-  className="templateHomeCard"
-  onClick={() => {
-    if (!hasSubscription) {
-      setSection("subscription");
-      return;
-    }
-
-    createBabyTemplate("boy");
-  }}
->
-  <div className="templateIcon">🧸</div>
-  <div>
-    <h2>Baby’s First Year Boy</h2>
-    <p>Premium template</p>
-  </div>
-</button>         
   return (
     <div className="phone">
       <div className="screen paper homeLikeScreenshot">
@@ -1701,7 +1876,6 @@ function Home({ user, flash }) {
       </div>
     </div>
   );
+}
 
-  createRoot(document.getElementById("root")).render(
-  React.createElement(App)
-);        
+createRoot(document.getElementById("root")).render(<App />);
