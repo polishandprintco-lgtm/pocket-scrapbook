@@ -1,1925 +1,655 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { auth, db, storage } from "./firebase";
+import "./style.css";
 
+import { auth, db, storage } from "./firebase";
 import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  sendPasswordResetEmail,
-  onAuthStateChanged,
-  updateProfile,
-  signOut
+  onAuthStateChanged,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail,
+  signOut,
 } from "firebase/auth";
 
 import {
-  addDoc,
-  collection,
-  getDocs,
-  orderBy,
-  query,
-  serverTimestamp,
-  deleteDoc,
-  doc,
-  updateDoc
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  orderBy,
+  query,
+  serverTimestamp,
+  updateDoc,
 } from "firebase/firestore";
 
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import "./style.css";
 
-function makeId() {
-  return crypto?.randomUUID
-    ? crypto.randomUUID()
-    : `${Date.now()}-${Math.random()}`;
+const COLORS = {
+  pink: "#f8b8ca",
+  blue: "#bcd8f4",
+  lavender: "#d9c8f2",
+  cream: "#fff8ef",
+  tan: "#ead6bd",
+};
+
+const BACKGROUNDS = [
+  { name: "Cream", value: "cream" },
+  { name: "Baby Pink", value: "pink" },
+  { name: "Baby Blue", value: "blue" },
+  { name: "Lavender", value: "lavender" },
+  { name: "Grid", value: "grid" },
+  { name: "Dots", value: "dots" },
+  { name: "Paper", value: "paper" },
+];
+
+const STICKERS = ["♡", "❤", "✿", "🌼", "🎀", "⭐", "🧸", "🍼", "👶", "🦋"];
+
+function uid() {
+  return crypto?.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
 }
 
-function blankPage(bg = "bgGrid") {
-  return {
-    background: bg,
-    items: []
-  };
+const babyBoyTemplate = {
+  premium: true,
+  title: "Baby Boy First Year",
+  background: "blue",
+  pages: [
+    {
+      id: uid(),
+      background: "blue",
+      elements: [
+        textEl("baby’s\nfirst year", 40, 60, 220, 90, 36),
+        textEl("our little boy", 245, 170, 140, 34, 16),
+        frameEl(45, 190, 170, 170),
+        frameEl(240, 205, 115, 115),
+        stickerEl("⭐", 25, 30),
+        stickerEl("🧸", 30, 350),
+      ],
+    },
+    ...Array.from({ length: 12 }, (_, i) => ({
+      id: uid(),
+      background: "blue",
+      elements: [
+        textEl(`${i + 1}\nmonth${i === 0 ? "" : "s"}`, 28, 35, 110, 90, 28),
+        frameEl(150, 70, 220, 210),
+        textEl(
+          ["you are so loved", "growing so fast", "sweet boy", "so happy", "little blessing"][
+            i % 5
+          ],
+          170,
+          315,
+          170,
+          45,
+          16
+        ),
+        stickerEl(i % 2 ? "🧸" : "⭐", 30, 300),
+      ],
+    })),
+  ],
+};
+
+const babyGirlTemplate = {
+  premium: true,
+  title: "Baby Girl First Year",
+  background: "pink",
+  pages: [
+    {
+      id: uid(),
+      background: "pink",
+      elements: [
+        textEl("baby’s\nfirst year", 40, 60, 220, 90, 36),
+        textEl("our little girl", 245, 170, 140, 34, 16),
+        frameEl(45, 190, 170, 170),
+        frameEl(240, 205, 115, 115),
+        stickerEl("🎀", 25, 30),
+        stickerEl("♡", 30, 350),
+      ],
+    },
+    ...Array.from({ length: 12 }, (_, i) => ({
+      id: uid(),
+      background: "pink",
+      elements: [
+        textEl(`${i + 1}\nmonth${i === 0 ? "" : "s"}`, 28, 35, 110, 90, 28),
+        frameEl(150, 70, 220, 210),
+        textEl(
+          ["you are so loved", "growing so fast", "sweet girl", "so happy", "little blessing"][
+            i % 5
+          ],
+          170,
+          315,
+          170,
+          45,
+          16
+        ),
+        stickerEl(i % 2 ? "🌼" : "🎀", 30, 300),
+      ],
+    })),
+  ],
+};
+
+function textEl(text, x, y, w, h, size = 22) {
+  return {
+    id: uid(),
+    type: "text",
+    text,
+    x,
+    y,
+    w,
+    h,
+    rotate: 0,
+    fontSize: size,
+  };
 }
 
-function babyPage(title, caption, photoCount = 1, gender = "girl", pageNum = 1) {
-  const bg = gender === "boy" ? "bgBabyBluePlaid" : "bgBabyPinkPlaid";
-  const accent = gender === "boy" ? "#7ba7d9" : "#e96d9b";
-
-  const items = [
-    {
-      id: makeId(),
-      type: "text",
-      text: title,
-      x: 28,
-      y: 24,
-      w: 120,
-      h: 80,
-      fontSize: 24,
-      fontFamily: "Georgia",
-      color: "#2f211c",
-      rotate: -4
-    },
-    {
-      id: makeId(),
-      type: "text",
-      text: caption,
-      x: 210,
-      y: 350,
-      w: 135,
-      h: 50,
-      fontSize: 15,
-      fontFamily: "Georgia",
-      color: "#5a4038",
-      rotate: -2
-    },
-    {
-      id: makeId(),
-      type: "sticker",
-      text: "🎀",
-      x: 18,
-      y: 8,
-      w: 50,
-      h: 50,
-      fontSize: 38,
-      rotate: -12
-    },
-    {
-      id: makeId(),
-      type: "sticker",
-      text: "♡",
-      x: 300,
-      y: 38,
-      w: 50,
-      h: 50,
-      fontSize: 38,
-      rotate: 8
-    },
-    {
-      id: makeId(),
-      type: "sticker",
-      text: "🌸",
-      x: 315,
-      y: 280,
-      w: 55,
-      h: 55,
-      fontSize: 38,
-      rotate: 0
-    },
-    {
-      id: makeId(),
-      type: "sticker",
-      text: "🌿",
-      x: 40,
-      y: 300,
-      w: 60,
-      h: 60,
-      fontSize: 42,
-      rotate: -10
-    },
-    {
-      id: makeId(),
-      type: "sticker",
-      text: "💗",
-      x: 35,
-      y: 360,
-      w: 52,
-      h: 52,
-      fontSize: 38,
-      rotate: -4
-    }
-  ];
-
-  for (let i = 0; i < photoCount; i++) {
-    items.push({
-      id: makeId(),
-      type: "placeholder",
-      text: "Add Photo",
-      x: i === 0 ? 120 : 235,
-      y: i === 0 ? 130 : 185,
-      w: i === 0 ? 145 : 120,
-      h: i === 0 ? 150 : 130,
-      fontSize: 16,
-      color: accent,
-      rotate: i === 0 ? -5 : 5
-    });
-  }
-
-  return {
-    background: bg,
-    items
-  };
+function stickerEl(text, x, y) {
+  return {
+    id: uid(),
+    type: "sticker",
+    text,
+    x,
+    y,
+    w: 60,
+    h: 60,
+    rotate: 0,
+    fontSize: 38,
+  };
 }
 
-function cloneBook(book) {
-  return JSON.parse(JSON.stringify(book));
+function frameEl(x, y, w, h) {
+  return {
+    id: uid(),
+    type: "photo",
+    src: "",
+    x,
+    y,
+    w,
+    h,
+    rotate: 0,
+  };
 }
 
 function App() {
-  const [page, setPage] = useState("welcome");
-  const [toast, setToast] = useState("");
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(null);
+  const [screen, setScreen] = useState("home");
+  const [books, setBooks] = useState([]);
+  const [book, setBook] = useState(null);
+  const [pageIndex, setPageIndex] = useState(0);
+  const [selectedId, setSelectedId] = useState(null);
+  const [drag, setDrag] = useState(null);
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [authMode, setAuthMode] = useState("login");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
+  const page = book?.pages?.[pageIndex];
 
-  function flash(message) {
-    setToast(message);
-    setTimeout(() => setToast(""), 3000);
-  }
+  useEffect(() => {
+    return onAuthStateChanged(auth, async (u) => {
+      setUser(u);
+      if (u) loadBooks(u.uid);
+    });
+  }, []);
 
-  useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (u) => {
-      setUser(u || null);
-      setPage(u ? "home" : "welcome");
-    });
+  useEffect(() => {
+    function keyDown(e) {
+      if ((e.key === "Delete" || e.key === "Backspace") && selectedId && book) {
+        e.preventDefault();
+        deleteSelected();
+      }
+    }
 
-    return () => unsub();
-  }, []);
+    window.addEventListener("keydown", keyDown);
+    return () => window.removeEventListener("keydown", keyDown);
+  }, [selectedId, book, pageIndex]);
 
-  return (
-    <div className="appShell">
-      {toast && <div className="toast">{toast}</div>}
-
-      {page === "welcome" && <Welcome go={setPage} />}
-      {page === "login" && <Login go={setPage} flash={flash} />}
-      {page === "signup" && <Signup go={setPage} flash={flash} />}
-      {page === "forgot" && <Forgot go={setPage} flash={flash} />}
-      {page === "home" && <Home user={user} flash={flash} />}
-    </div>
-  );
-}
-
-function Welcome({ go }) {
-  return (
-    <div className="phone">
-      <div className="screen paper auth-page">
-        <div className="auth-logo">Pocket Scrapbook</div>
-        <h1>Turn your memories into beautiful stories 💗</h1>
-        <div className="hero">🌼 🖼️ 🦋</div>
-
-        <div className="auth-card">
-          <button onClick={() => go("signup")}>✨ Start Scrapbooking</button>
-          <button className="secondary" onClick={() => go("login")}>
-            Login
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function Login({ go, flash }) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPass, setShowPass] = useState(false);
-
-  async function submit() {
-    try {
-      await signInWithEmailAndPassword(auth, email.trim(), password);
-      flash("Logged in 💖");
-      go("home");
-    } catch (e) {
-      flash("Login error: " + e.message);
-    }
-  }
-
-  return (
-    <div className="phone">
-      <div className="screen paper auth-page">
-        <div className="auth-logo">Pocket Scrapbook</div>
-        <h1>Welcome Back ✨</h1>
-
-        <div className="auth-card">
-          <input
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-
-          <div className="passwordWrap">
-            <input
-              placeholder="Password"
-              type={showPass ? "text" : "password"}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") submit();
-              }}
-            />
-
-            <button className="showBtn" onClick={() => setShowPass(!showPass)}>
-              {showPass ? "🙈" : "👁️"}
-            </button>
-          </div>
-
-          <button onClick={submit}>Login ✨</button>
-        </div>
-
-        <button className="text-btn" onClick={() => go("forgot")}>
-          Forgot Password?
-        </button>
-
-        <button className="text-btn" onClick={() => go("signup")}>
-          Need an account?
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function Signup({ go, flash }) {
-  const [name, setName] = useState("");
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPass, setShowPass] = useState(false);
-
-  async function submit() {
-    try {
-      if (!name || !username || !email || !password) {
-        throw new Error("Fill in every field.");
-      }
-
-      if (password.length < 6) {
-        throw new Error("Password must be at least 6 characters.");
-      }
-
-      const cred = await createUserWithEmailAndPassword(
-        auth,
-        email.trim(),
-        password
-      );
-
-      await updateProfile(cred.user, { displayName: name });
-
-      await addDoc(collection(db, "profiles"), {
-        uid: cred.user.uid,
-        name,
-        username,
-        email: email.trim(),
-        createdAt: serverTimestamp()
-      });
-
-      flash("Account created 💖");
-      go("home");
-    } catch (e) {
-      flash("Signup error: " + e.message);
-    }
-  }
-
-  return (
-    <div className="phone">
-      <div className="screen paper auth-page">
-        <div className="auth-logo">Pocket Scrapbook</div>
-        <h1>Create Your Account ✨</h1>
-
-        <div className="auth-card">
-          <input
-            placeholder="Full Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-
-          <input
-            placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
-
-          <input
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-
-          <div className="passwordWrap">
-            <input
-              placeholder="Password"
-              type={showPass ? "text" : "password"}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") submit();
-              }}
-            />
-
-            <button className="showBtn" onClick={() => setShowPass(!showPass)}>
-              {showPass ? "🙈" : "👁️"}
-            </button>
-          </div>
-
-          <button onClick={submit}>💖 Create Account</button>
-        </div>
-
-        <button className="text-btn" onClick={() => go("login")}>
-          Already have an account?
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function Forgot({ go, flash }) {
-  const [email, setEmail] = useState("");
-
-  async function reset() {
-    try {
-      await sendPasswordResetEmail(auth, email.trim());
-      flash("Reset email sent 💌");
-      go("login");
-    } catch (e) {
-      flash("Reset error: " + e.message);
-    }
-  }
-
-  return (
-    <div className="phone">
-      <div className="screen paper auth-page">
-        <h1>Forgot Password?</h1>
-
-        <div className="auth-card">
-          <input
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-
-          <button onClick={reset}>Send Reset Link</button>
-        </div>
-
-        <button className="text-btn" onClick={() => go("login")}>
-          Back to Login
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function Home({ user, flash }) {
-  const [books, setBooks] = useState([]);
-  const [title, setTitle] = useState("");
-  const [section, setSection] = useState("home");
-  const [activeBook, setActiveBook] = useState(null);
-  const [openMenuId, setOpenMenuId] = useState(null);
-  const [editorMenuOpen, setEditorMenuOpen] = useState(false);
-  const [backgroundMenuOpen, setBackgroundMenuOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(0);
-  const [selectedItemId, setSelectedItemId] = useState(null);
-  const [dragging, setDragging] = useState(null);
-  const [resizing, setResizing] = useState(null);
-  const [undoStack, setUndoStack] = useState([]);
-  const [redoStack, setRedoStack] = useState([]);
-  const [showStickerPicker, setShowStickerPicker] = useState(false);
-
-  async function loadBooks() {
-    if (!user) return;
-
-    try {
-      setLoading(true);
-
-      const q = query(
-        collection(db, "scrapbooks"),
-        orderBy("createdAt", "desc")
-      );
-
-      const snap = await getDocs(q);
-
-      setBooks(
-        snap.docs
-          .map((d) => ({ id: d.id, ...d.data() }))
-          .filter((b) => b.uid === user.uid)
-      );
-    } catch (e) {
-      flash("Could not load scrapbooks: " + e.message);
-    } finally {
-      setLoading(false);
-    }
-  }
-async function uploadPhotoToPlaceholder(e, placeholderId) {
-  const file = e.target.files?.[0];
-
-  if (!file || !activeBook?.id || !user) return;
-
-  try {
-    rememberUndo();
-
-    const storageRef = ref(
-      storage,
-      `users/${user.uid}/scrapbooks/${activeBook.id}/${Date.now()}-${file.name}`
-    );
-
-    await uploadBytes(storageRef, file);
-    const url = await getDownloadURL(storageRef);
-
-    updateCurrentItems(
-      currentItems().map((item) =>
-        item.id === placeholderId
-          ? {
-              ...item,
-              type: "photo",
-              url,
-              text: "",
-              rotate: item.rotate || 0
-            }
-          : item
-      ),
-      false
-    );
-
-    setSelectedItemId(placeholderId);
-    flash("Photo added 💖");
-  } catch (e) {
-    flash("Photo upload failed: " + e.message);
+  async function loadBooks(uidValue) {
+    const q = query(collection(db, "users", uidValue, "books"), orderBy("createdAt", "desc"));
+    const snap = await getDocs(q);
+    setBooks(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
   }
-}
-  useEffect(() => {
-  function handleKeyDown(e) {
-    const tag = document.activeElement?.tagName?.toLowerCase();
 
-    if (tag === "input" || tag === "textarea") return;
+  async function saveBook(nextBook = book) {
+    if (!user || !nextBook) return;
 
-    if (
-      (e.key === "Delete" || e.key === "Backspace") &&
-      selectedItemId
-    ) {
-      e.preventDefault();
+    if (nextBook.id) {
+      await updateDoc(doc(db, "users", user.uid, "books", nextBook.id), {
+        ...nextBook,
+        updatedAt: serverTimestamp(),
+      });
+    } else {
+      const added = await addDoc(collection(db, "users", user.uid, "books"), {
+        ...nextBook,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+      nextBook.id = added.id;
+      setBook({ ...nextBook });
+    }
 
-      updateCurrentItems(
-        currentItems().filter(
-          (item) => item.id !== selectedItemId
-        )
-      );
+    loadBooks(user.uid);
+  }
 
-      setSelectedItemId(null);
+  async function handleAuth() {
+    if (!email || !password) return alert("Enter email and password.");
 
-      flash("Deleted 🗑️");
+    if (authMode === "signup") {
+      await createUserWithEmailAndPassword(auth, email, password);
+    } else {
+      await signInWithEmailAndPassword(auth, email, password);
     }
   }
 
-  window.addEventListener("keydown", handleKeyDown);
-
-  return () => {
-    window.removeEventListener("keydown", handleKeyDown);
-  };
-}, [selectedItemId, activeBook, currentPage]);
-
-  useEffect(() => {
-    loadBooks();
-  }, [user]);
-
-seEffect(() => {
-  function handleKeyDown(e) {
-    if (
-      (e.key === "Delete" || e.key === "Backspace") &&
-      selectedItemId
-    ) {
-      e.preventDefault();
-
-      updateCurrentItems(
-        currentItems().filter(
-          (item) => item.id !== selectedItemId
-        )
-      );
-
-      setSelectedItemId(null);
-
-      flash("Deleted 🗑️");
-    }
-  }
-
-  function getPages() {
-    return activeBook?.pagesData?.length
-      ? activeBook.pagesData
-      : [blankPage()];
-  }
-
-  function currentPageData() {
-    return getPages()[currentPage] || blankPage();
-  }
-
-  function currentItems() {
-    return currentPageData().items || [];
-  }
-
-  function applyBook(nextBook) {
-    setActiveBook(nextBook);
-    setBooks((old) =>
-      old.map((b) => (b.id === nextBook.id ? nextBook : b))
-    );
-  }
-
-  function rememberUndo() {
-    if (!activeBook) return;
-    setUndoStack((old) => [cloneBook(activeBook), ...old].slice(0, 30));
-    setRedoStack([]);
-  }
-
-  function updateCurrentPage(nextPage, remember = true) {
-    if (remember) rememberUndo();
-
-    const pagesData = [...getPages()];
-    pagesData[currentPage] = nextPage;
-
-    applyBook({
-      ...activeBook,
-      pagesData,
-      pages: pagesData.length,
-      updated: "just now"
-    });
-  }
-
-  function updateCurrentItems(nextItems, remember = true) {
-    updateCurrentPage(
-      {
-        ...currentPageData(),
-        items: nextItems
-      },
-      remember
-    );
-  }
-
-  function undo() {
-    if (!undoStack.length || !activeBook) {
-      flash("Nothing to undo");
-      return;
-    }
-
-    const previous = undoStack[0];
-    setRedoStack((old) => [cloneBook(activeBook), ...old].slice(0, 30));
-    setUndoStack((old) => old.slice(1));
-    applyBook(previous);
-    setCurrentPage(Math.min(currentPage, previous.pagesData.length - 1));
-    setSelectedItemId(null);
-  }
-
-  function redo() {
-    if (!redoStack.length || !activeBook) {
-      flash("Nothing to redo");
-      return;
-    }
-
-    const next = redoStack[0];
-    setUndoStack((old) => [cloneBook(activeBook), ...old].slice(0, 30));
-    setRedoStack((old) => old.slice(1));
-    applyBook(next);
-    setCurrentPage(Math.min(currentPage, next.pagesData.length - 1));
-    setSelectedItemId(null);
-  }
-
-  function changeBackground(backgroundClass) {
-  if (!activeBook) return;
-
-  const pagesData = [...getPages()];
-
-  pagesData[currentPage] = {
-    ...pagesData[currentPage],
-    background: backgroundClass
-  };
-
-  applyBook({
-    ...activeBook,
-    pagesData,
-    pages: pagesData.length,
-    updated: "just now"
-  });
-
-  setBackgroundMenuOpen(false);
-  flash("Background changed 🎨");
-}
-
-  function templateDefaultBg() {
-    if (activeBook?.templateType === "babyBoy") return "bgBabyBluePlaid";
-    if (activeBook?.templateType === "babyGirl") return "bgBabyPinkPlaid";
-    return currentPageData().background || "bgGrid";
-  }
-
-  async function createBook() {
-    if (!title.trim()) {
-      flash("Add a scrapbook title 💕");
-      return;
-    }
-
-    try {
-      const data = {
-        uid: user.uid,
-        title: title.trim(),
-        pages: 1,
-        cover: "📔",
-        updated: "just now",
-        createdAt: serverTimestamp(),
-        templateType: "blank",
-        pagesData: [blankPage()]
-      };
-
-      const docRef = await addDoc(collection(db, "scrapbooks"), data);
-      const newBook = { id: docRef.id, ...data };
-
-      setBooks([newBook, ...books]);
-      setTitle("");
-      setActiveBook(newBook);
-      setUndoStack([]);
-      setRedoStack([]);
-      setCurrentPage(0);
-      setSelectedItemId(null);
-      setSection("editor");
-      flash("Scrapbook created 💖");
-    } catch (e) {
-      flash("Create error: " + e.message);
-    }
-  }
-
-  async function createBabyTemplate(gender) {
-  try {
-    const isBoy = gender === "boy";
-    const bg = isBoy ? "bgBabyBluePlaid" : "bgBabyPinkPlaid";
-
-    const t = (text, x, y, w = 120, h = 40, fontSize = 20) => ({
-      id: makeId(),
-      type: "text",
-      text,
-      x,
-      y,
-      w,
-      h,
-      fontSize,
-      fontFamily: "Georgia",
-      color: "#4d392f",
-      rotate: 0
-    });
-
-    const s = (text, x, y, size = 34, rotate = 0) => ({
-      id: makeId(),
-      type: "sticker",
-      text,
-      x,
-      y,
-      w: size + 14,
-      h: size + 14,
-      fontSize: size,
-      rotate
-    });
-
-    const p = (x, y, w = 130, h = 150, rotate = 0) => ({
-      id: makeId(),
-      type: "placeholder",
-      text: "Add Photo",
-      x,
-      y,
-      w,
-      h,
-      fontSize: 18,
-      color: isBoy ? "#7ba7d9" : "#e96d9b",
-      rotate
-    });
-
-    const note = (text, x, y, w = 120, h = 50, rotate = 0) => ({
-      id: makeId(),
-      type: "text",
-      text,
-      x,
-      y,
-      w,
-      h,
-      fontSize: 15,
-      fontFamily: "Georgia",
-      color: "#7a5a4f",
-      rotate
-    });
-
-    const page = (items) => ({
-      background: bg,
-      items
-    });
-
-    const pagesData = [
-  page([
-    s("🎀", 10, 10, 42, -10),
-    t("baby's\nfirst year\n♡", 65, 45, 170, 95, 27),
-    note("our little boy", 240, 110, 125, 40, -2),
-    p(35, 185, 150, 170, -5),
-    p(225, 165, 105, 120, 6),
-    note("so much\nlove\n♡", 225, 305, 105, 70, -2),
-    s("⭐", 315, 35, 34),
-    s("⭐", 345, 75, 24),
-    s("🟤", 20, 365, 28),
-    s("🌿", 335, 300, 32)
-  ]),
-
-  page([
-    s("⭐", 20, 20, 35),
-    t("hello\nworld\n♡", 55, 55, 120, 90, 24),
-    p(215, 55, 150, 185, 5),
-    note("the day\nyou were born ♡", 80, 170, 150, 55),
-    t("date: __________", 60, 245, 170, 22, 12),
-    t("time: __________", 60, 270, 170, 22, 12),
-    t("weight: ________", 60, 295, 170, 22, 12),
-    t("length: ________", 60, 320, 170, 22, 12),
-    s("🌿", 165, 80, 30),
-    s("⭐", 330, 20, 30)
-  ]),
-
-  page([
-    s("⭐", 25, 25, 34),
-    t("tiny\nhands\nbig\nlove\n♡", 65, 85, 110, 135, 22),
-    p(205, 65, 150, 190, -4),
-    s("♡", 320, 260, 42),
-    s("🟤", 75, 280, 30),
-    s("⭐", 45, 330, 28),
-    s("⭐", 360, 330, 24)
-  ]),
-
-  page([
-    s("⭐", 20, 20, 34),
-    t("1\nmonth", 55, 55, 90, 75, 25),
-    p(225, 55, 145, 150, 0),
-    note("you are\nso loved\n♡", 140, 220, 110, 70),
-    t("______________", 235, 285, 125, 25, 14),
-    t("______________", 235, 315, 125, 25, 14),
-    s("🌿", 55, 250, 34),
-    s("⭐", 50, 320, 24)
-  ]),
-
-  page([
-    s("⭐", 20, 20, 34),
-    t("2\nmonths", 45, 55, 100, 75, 25),
-    p(155, 115, 120, 140, -5),
-    p(245, 95, 120, 140, 4),
-    note("growing\nso fast ♡", 160, 300, 140, 50),
-    s("♡", 50, 260, 40),
-    s("🟤", 335, 280, 28),
-    s("🌿", 350, 210, 30)
-  ]),
-
-  page([
-    s("⭐", 20, 20, 34),
-    t("3\nmonths", 45, 55, 100, 75, 25),
-    p(215, 75, 150, 150, 0),
-    note("sweet boy ♡", 250, 295, 120, 45),
-    s("🧸", 95, 215, 52),
-    s("🔤", 65, 245, 34),
-    s("🌿", 345, 240, 30),
-    s("⭐", 340, 80, 24)
-  ]),
-
-  page([
-    s("⭐", 20, 20, 34),
-    t("4\nmonths", 45, 55, 100, 75, 25),
-    p(185, 80, 145, 150, 0),
-    note("so happy ♡", 205, 295, 140, 45),
-    s("♡", 50, 260, 40),
-    s("🧸", 330, 100, 34),
-    s("⭐", 350, 340, 24)
-  ]),
-
-  page([
-    s("⭐", 20, 20, 34),
-    t("5\nmonths", 45, 55, 100, 75, 25),
-    p(120, 205, 120, 140, -4),
-    p(255, 105, 125, 145, 2),
-    s("♡", 235, 300, 42),
-    s("⭐", 350, 95, 34),
-    s("🌿", 345, 230, 30)
-  ]),
-
-  page([
-    s("⭐", 20, 20, 34),
-    t("6\nmonths", 45, 55, 100, 75, 25),
-    p(125, 125, 175, 150, 0),
-    note("little\nblessing ♡", 45, 300, 110, 70),
-    s("🐰", 310, 210, 52),
-    s("⭐", 35, 345, 28)
-  ]),
-
-  page([
-    s("⭐", 20, 20, 34),
-    t("7\nmonths", 45, 55, 100, 75, 25),
-    p(155, 95, 115, 145, 0),
-    p(285, 95, 115, 145, 0),
-    note("cutest\nsmile ♡", 300, 300, 100, 55),
-    s("⭐", 95, 310, 36),
-    s("⭐", 170, 320, 30),
-    s("⭐", 235, 320, 36),
-    s("🌿", 335, 245, 30)
-  ]),
-
-  page([
-    s("⭐", 20, 20, 34),
-    t("8\nmonths", 45, 55, 100, 75, 25),
-    p(160, 95, 120, 155, -4),
-    t("______________", 285, 90, 120, 25, 14),
-    t("______________", 285, 125, 120, 25, 14),
-    t("______________", 285, 160, 120, 25, 14),
-    note("learning\n& growing ♡", 290, 300, 115, 55),
-    s("🟤", 55, 290, 28),
-    s("⭐", 75, 330, 28),
-    s("🌿", 340, 230, 30)
-  ]),
-
-  page([
-    s("⭐", 20, 20, 34),
-    t("9\nmonths", 45, 55, 100, 75, 25),
-    p(160, 105, 125, 150, 0),
-    p(290, 105, 120, 150, 3),
-    note("so\ncurious ♡", 325, 300, 95, 60),
-    s("♡", 50, 295, 40),
-    s("🌿", 345, 230, 30)
-  ]),
-
-  page([
-    s("⭐", 20, 20, 34),
-    t("10\nmonths", 45, 55, 110, 75, 25),
-    p(150, 105, 130, 165, 4),
-    t("______________", 300, 105, 120, 25, 14),
-    t("______________", 300, 140, 120, 25, 14),
-    t("______________", 300, 175, 120, 25, 14),
-    s("⭐", 55, 300, 28),
-    s("⭐", 95, 340, 38),
-    s("🌿", 345, 230, 30)
-  ]),
-
-  page([
-    s("⭐", 20, 20, 34),
-    t("11\nmonths", 45, 55, 110, 75, 25),
-    p(155, 105, 145, 180, -4),
-    p(310, 115, 120, 145, 4),
-    note("almost\none! ♡", 330, 315, 95, 55),
-    s("♡", 55, 300, 40),
-    s("🌿", 345, 230, 30)
-  ]),
-
-  page([
-    s("⭐", 20, 20, 34),
-    t("12\nmonths", 45, 55, 110, 75, 25),
-    t("______________", 145, 115, 120, 25, 14),
-    t("______________", 145, 150, 120, 25, 14),
-    t("______________", 145, 185, 120, 25, 14),
-    p(295, 105, 125, 170, -3),
-    note("one year\nof you ♡", 330, 315, 100, 55),
-    note("what a\nyear ♡", 45, 310, 95, 55),
-    s("🟤", 250, 325, 28),
-    s("⭐", 380, 70, 24)
-  ])
-];
-
-    const data = {
-      uid: user.uid,
-      title: isBoy ? "Baby’s First Year (Boy)" : "Baby’s First Year (Girl)",
-      pages: pagesData.length,
-      cover: isBoy ? "🧸" : "🎀",
-      updated: "just now",
-      createdAt: serverTimestamp(),
-      templateType: isBoy ? "babyBoy" : "babyGirl",
-      pagesData
-    };
-
-    const docRef = await addDoc(collection(db, "scrapbooks"), data);
-    const newBook = { id: docRef.id, ...data };
-
-    setBooks([newBook, ...books]);
-    setActiveBook(newBook);
-    setUndoStack([]);
-    setRedoStack([]);
-    setCurrentPage(0);
-    setSelectedItemId(null);
-    setSection("editor");
-    flash(`${data.title} created 💖`);
-  } catch (e) {
-    flash("Template error: " + e.message);
-  }
-}
-
-  async function deleteBook(book) {
-    try {
-      await deleteDoc(doc(db, "scrapbooks", book.id));
-      setBooks(books.filter((b) => b.id !== book.id));
-      setOpenMenuId(null);
-      flash("Scrapbook deleted 🗑️");
-    } catch (e) {
-      flash("Delete failed: " + e.message);
-    }
-  }
-
-  function exportBook(book = activeBook) {
-    if (!book) return;
-
-    const data = JSON.stringify(book, null, 2);
-    const blob = new Blob([data], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${book.title || "scrapbook"}.json`;
-    a.click();
-
-    URL.revokeObjectURL(url);
-    setEditorMenuOpen(false);
-    flash("Export downloaded 💌");
-  }
-
-function cleanItem(item) {
-  if (!item || typeof item !== "object") return null;
-
-  return {
-    id: item.id || makeId(),
-    type: item.type || "text",
-    text: item.text || "",
-    url: item.url || "",
-    x: Number(item.x) || 40,
-    y: Number(item.y) || 40,
-    w: Number(item.w || item.width) || 120,
-    h: Number(item.h || item.height) || 120,
-    fontSize: Number(item.fontSize) || 24,
-    fontFamily: item.fontFamily || "Georgia",
-    color: item.color || "#5A463A",
-    rotate: Number(item.rotate) || 0
-  };
-}
-
-function cleanPage(page) {
-  const safeItems = Array.isArray(page?.items)
-    ? page.items.map(cleanItem).filter(Boolean)
-    : [];
-
-  return {
-    background: page?.background || "bgGrid",
-    items: safeItems
-  };
-}
-
-function openBook(book) {
-  try {
-    const safePages =
-      Array.isArray(book?.pagesData) && book.pagesData.length
-        ? book.pagesData.map(cleanPage)
-        : [blankPage()];
-
-    setActiveBook({
-      ...book,
-      pagesData: safePages,
-      pages: safePages.length,
-      templateType: book?.templateType || "blank"
-    });
-
-    setUndoStack([]);
-    setRedoStack([]);
-    setCurrentPage(0);
-    setSelectedItemId(null);
-    setOpenMenuId(null);
-    setSection("editor");
-  } catch (e) {
-    flash("Could not open scrapbook: " + e.message);
+  async function resetPassword() {
+    if (!email) return alert("Type your email first.");
+    await sendPasswordResetEmail(auth, email);
+    alert("Password reset sent.");
   }
-}
-
-  async function saveBook() {
-    if (!activeBook?.id) return;
-
-    try {
-      await updateDoc(doc(db, "scrapbooks", activeBook.id), {
-        pagesData: getPages(),
-        pages: getPages().length,
-        updated: "just now",
-        templateType: activeBook.templateType || "blank"
-      });
-
-      flash("Saved 💖");
-    } catch (e) {
-      flash("Save failed: " + e.message);
-    }
-  }
-
-  async function uploadPhoto(e) {
-    const file = e.target.files?.[0];
-
-    if (!file || !activeBook?.id || !user) return;
-
-    try {
-      rememberUndo();
-
-      const storageRef = ref(
-        storage,
-        `users/${user.uid}/scrapbooks/${activeBook.id}/${Date.now()}-${file.name}`
-      );
-
-      await uploadBytes(storageRef, file);
-      const url = await getDownloadURL(storageRef);
-
-      const newItem = {
-        id: makeId(),
-        type: "photo",
-        url,
-        x: 55,
-        y: 175,
-        w: 140,
-        h: 170,
-        rotate: 0
-      };
-
-      updateCurrentItems([...currentItems(), newItem], false);
-      setSelectedItemId(newItem.id);
-      flash("Photo added 📷");
-    } catch (e) {
-      flash("Photo upload failed: " + e.message);
-    }
-  }
-
-  function addText() {
-    const text = prompt("Enter your text:");
-    if (!text) return;
-
-    const newItem = {
-      id: makeId(),
-      type: "text",
-      text,
-      x: 90,
-      y: 120,
-      w: 180,
-      h: 70,
-      fontSize: 24,
-      fontFamily: "Georgia",
-      color: "#5A463A",
-      rotate: 0
-    };
-
-    updateCurrentItems([...currentItems(), newItem]);
-    setSelectedItemId(newItem.id);
-  }
-
- // =======================
-// STICKERS
-// =======================
-
-const STICKERS = [
-  { id: "bow", text: "🎀" },
-  { id: "bear", text: "🧸" },
-  { id: "bottle", text: "🍼" },
-  { id: "moon", text: "🌙" },
-  { id: "star", text: "⭐" },
-  { id: "heart", text: "💗" },
-  { id: "flower", text: "🌸" },
-  { id: "butterfly", text: "🦋" },
-  { id: "baby", text: "👶" },
-  { id: "rabbit", text: "🐰" },
-  { id: "toy", text: "🪀" },
-  { id: "duck", text: "🦆" },
-  { id: "cloud", text: "☁️" },
-  { id: "sparkle", text: "✨" },
-  { id: "gift", text: "🎁" }
-];
-
-
-// =======================
-// ADD STICKER FUNCTION
-// =======================
-
-function addSticker(sticker) {
-  const newSticker = {
-    id: makeId(),
-    type: "sticker",
-    text: sticker.text,
-    x: 120,
-    y: 120,
-    w: 80,
-    h: 80,
-    fontSize: 52,
-    rotate: 0
-  };
-
-  updateCurrentItems([
-    ...currentItems(),
-    newSticker
-  ]);
-
-  setSelectedItemId(newSticker.id);
-}
- 
-
-
-// =======================
-// STICKER PICKER
-// =======================
-
-function StickerPicker() {
-  return (
-    <div className="stickerGrid">
-      {STICKERS.map((sticker) => (
-        <button
-          key={sticker.id}
-          className="stickerButton"
-          onClick={() => addSticker(sticker)}
-        >
-          <span style={{ fontSize: 38 }}>
-            {sticker.text}
-          </span>
-        </button>
-      ))}
-    </div>
-  );
-}
-
-
-  function addBabySticker(sticker) {
-    const newItem = {
-      id: makeId(),
-      type: "sticker",
-      text: sticker,
-      x: 135,
-      y: 180,
-      w: 55,
-      h: 55,
-      fontSize: 42,
-      rotate: 0
-    };
-
-    updateCurrentItems([...currentItems(), newItem]);
-    setSelectedItemId(newItem.id);
-  }
-
-  function deleteSelected() {
-    if (!selectedItemId) {
-      flash("Tap something first.");
-      return;
-    }
-
-    updateCurrentItems(currentItems().filter((item) => item.id !== selectedItemId));
-    setSelectedItemId(null);
-    flash("Deleted 🗑️");
-  }
-function rotateSelected(amount) {
-  if (!selectedItemId) {
-    flash("Tap something first.");
-    return;
-  }
-
-  updateCurrentItems(
-    currentItems().map((item) =>
-      item.id === selectedItemId
-        ? {
-            ...item,
-            rotate: (item.rotate || 0) + amount
-          }
-        : item
-    )
-  );
-}
-
-  function changeSelectedFontSize(amount) {
-    if (!selectedItemId) {
-      flash("Tap text or a sticker first 💕");
-      return;
-    }
-
-    updateCurrentItems(
-      currentItems().map((item) =>
-        item.id === selectedItemId &&
-        (item.type === "text" || item.type === "sticker" || item.type === "placeholder")
-          ? { ...item, fontSize: Math.max(12, (item.fontSize || 24) + amount) }
-          : item
-      )
-    );
-  }
-
-  function addPage() {
-    const pagesData = [...getPages(), blankPage(templateDefaultBg())];
-
-    rememberUndo();
-
-    applyBook({
-      ...activeBook,
-      pagesData,
-      pages: pagesData.length,
-      updated: "just now"
-    });
-
-    setCurrentPage(pagesData.length - 1);
-    setSelectedItemId(null);
-  }
-
-  function deletePage() {
-    const pagesData = [...getPages()];
-
-    if (pagesData.length <= 1) {
-      flash("You need at least one page.");
-      return;
-    }
-
-    rememberUndo();
-    pagesData.splice(currentPage, 1);
-
-    applyBook({
-      ...activeBook,
-      pagesData,
-      pages: pagesData.length,
-      updated: "just now"
-    });
-
-    setCurrentPage(Math.max(0, currentPage - 1));
-    setSelectedItemId(null);
-    flash("Page deleted 🗑️");
-  }
-
-  updateCurrentItems(
-    currentItems().map((item) =>
-      item.id === selectedItemId
-        ? {
-            ...item,
-            rotate: (item.rotate || 0) + amount
-          }
-        : item
-    )
-  );
-}, [selectedItemId, activeBook, currentPage]);
-  function handlePointerDown(e, item) {
-    if (e.target.classList.contains("resizeHandle")) return;
-
-    const rect = e.currentTarget.parentElement.getBoundingClientRect();
-
-    rememberUndo();
-
-    setSelectedItemId(item.id);
-    setDragging({
-      id: item.id,
-      offsetX: e.clientX - rect.left - item.x,
-      offsetY: e.clientY - rect.top - item.y
-    });
-  }
-
-  function startResize(e, item, corner) {
-    e.stopPropagation();
-
-    rememberUndo();
-
-    setSelectedItemId(item.id);
-    setResizing({
-      id: item.id,
-      corner,
-      startX: e.clientX,
-      startY: e.clientY,
-      item: { ...item }
-    });
-  }
-
-  function handleCanvasMove(e) {
-    const rect = e.currentTarget.getBoundingClientRect();
-
-    if (dragging) {
-      const x = e.clientX - rect.left - dragging.offsetX;
-      const y = e.clientY - rect.top - dragging.offsetY;
-
-      updateCurrentItems(
-        currentItems().map((item) =>
-          item.id === dragging.id ? { ...item, x, y } : item
-        ),
-        false
-      );
-    }
-
-    if (resizing) {
-      const dx = e.clientX - resizing.startX;
-      const dy = e.clientY - resizing.startY;
-
-      updateCurrentItems(
-        currentItems().map((item) => {
-          if (item.id !== resizing.id) return item;
-
-          let next = { ...resizing.item };
-
-          if (resizing.corner.includes("r")) next.w = Math.max(30, resizing.item.w + dx);
-          if (resizing.corner.includes("l")) {
-            next.w = Math.max(30, resizing.item.w - dx);
-            next.x = resizing.item.x + dx;
-          }
-          if (resizing.corner.includes("b")) next.h = Math.max(30, resizing.item.h + dy);
-          if (resizing.corner.includes("t")) {
-            next.h = Math.max(30, resizing.item.h - dy);
-            next.y = resizing.item.y + dy;
-          }
-
-          if (next.type === "text" || next.type === "sticker" || next.type === "placeholder") {
-            next.fontSize = Math.max(12, Math.round(next.h * 0.35));
-          }
-
-          return next;
-        }),
-        false
-      );
-    }
-  }
-
-  function stopActions() {
-    setDragging(null);
-    setResizing(null);
-  }
-
-  function renderItem(item, preview = false) {
-    if (!item || !item.type) return null;
-if (item.type === "photo" && !item.url) return null;
-    const selected = !preview && selectedItemId === item.id;
-if (!item || !item.type) return null;
-    
-    if (item.type === "doodle") {
-      const d = (item.points || [])
-        .map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`)
-        .join(" ");
-
-      return (
-        <svg
-          key={item.id}
-          className="doodleSvg"
-          onClick={() => !preview && setSelectedItemId(item.id)}
-        >
-          <path
-            d={d}
-            stroke={item.color || "#5A463A"}
-            strokeWidth="4"
-            fill="none"
-            strokeLinecap="round"
-          />
-        </svg>
-      );
-    }
-
-    return (
-      <div
-        key={item.id}
-        className={`editableItem ${selected ? "selectedEditableItem" : ""} ${
-          item.type === "placeholder" ? "photoPlaceholder" : ""
-        } ${preview ? "flipItem" : ""}`}
-        style={{
-          left: item.x,
-          top: item.y,
-          width: item.w,
-          height: item.h,
-          transform: `rotate(${item.rotate || 0}deg)`
-        }}
-        onPointerDown={(e) => !preview && handlePointerDown(e, item)}
-        onClick={() => !preview && setSelectedItemId(item.id)}
-      >
-        {item.type === "photo" && <img src={item.url} alt="" />}
-
-        {item.type === "sticker" && item.src && (
-  <img
-    src={item.src}
-    alt=""
-    style={{
-      width: "100%",
-      height: "100%",
-      objectFit: "contain",
-      pointerEvents: "none"
-    }}
-  />
-)}
-
-{item.type === "sticker" && !item.src && (
-  <div
-    className="editableSticker"
-    style={{ fontSize: item.fontSize || 42 }}
-  >
-    {item.text}
-  </div>
-)}
-
-        {(item.type === "text" || item.type === "placeholder") && (
-          <div
-            className="editableText"
-            style={{
-              fontSize: item.fontSize || 24,
-              fontFamily: item.fontFamily || "Georgia",
-              color: item.color || "#5A463A"
-            }}
-          >
-            {item.text}
-          </div>
-        )}
-
-        {selected && (
-          <>
-            <button
-              className="resizeHandle tl"
-              onPointerDown={(e) => startResize(e, item, "tl")}
-            ></button>
-            <button
-              className="resizeHandle tr"
-              onPointerDown={(e) => startResize(e, item, "tr")}
-            ></button>
-            <button
-              className="resizeHandle bl"
-              onPointerDown={(e) => startResize(e, item, "bl")}
-            ></button>
-            <button
-              className="resizeHandle br"
-              onPointerDown={(e) => startResize(e, item, "br")}
-            ></button>
-          </>
-        )}
-      </div>
-    );
-  }
-
-  async function logout() {
-    await signOut(auth);
-    flash("Logged out ✨");
-  }
-
-  if (section === "create") {
-    return (
-      <div className="phone">
-        <div className="screen paper auth-page">
-          <button className="text-btn" onClick={() => setSection("home")}>
-            ← Back
-          </button>
-
-          <h1>Create New Scrapbook</h1>
-
-          <div className="auth-card">
-            <input
-              placeholder="Scrapbook title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-
-            <button onClick={createBook}>Create & Start Editing 💖</button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (section === "flipbook") {
-    return (
-      <div className="phone">
-        <div className="screen paper flipbookScreen">
-          <div className="flipbookTop">
-            <button className="plainIcon" onClick={() => setSection("editor")}>
-              ‹
-            </button>
-
-            <div>
-              <h2>{activeBook?.title || "Flipbook"}</h2>
-              <p>{getPages().length} pages</p>
-            </div>
-
-            <button className="plainIcon" onClick={() => exportBook(activeBook)}>
-              ⋯
-            </button>
-          </div>
-
-          <div className="flipbookBook">
-            <div className="bookLeftPage">
-              <div className="bookCurl"></div>
-            </div>
-
-            <div className={`flipbookCanvas ${currentPageData().background || "bgGrid"}`}>
-              {currentItems().map((item) => renderItem(item, true))}
-            </div>
-          </div>
-
-          <div className="flipPageCount">
-            {currentPage + 1} / {getPages().length}
-          </div>
-
-          <div className="flipControls">
-            <button onClick={() => setCurrentPage(0)}>▦<br />Thumbnails</button>
-
-            <button
-              className="flipArrow"
-              onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
-            >
-              ←
-            </button>
-
-            <button
-              className="flipArrow"
-              onClick={() =>
-                setCurrentPage(Math.min(getPages().length - 1, currentPage + 1))
-              }
-            >
-              →
-            </button>
-
-            <button onClick={() => flash("Autoplay coming soon ▶")}>
-              ▶<br />Autoplay
-            </button>
-          </div>
-
-          <div className="flipThumbs">
-            {getPages().map((page, index) => (
-              <div
-                key={index}
-                className={index === currentPage ? "flipThumb activeFlipThumb" : "flipThumb"}
-                onClick={() => setCurrentPage(index)}
-              >
-                <div className={page.background || "bgGrid"}></div>
-                <small>{index + 1}</small>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (section === "editor") {
-    return (
-      <div className="phone">
-        <div className="screen paper editorScreenPretty">
-          <div className="editorHeaderPretty">
-            <button className="plainIcon" onClick={() => setSection("home")}>
-              ‹
-            </button>
-
-            <button className="plainIcon" onClick={undo}>↶</button>
-            <button className="plainIcon" onClick={redo}>↷</button>
-
-            <button className="savePill" onClick={saveBook}>
-              Save
-            </button>
-
-            <div className="editorMenuWrap">
-              <button
-                className="plainIcon"
-                onClick={() => setEditorMenuOpen(!editorMenuOpen)}
-              >
-                ⋯
-              </button>
-
-              {editorMenuOpen && (
-                <div className="miniMenu editorMenu">
-                  <button
-                    onClick={() => {
-                      setEditorMenuOpen(false);
-                      setSection("flipbook");
-                    }}
-                  >
-                    View Flipbook
-                  </button>
-
-                  <button onClick={() => exportBook(activeBook)}>
-                    Export
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="pageCounter">
-            Page {currentPage + 1} / {getPages().length}
-          </div>
-
-          <div
-            className={`scrapCanvas ${currentPageData().background || "bgGrid"}`}
-            onPointerMove={handleCanvasMove}
-            onPointerUp={stopActions}
-            onPointerLeave={stopActions}
-          >
-            {currentItems().map((item) => renderItem(item))}
-          </div>
-
-         <div className="toolPanel fixedTools">
-  <label>
-    🖼️
-    <span>Photo</span>
-    <input type="file" accept="image/*" hidden onChange={uploadPhoto} />
-  </label>
-
-  <button onClick={() => setShowStickerPicker(!showStickerPicker)}>
-    💬
-    <span>Sticker</span>
-  </button>
-
-  <button onClick={addText}>
-    𝑇
-    <span>Text</span>
-  </button>
-
-  <div className="backgroundPickerWrap">
- <button
-  onClick={() => setBackgroundMenuOpen((open) => !open)}
->
-  🎨
-  <span>Background</span>
-</button>
-
-  {backgroundMenuOpen && (
-    <div className="backgroundPicker">
-      {BACKGROUNDS.map((bg) => (
-        <button
-          key={bg.id}
-          className={`backgroundOption ${bg.className}`}
-          onClick={() => changeBackground(bg.className)}
-        >
-          {bg.label}
-        </button>
-      ))}
-    </div>
-  )}
-</div>
-
-  <button onClick={deleteSelected}>
-    🗑️
-    <span>Delete</span>
-  </button>
-
-
-{showStickerPicker && <StickerPicker />}
-
-          <div className="fontControls">
-            {["🍼", "🧸", "⭐", "🌙", "🛏️", "👶", "🦋", "💗"].map((sticker) => (
-              <button key={sticker} onClick={() => addBabySticker(sticker)}>
-                {sticker}
-              </button>
-            ))}
-          </div>
-
-          <div className="pageStrip">
-            {getPages().map((page, index) => (
-              <div
-                key={index}
-                className={
-                  index === currentPage ? "pageThumb activePageThumb" : "pageThumb"
-                }
-                onClick={() => {
-                  setCurrentPage(index);
-                  setSelectedItemId(null);
-                }}
-              >
-                <div>📔</div>
-                <small>{index + 1}</small>
-              </div>
-            ))}
-
-            <button className="addPageBtn" onClick={addPage}>
-              ＋
-            </button>
-
-            <button className="deletePageBtn" onClick={deletePage}>
-              Delete Page
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  
-  if (section === "settings") {
-  }
-        
-    return (
-      <div className="phone">
-        <div className="screen paper auth-page">
-          <button className="text-btn" onClick={() => setSection("home")}>
-            ← Back
-          </button>
-
-          <h1>Settings ⚙️</h1>
-
-          <div className="settings-card">
-            <div className="setting-row">
-              <div>
-                <h3>Profile 👤</h3>
-                <p>View account info.</p>
-              </div>
-
-              <button onClick={() => setSection("profile")}>Open</button>
-            </div>
-
-            <div className="setting-row">
-              <div>
-                <h3>Templates 📚</h3>
-                <p>Browse templates.</p>
-              </div>
-
-              <button onClick={() => setSection("templates")}>Open</button>
-            </div>
-
-            <div className="setting-row">
-              <div>
-                <h3>Logout 🚪</h3>
-                <p>Sign out.</p>
-              </div>
-
-              <button onClick={logout}>Logout</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (section === "profile") {
-    return (
-      <div className="phone">
-        <div className="screen paper auth-page">
-          <button className="text-btn" onClick={() => setSection("home")}>
-            ← Back
-          </button>
-
-          <h1>Profile</h1>
-
-          <div className="auth-card">
-            <p>{user?.displayName}</p>
-            <p>{user?.email}</p>
-            <p>Scrapbooks: {books.length}</p>
-            <button onClick={logout}>Logout</button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (section === "templates") {
-    return (
-      <div className="phone">
-        <div className="screen paper">
-          <button className="text-btn" onClick={() => setSection("home")}>
-            ← Back
-          </button>
-
-          <h1>Templates</h1>
-
-          <button className="templateHomeCard" onClick={() => createBabyTemplate("girl")}>
-            <div className="templateIcon">🎀</div>
-            <div>
-              <h2>Baby’s First Year Girl</h2>
-              <p>Pink plaid, 16 editable pages</p>
-            </div>
-          </button>
-
-          <button className="templateHomeCard" onClick={() => createBabyTemplate("boy")}>
-            <div className="templateIcon">🧸</div>
-            <div>
-              <h2>Baby’s First Year Boy</h2>
-              <p>Blue plaid, 16 editable pages</p>
-            </div>
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="phone">
-      <div className="screen paper homeLikeScreenshot">
-        <div className="homeHeader">
-          <button className="circleBtn" onClick={() => setSection("settings")}>
-            ⚙️
-          </button>
-
-          <div className="headerIcons">
-            <button className="circleBtn">👑</button>
-            <button className="circleBtn" onClick={() => flash("No notifications 🔔")}>
-              🔔
-            </button>
-          </div>
-        </div>
-
-        <div className="brandLogo">
-          Pocket<span>Scrapbook</span>
-        </div>
-
-        <p className="homeTagline">
-          Turn your memories into
-          <br />
-          beautiful stories 💗
-        </p>
-
-        <div className="decorPolaroid">
-          <span className="flower">🌼</span>
-          <div className="miniPhoto">🌅</div>
-          <span className="butterfly">🦋</span>
-          <span className="heart">💗</span>
-        </div>
-
-        <button className="bigCreateCard" onClick={() => setSection("create")}>
-          <div className="bigPlus">＋</div>
-          <div>
-            <h2>Create New Scrapbook</h2>
-            <p>Start a new scrapbook</p>
-          </div>
-          <div className="bookArt">📔</div>
-        </button>
-
-        <button className="templateHomeCard" onClick={() => createBabyTemplate("girl")}>
-          <div className="templateIcon">🎀</div>
-          <div>
-            <h2>Baby’s First Year Girl</h2>
-            <p>Create 16 editable pages</p>
-          </div>
-        </button>
-
-        <button className="templateHomeCard" onClick={() => createBabyTemplate("boy")}>
-          <div className="templateIcon">🧸</div>
-          <div>
-            <h2>Baby’s First Year Boy</h2>
-            <p>Create 16 editable pages</p>
-          </div>
-        </button>
-
-        <div className="row">
-          <h2>My Scrapbooks</h2>
-          <button className="seeAll" onClick={() => flash("Showing all scrapbooks")}>
-            See All ›
-          </button>
-        </div>
-
-        {loading ? (
-          <p className="muted">Loading scrapbooks...</p>
-        ) : books.length === 0 ? (
-          <p className="muted">No scrapbooks yet. Create your first one 💕</p>
-        ) : (
-          books.map((book) => (
-            <div className="scrapBookRow" key={book.id}>
-              <div className="bookCover">{book.cover || "📔"}</div>
-
-              <div className="bookInfo" onClick={() => openBook(book)}>
-                <h3>{book.title}</h3>
-                <p>{book.updated || "Updated just now"}</p>
-              </div>
-
-              <div className="bookMeta">
-                <button
-                  className="dots"
-                  onClick={() => setOpenMenuId(openMenuId === book.id ? null : book.id)}
-                >
-                  ⋯
-                </button>
-
-                <span>{book.pages || 1} Pages</span>
-
-                {openMenuId === book.id && (
-                  <div className="miniMenu">
-                    <button onClick={() => openBook(book)}>Edit</button>
-                    <button onClick={() => exportBook(book)}>Export</button>
-                    <button onClick={() => deleteBook(book)}>Delete</button>
-                  </div>
-                )}
-              </div>
-            </div>
-          ))
-        )}
-      </div>
-
-      <div className="bottom">
-        <button onClick={() => setSection("home")}>
-          🏠
-          <br />
-          Home
-        </button>
-
-        <button onClick={() => setSection("templates")}>
-          📖
-          <br />
-          Templates
-        </button>
-
-        <button className="plus" onClick={() => setSection("create")}>
-          ＋
-        </button>
-
-        <button onClick={() => setSection("profile")}>
-          ♡
-          <br />
-          Profile
-        </button>
-      </div>
-    </div>
-  );
+
+  function createBlankBook() {
+    const newBook = {
+      title: "My Scrapbook",
+      background: "cream",
+      pages: [
+        {
+          id: uid(),
+          background: "cream",
+          elements: [
+            textEl("My Scrapbook", 75, 55, 250, 60, 34),
+            frameEl(80, 145, 250, 250),
+            stickerEl("♡", 30, 340),
+          ],
+        },
+      ],
+    };
+
+    setBook(newBook);
+    setPageIndex(0);
+    setScreen("editor");
+  }
+
+  function createFromTemplate(template) {
+    if (template.premium && !isSubscribed) {
+      const viewOnly = window.confirm(
+        "This is a premium baby template. You can preview it now. Press OK to preview, or Cancel to unlock."
+      );
+
+      if (!viewOnly) {
+        setScreen("subscribe");
+        return;
+      }
+    }
+
+    const copied = JSON.parse(JSON.stringify(template));
+    copied.id = null;
+    copied.title = template.title;
+    setBook(copied);
+    setPageIndex(0);
+    setScreen("editor");
+  }
+
+  function unlockPremium() {
+    setIsSubscribed(true);
+    alert("Premium unlocked for testing.");
+    setScreen("templates");
+  }
+
+  function updatePage(nextPage) {
+    const pages = [...book.pages];
+    pages[pageIndex] = nextPage;
+    setBook({ ...book, pages });
+  }
+
+  function addPage() {
+    setBook({
+      ...book,
+      pages: [
+        ...book.pages,
+        {
+          id: uid(),
+          background: book.background || "cream",
+          elements: [],
+        },
+      ],
+    });
+    setPageIndex(book.pages.length);
+  }
+
+  function addText() {
+    updatePage({
+      ...page,
+      elements: [...page.elements, textEl("tap to edit", 90, 110, 180, 70, 24)],
+    });
+  }
+
+  function addSticker(s) {
+    updatePage({
+      ...page,
+      elements: [...page.elements, stickerEl(s, 120, 150)],
+    });
+  }
+
+  function addPhotoFrame() {
+    updatePage({
+      ...page,
+      elements: [...page.elements, frameEl(80, 120, 220, 220)],
+    });
+  }
+
+  async function uploadImage(elementId, file) {
+    if (!file) return;
+
+    const imageRef = ref(storage, `scrapbooks/${user.uid}/${uid()}-${file.name}`);
+    await uploadBytes(imageRef, file);
+    const url = await getDownloadURL(imageRef);
+
+    updatePage({
+      ...page,
+      elements: page.elements.map((el) =>
+        el.id === elementId ? { ...el, src: url } : el
+      ),
+    });
+  }
+
+  function changeBackground(bg) {
+    updatePage({ ...page, background: bg });
+  }
+
+  function deleteSelected() {
+    updatePage({
+      ...page,
+      elements: page.elements.filter((el) => el.id !== selectedId),
+    });
+    setSelectedId(null);
+  }
+
+  function updateElement(id, changes) {
+    updatePage({
+      ...page,
+      elements: page.elements.map((el) => (el.id === id ? { ...el, ...changes } : el)),
+    });
+  }
+
+  function startDrag(e, el, mode = "move") {
+    e.stopPropagation();
+    setSelectedId(el.id);
+
+    const point = getPoint(e);
+    setDrag({
+      id: el.id,
+      mode,
+      startX: point.x,
+      startY: point.y,
+      startEl: { ...el },
+    });
+  }
+
+  function onMove(e) {
+    if (!drag) return;
+
+    const point = getPoint(e);
+    const dx = point.x - drag.startX;
+    const dy = point.y - drag.startY;
+    const el = drag.startEl;
+
+    if (drag.mode === "move") {
+      updateElement(drag.id, {
+        x: el.x + dx,
+        y: el.y + dy,
+      });
+    }
+
+    if (drag.mode === "resize") {
+      updateElement(drag.id, {
+        w: Math.max(40, el.w + dx),
+        h: Math.max(40, el.h + dy),
+      });
+    }
+
+    if (drag.mode === "rotate") {
+      updateElement(drag.id, {
+        rotate: el.rotate + dx,
+      });
+    }
+  }
+
+  function getPoint(e) {
+    if (e.touches?.[0]) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    return { x: e.clientX, y: e.clientY };
+  }
+
+  if (!user) {
+    return (
+      <div className="authPage">
+        <h1>ScrapFlip 💗</h1>
+        <p>Turn your memories into beautiful stories.</p>
+
+        <input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
+        <input
+          placeholder="Password"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+
+        <button onClick={handleAuth}>{authMode === "login" ? "Log In" : "Sign Up"}</button>
+        <button className="linkBtn" onClick={() => setAuthMode(authMode === "login" ? "signup" : "login")}>
+          {authMode === "login" ? "Create account" : "Already have an account?"}
+        </button>
+        <button className="linkBtn" onClick={resetPassword}>Forgot password?</button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="app">
+      {screen === "home" && (
+        <div className="home">
+          <div className="topBar">
+            <button>☰</button>
+            <button onClick={() => signOut(auth)}>Logout</button>
+          </div>
+
+          <h1>ScrapFlip💗</h1>
+          <p>Turn your memories into beautiful stories</p>
+
+          <button className="createCard" onClick={createBlankBook}>
+            <span>＋</span>
+            <div>
+              <b>Create New Scrapbook</b>
+              <small>Start a new scrapbook</small>
+            </div>
+          </button>
+
+          <h2>My Scrapbooks</h2>
+
+          {books.map((b) => (
+            <div
+              className="bookCard"
+              key={b.id}
+              onClick={() => {
+                setBook(b);
+                setPageIndex(0);
+                setScreen("editor");
+              }}
+            >
+              <div className={`bookThumb bg-${b.background || "cream"}`}></div>
+              <div>
+                <b>{b.title}</b>
+                <small>{b.pages?.length || 1} Pages</small>
+              </div>
+              <button
+                onClick={async (e) => {
+                  e.stopPropagation();
+                  await deleteDoc(doc(db, "users", user.uid, "books", b.id));
+                  loadBooks(user.uid);
+                }}
+              >
+                ⋯
+              </button>
+            </div>
+          ))}
+
+          <nav>
+            <button onClick={() => setScreen("home")}>🏠 Home</button>
+            <button onClick={() => setScreen("templates")}>📖 Templates</button>
+            <button onClick={createBlankBook}>＋</button>
+            <button onClick={() => setScreen("stickers")}>♡ Stickers</button>
+            <button onClick={() => setScreen("subscribe")}>👑 Premium</button>
+          </nav>
+        </div>
+      )}
+
+      {screen === "templates" && (
+        <div className="panel">
+          <button onClick={() => setScreen("home")}>← Back</button>
+          <h2>Templates</h2>
+
+          <div className="templateGrid">
+            <button onClick={() => createFromTemplate(babyGirlTemplate)}>
+              <div className="templatePreview girl">Baby Girl First Year 🎀</div>
+              <b>Premium</b>
+            </button>
+
+            <button onClick={() => createFromTemplate(babyBoyTemplate)}>
+              <div className="templatePreview boy">Baby Boy First Year ⭐</div>
+              <b>Premium</b>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {screen === "subscribe" && (
+        <div className="panel">
+          <button onClick={() => setScreen("home")}>← Back</button>
+          <h2>Premium Baby Templates 👑</h2>
+          <p>Baby boy and baby girl first-year templates are premium.</p>
+          <button onClick={unlockPremium}>Unlock Premium for Testing</button>
+          <small>Later you can replace this with Stripe, RevenueCat, or Firebase payments.</small>
+        </div>
+      )}
+
+      {screen === "stickers" && (
+        <div className="panel">
+          <button onClick={() => setScreen("home")}>← Back</button>
+          <h2>Stickers</h2>
+          <div className="stickerGrid">
+            {STICKERS.map((s) => (
+              <button key={s}>{s}</button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {screen === "editor" && book && page && (
+        <div className="editor">
+          <header>
+            <button onClick={() => setScreen("home")}>←</button>
+            <button onClick={() => setPageIndex(Math.max(0, pageIndex - 1))}>‹</button>
+            <span>
+              Page {pageIndex + 1} / {book.pages.length}
+            </span>
+            <button onClick={() => setPageIndex(Math.min(book.pages.length - 1, pageIndex + 1))}>›</button>
+            <button onClick={() => saveBook()}>Save</button>
+          </header>
+
+          <main
+            className={`canvas bg-${page.background}`}
+            onMouseMove={onMove}
+            onMouseUp={() => setDrag(null)}
+            onTouchMove={onMove}
+            onTouchEnd={() => setDrag(null)}
+            onClick={() => setSelectedId(null)}
+          >
+            {page.elements.map((el) => (
+              <div
+                key={el.id}
+                className={`element ${selectedId === el.id ? "selected" : ""}`}
+                style={{
+                  left: el.x,
+                  top: el.y,
+                  width: el.w,
+                  height: el.h,
+                  transform: `rotate(${el.rotate || 0}deg)`,
+                  fontSize: el.fontSize,
+                }}
+                onMouseDown={(e) => startDrag(e, el)}
+                onTouchStart={(e) => startDrag(e, el)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedId(el.id);
+                }}
+              >
+                {el.type === "text" && (
+                  <textarea
+                    value={el.text}
+                    onChange={(e) => updateElement(el.id, { text: e.target.value })}
+                    style={{ fontSize: el.fontSize }}
+                  />
+                )}
+
+                {el.type === "sticker" && <div className="sticker">{el.text}</div>}
+
+                {el.type === "photo" && (
+                  <label className="photoBox">
+                    {el.src ? <img src={el.src} /> : <span>＋ Photo</span>}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      hidden
+                      onChange={(e) => uploadImage(el.id, e.target.files[0])}
+                    />
+                  </label>
+                )}
+
+                {selectedId === el.id && (
+                  <>
+                    <button
+                      className="resizeHandle"
+                      onMouseDown={(e) => startDrag(e, el, "resize")}
+                      onTouchStart={(e) => startDrag(e, el, "resize")}
+                    >
+                      ↘
+                    </button>
+                    <button
+                      className="rotateHandle"
+                      onMouseDown={(e) => startDrag(e, el, "rotate")}
+                      onTouchStart={(e) => startDrag(e, el, "rotate")}
+                    >
+                      ⟳
+                    </button>
+                  </>
+                )}
+              </div>
+            ))}
+          </main>
+
+          <section className="toolbar">
+            <button onClick={addPhotoFrame}>Photo</button>
+            <button onClick={addText}>Text</button>
+            <button onClick={() => addSticker("♡")}>Sticker</button>
+            <button onClick={addPage}>Add Page</button>
+            <button onClick={deleteSelected}>Delete</button>
+          </section>
+
+          <section className="backgrounds">
+            {BACKGROUNDS.map((b) => (
+              <button key={b.value} onClick={() => changeBackground(b.value)}>
+                {b.name}
+              </button>
+            ))}
+          </section>
+
+          <section className="stickerRow">
+            {STICKERS.map((s) => (
+              <button key={s} onClick={() => addSticker(s)}>
+                {s}
+              </button>
+            ))}
+          </section>
+        </div>
+      )}
+    </div>
+  );
 }
 
 createRoot(document.getElementById("root")).render(<App />);
