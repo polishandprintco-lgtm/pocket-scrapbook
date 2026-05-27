@@ -181,6 +181,7 @@ function App() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [selectedBookMenu, setSelectedBookMenu] = useState(null);
   
   const page = book?.pages?.[pageIndex];
 
@@ -565,23 +566,32 @@ if (action) {
   );
 
   if (secondAction) {
-    alert("Export option coming soon.");
-  } else {
-    const sure = window.confirm(
-      "Are you sure you want to delete this scrapbook?"
-    );
+    <button
+  onClick={(e) => {
+    e.stopPropagation();
+    setSelectedBookMenu(b.id);
+  }}
+>
+  ⋯
+</button>
 
-    if (sure) {
-      deleteDoc(doc(db, "users", user.uid, "books", b.id));
-      loadBooks(user.uid);
-    }
-  }
-}
-    }}
-  >
-    ⋯
-  </button>
-            </div>
+{selectedBookMenu === b.id && (
+  <div className="bookMenu" onClick={(e) => e.stopPropagation()}>
+    <button onClick={() => setScreen("flipbook")}>📖 View Flipbook</button>
+    <button onClick={() => alert("Export option coming soon.")}>⬇️ Export</button>
+    <button
+      onClick={() => {
+        const sure = window.confirm("Are you sure you want to delete this scrapbook?");
+        if (sure) {
+          deleteDoc(doc(db, "users", user.uid, "books", b.id));
+          loadBooks(user.uid);
+        }
+      }}
+    >
+      🗑 Delete
+    </button>
+  </div>
+)}
           ))}
 
           <nav>
