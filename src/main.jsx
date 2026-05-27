@@ -561,7 +561,11 @@ function App() {
 
           <nav>
             <button onClick={() => setScreen("home")}>🏠 Home</button>
-            <button onClick={() => setScreen("templates")}>📖 Templates</button>
+            {isSubscribed && (
+            <button onClick={() => setScreen("templates")}>
+    📖 Templates
+  </button>
+)}
             <button onClick={createBlankBook}>＋</button>
             <button onClick={() => setScreen("stickers")}>♡ Stickers</button>
             <button onClick={() => setScreen("subscribe")}>👑 Premium</button>
