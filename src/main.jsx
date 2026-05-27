@@ -458,7 +458,7 @@ function redo() {
     renameBook(b);
     setSelectedBookMenu(null);
   }}
->
+
  <button
   onClick={(e) => {
     e.stopPropagation();
