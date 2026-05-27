@@ -1,247 +1,655 @@
-* { box-sizing: border-box; }
-body {
-  margin: 0;
-  font-family: "Arial", sans-serif;
-  background: #fff8f7;
-  color: #3b2b2b;
+import React, { useEffect, useRef, useState } from "react";
+import { createRoot } from "react-dom/client";
+import "./style.css";
+
+import { auth, db, storage } from "./firebase";
+import {
+  onAuthStateChanged,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail,
+  signOut,
+} from "firebase/auth";
+
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  orderBy,
+  query,
+  serverTimestamp,
+  updateDoc,
+} from "firebase/firestore";
+
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+
+const COLORS = {
+  pink: "#f8b8ca",
+  blue: "#bcd8f4",
+  lavender: "#d9c8f2",
+  cream: "#fff8ef",
+  tan: "#ead6bd",
+};
+
+const BACKGROUNDS = [
+  { name: "Cream", value: "cream" },
+  { name: "Baby Pink", value: "pink" },
+  { name: "Baby Blue", value: "blue" },
+  { name: "Lavender", value: "lavender" },
+  { name: "Grid", value: "grid" },
+  { name: "Dots", value: "dots" },
+  { name: "Paper", value: "paper" },
+];
+
+const STICKERS = ["♡", "❤", "✿", "🌼", "🎀", "⭐", "🧸", "🍼", "👶", "🦋"];
+
+function uid() {
+  return crypto?.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
 }
 
-button {
-  border: 0;
-  border-radius: 18px;
-  padding: 12px 16px;
-  background: #f7d7df;
-  color: #3b2b2b;
-  font-weight: 700;
+const babyBoyTemplate = {
+  premium: true,
+  title: "Baby Boy First Year",
+  background: "blue",
+  pages: [
+    {
+      id: uid(),
+      background: "blue",
+      elements: [
+        textEl("baby’s\nfirst year", 40, 60, 220, 90, 36),
+        textEl("our little boy", 245, 170, 140, 34, 16),
+        frameEl(45, 190, 170, 170),
+        frameEl(240, 205, 115, 115),
+        stickerEl("⭐", 25, 30),
+        stickerEl("🧸", 30, 350),
+      ],
+    },
+    ...Array.from({ length: 12 }, (_, i) => ({
+      id: uid(),
+      background: "blue",
+      elements: [
+        textEl(`${i + 1}\nmonth${i === 0 ? "" : "s"}`, 28, 35, 110, 90, 28),
+        frameEl(150, 70, 220, 210),
+        textEl(
+          ["you are so loved", "growing so fast", "sweet boy", "so happy", "little blessing"][
+            i % 5
+          ],
+          170,
+          315,
+          170,
+          45,
+          16
+        ),
+        stickerEl(i % 2 ? "🧸" : "⭐", 30, 300),
+      ],
+    })),
+  ],
+};
+
+const babyGirlTemplate = {
+  premium: true,
+  title: "Baby Girl First Year",
+  background: "pink",
+  pages: [
+    {
+      id: uid(),
+      background: "pink",
+      elements: [
+        textEl("baby’s\nfirst year", 40, 60, 220, 90, 36),
+        textEl("our little girl", 245, 170, 140, 34, 16),
+        frameEl(45, 190, 170, 170),
+        frameEl(240, 205, 115, 115),
+        stickerEl("🎀", 25, 30),
+        stickerEl("♡", 30, 350),
+      ],
+    },
+    ...Array.from({ length: 12 }, (_, i) => ({
+      id: uid(),
+      background: "pink",
+      elements: [
+        textEl(`${i + 1}\nmonth${i === 0 ? "" : "s"}`, 28, 35, 110, 90, 28),
+        frameEl(150, 70, 220, 210),
+        textEl(
+          ["you are so loved", "growing so fast", "sweet girl", "so happy", "little blessing"][
+            i % 5
+          ],
+          170,
+          315,
+          170,
+          45,
+          16
+        ),
+        stickerEl(i % 2 ? "🌼" : "🎀", 30, 300),
+      ],
+    })),
+  ],
+};
+
+function textEl(text, x, y, w, h, size = 22) {
+  return {
+    id: uid(),
+    type: "text",
+    text,
+    x,
+    y,
+    w,
+    h,
+    rotate: 0,
+    fontSize: size,
+  };
 }
 
-input, textarea {
-  border: 1px solid #eadde0;
-  border-radius: 14px;
-  padding: 12px;
-  width: 100%;
+function stickerEl(text, x, y) {
+  return {
+    id: uid(),
+    type: "sticker",
+    text,
+    x,
+    y,
+    w: 60,
+    h: 60,
+    rotate: 0,
+    fontSize: 38,
+  };
 }
 
-.authPage, .home, .panel {
-  max-width: 430px;
-  margin: auto;
-  min-height: 100vh;
-  padding: 24px;
+function frameEl(x, y, w, h) {
+  return {
+    id: uid(),
+    type: "photo",
+    src: "",
+    x,
+    y,
+    w,
+    h,
+    rotate: 0,
+  };
 }
 
-.authPage {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  justify-content: center;
+function App() {
+  const [user, setUser] = useState(null);
+  const [screen, setScreen] = useState("home");
+  const [books, setBooks] = useState([]);
+  const [book, setBook] = useState(null);
+  const [pageIndex, setPageIndex] = useState(0);
+  const [selectedId, setSelectedId] = useState(null);
+  const [drag, setDrag] = useState(null);
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [authMode, setAuthMode] = useState("login");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const page = book?.pages?.[pageIndex];
+
+  useEffect(() => {
+    return onAuthStateChanged(auth, async (u) => {
+      setUser(u);
+      if (u) loadBooks(u.uid);
+    });
+  }, []);
+
+  useEffect(() => {
+    function keyDown(e) {
+      if ((e.key === "Delete" || e.key === "Backspace") && selectedId && book) {
+        e.preventDefault();
+        deleteSelected();
+      }
+    }
+
+    window.addEventListener("keydown", keyDown);
+    return () => window.removeEventListener("keydown", keyDown);
+  }, [selectedId, book, pageIndex]);
+
+  async function loadBooks(uidValue) {
+    const q = query(collection(db, "users", uidValue, "books"), orderBy("createdAt", "desc"));
+    const snap = await getDocs(q);
+    setBooks(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+  }
+
+  async function saveBook(nextBook = book) {
+    if (!user || !nextBook) return;
+
+    if (nextBook.id) {
+      await updateDoc(doc(db, "users", user.uid, "books", nextBook.id), {
+        ...nextBook,
+        updatedAt: serverTimestamp(),
+      });
+    } else {
+      const added = await addDoc(collection(db, "users", user.uid, "books"), {
+        ...nextBook,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+      nextBook.id = added.id;
+      setBook({ ...nextBook });
+    }
+
+    loadBooks(user.uid);
+  }
+
+  async function handleAuth() {
+    if (!email || !password) return alert("Enter email and password.");
+
+    if (authMode === "signup") {
+      await createUserWithEmailAndPassword(auth, email, password);
+    } else {
+      await signInWithEmailAndPassword(auth, email, password);
+    }
+  }
+
+  async function resetPassword() {
+    if (!email) return alert("Type your email first.");
+    await sendPasswordResetEmail(auth, email);
+    alert("Password reset sent.");
+  }
+
+  function createBlankBook() {
+    const newBook = {
+      title: "My Scrapbook",
+      background: "cream",
+      pages: [
+        {
+          id: uid(),
+          background: "cream",
+          elements: [
+            textEl("My Scrapbook", 75, 55, 250, 60, 34),
+            frameEl(80, 145, 250, 250),
+            stickerEl("♡", 30, 340),
+          ],
+        },
+      ],
+    };
+
+    setBook(newBook);
+    setPageIndex(0);
+    setScreen("editor");
+  }
+
+  function createFromTemplate(template) {
+    if (template.premium && !isSubscribed) {
+      const viewOnly = window.confirm(
+        "This is a premium baby template. You can preview it now. Press OK to preview, or Cancel to unlock."
+      );
+
+      if (!viewOnly) {
+        setScreen("subscribe");
+        return;
+      }
+    }
+
+    const copied = JSON.parse(JSON.stringify(template));
+    copied.id = null;
+    copied.title = template.title;
+    setBook(copied);
+    setPageIndex(0);
+    setScreen("editor");
+  }
+
+  function unlockPremium() {
+    setIsSubscribed(true);
+    alert("Premium unlocked for testing.");
+    setScreen("templates");
+  }
+
+  function updatePage(nextPage) {
+    const pages = [...book.pages];
+    pages[pageIndex] = nextPage;
+    setBook({ ...book, pages });
+  }
+
+  function addPage() {
+    setBook({
+      ...book,
+      pages: [
+        ...book.pages,
+        {
+          id: uid(),
+          background: book.background || "cream",
+          elements: [],
+        },
+      ],
+    });
+    setPageIndex(book.pages.length);
+  }
+
+  function addText() {
+    updatePage({
+      ...page,
+      elements: [...page.elements, textEl("tap to edit", 90, 110, 180, 70, 24)],
+    });
+  }
+
+  function addSticker(s) {
+    updatePage({
+      ...page,
+      elements: [...page.elements, stickerEl(s, 120, 150)],
+    });
+  }
+
+  function addPhotoFrame() {
+    updatePage({
+      ...page,
+      elements: [...page.elements, frameEl(80, 120, 220, 220)],
+    });
+  }
+
+  async function uploadImage(elementId, file) {
+    if (!file) return;
+
+    const imageRef = ref(storage, `scrapbooks/${user.uid}/${uid()}-${file.name}`);
+    await uploadBytes(imageRef, file);
+    const url = await getDownloadURL(imageRef);
+
+    updatePage({
+      ...page,
+      elements: page.elements.map((el) =>
+        el.id === elementId ? { ...el, src: url } : el
+      ),
+    });
+  }
+
+  function changeBackground(bg) {
+    updatePage({ ...page, background: bg });
+  }
+
+  function deleteSelected() {
+    updatePage({
+      ...page,
+      elements: page.elements.filter((el) => el.id !== selectedId),
+    });
+    setSelectedId(null);
+  }
+
+  function updateElement(id, changes) {
+    updatePage({
+      ...page,
+      elements: page.elements.map((el) => (el.id === id ? { ...el, ...changes } : el)),
+    });
+  }
+
+  function startDrag(e, el, mode = "move") {
+    e.stopPropagation();
+    setSelectedId(el.id);
+
+    const point = getPoint(e);
+    setDrag({
+      id: el.id,
+      mode,
+      startX: point.x,
+      startY: point.y,
+      startEl: { ...el },
+    });
+  }
+
+  function onMove(e) {
+    if (!drag) return;
+
+    const point = getPoint(e);
+    const dx = point.x - drag.startX;
+    const dy = point.y - drag.startY;
+    const el = drag.startEl;
+
+    if (drag.mode === "move") {
+      updateElement(drag.id, {
+        x: el.x + dx,
+        y: el.y + dy,
+      });
+    }
+
+    if (drag.mode === "resize") {
+      updateElement(drag.id, {
+        w: Math.max(40, el.w + dx),
+        h: Math.max(40, el.h + dy),
+      });
+    }
+
+    if (drag.mode === "rotate") {
+      updateElement(drag.id, {
+        rotate: el.rotate + dx,
+      });
+    }
+  }
+
+  function getPoint(e) {
+    if (e.touches?.[0]) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    return { x: e.clientX, y: e.clientY };
+  }
+
+  if (!user) {
+    return (
+      <div className="authPage">
+        <h1>ScrapFlip 💗</h1>
+        <p>Turn your memories into beautiful stories.</p>
+
+        <input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
+        <input
+          placeholder="Password"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+
+        <button onClick={handleAuth}>{authMode === "login" ? "Log In" : "Sign Up"}</button>
+        <button className="linkBtn" onClick={() => setAuthMode(authMode === "login" ? "signup" : "login")}>
+          {authMode === "login" ? "Create account" : "Already have an account?"}
+        </button>
+        <button className="linkBtn" onClick={resetPassword}>Forgot password?</button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="app">
+      {screen === "home" && (
+        <div className="home">
+          <div className="topBar">
+            <button>☰</button>
+            <button onClick={() => signOut(auth)}>Logout</button>
+          </div>
+
+          <h1>ScrapFlip💗</h1>
+          <p>Turn your memories into beautiful stories</p>
+
+          <button className="createCard" onClick={createBlankBook}>
+            <span>＋</span>
+            <div>
+              <b>Create New Scrapbook</b>
+              <small>Start a new scrapbook</small>
+            </div>
+          </button>
+
+          <h2>My Scrapbooks</h2>
+
+          {books.map((b) => (
+            <div
+              className="bookCard"
+              key={b.id}
+              onClick={() => {
+                setBook(b);
+                setPageIndex(0);
+                setScreen("editor");
+              }}
+            >
+              <div className={`bookThumb bg-${b.background || "cream"}`}></div>
+              <div>
+                <b>{b.title}</b>
+                <small>{b.pages?.length || 1} Pages</small>
+              </div>
+              <button
+                onClick={async (e) => {
+                  e.stopPropagation();
+                  await deleteDoc(doc(db, "users", user.uid, "books", b.id));
+                  loadBooks(user.uid);
+                }}
+              >
+                ⋯
+              </button>
+            </div>
+          ))}
+
+          <nav>
+            <button onClick={() => setScreen("home")}>🏠 Home</button>
+            <button onClick={() => setScreen("templates")}>📖 Templates</button>
+            <button onClick={createBlankBook}>＋</button>
+            <button onClick={() => setScreen("stickers")}>♡ Stickers</button>
+            <button onClick={() => setScreen("subscribe")}>👑 Premium</button>
+          </nav>
+        </div>
+      )}
+
+      {screen === "templates" && (
+        <div className="panel">
+          <button onClick={() => setScreen("home")}>← Back</button>
+          <h2>Templates</h2>
+
+          <div className="templateGrid">
+            <button onClick={() => createFromTemplate(babyGirlTemplate)}>
+              <div className="templatePreview girl">Baby Girl First Year 🎀</div>
+              <b>Premium</b>
+            </button>
+
+            <button onClick={() => createFromTemplate(babyBoyTemplate)}>
+              <div className="templatePreview boy">Baby Boy First Year ⭐</div>
+              <b>Premium</b>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {screen === "subscribe" && (
+        <div className="panel">
+          <button onClick={() => setScreen("home")}>← Back</button>
+          <h2>Premium Baby Templates 👑</h2>
+          <p>Baby boy and baby girl first-year templates are premium.</p>
+          <button onClick={unlockPremium}>Unlock Premium for Testing</button>
+          <small>Later you can replace this with Stripe, RevenueCat, or Firebase payments.</small>
+        </div>
+      )}
+
+      {screen === "stickers" && (
+        <div className="panel">
+          <button onClick={() => setScreen("home")}>← Back</button>
+          <h2>Stickers</h2>
+          <div className="stickerGrid">
+            {STICKERS.map((s) => (
+              <button key={s}>{s}</button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {screen === "editor" && book && page && (
+        <div className="editor">
+          <header>
+            <button onClick={() => setScreen("home")}>←</button>
+            <button onClick={() => setPageIndex(Math.max(0, pageIndex - 1))}>‹</button>
+            <span>
+              Page {pageIndex + 1} / {book.pages.length}
+            </span>
+            <button onClick={() => setPageIndex(Math.min(book.pages.length - 1, pageIndex + 1))}>›</button>
+            <button onClick={() => saveBook()}>Save</button>
+          </header>
+
+          <main
+            className={`canvas bg-${page.background}`}
+            onMouseMove={onMove}
+            onMouseUp={() => setDrag(null)}
+            onTouchMove={onMove}
+            onTouchEnd={() => setDrag(null)}
+            onClick={() => setSelectedId(null)}
+          >
+            {page.elements.map((el) => (
+              <div
+                key={el.id}
+                className={`element ${selectedId === el.id ? "selected" : ""}`}
+                style={{
+                  left: el.x,
+                  top: el.y,
+                  width: el.w,
+                  height: el.h,
+                  transform: `rotate(${el.rotate || 0}deg)`,
+                  fontSize: el.fontSize,
+                }}
+                onMouseDown={(e) => startDrag(e, el)}
+                onTouchStart={(e) => startDrag(e, el)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedId(el.id);
+                }}
+              >
+                {el.type === "text" && (
+                  <textarea
+                    value={el.text}
+                    onChange={(e) => updateElement(el.id, { text: e.target.value })}
+                    style={{ fontSize: el.fontSize }}
+                  />
+                )}
+
+                {el.type === "sticker" && <div className="sticker">{el.text}</div>}
+
+                {el.type === "photo" && (
+                  <label className="photoBox">
+                    {el.src ? <img src={el.src} /> : <span>＋ Photo</span>}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      hidden
+                      onChange={(e) => uploadImage(el.id, e.target.files[0])}
+                    />
+                  </label>
+                )}
+
+                {selectedId === el.id && (
+                  <>
+                    <button
+                      className="resizeHandle"
+                      onMouseDown={(e) => startDrag(e, el, "resize")}
+                      onTouchStart={(e) => startDrag(e, el, "resize")}
+                    >
+                      ↘
+                    </button>
+                    <button
+                      className="rotateHandle"
+                      onMouseDown={(e) => startDrag(e, el, "rotate")}
+                      onTouchStart={(e) => startDrag(e, el, "rotate")}
+                    >
+                      ⟳
+                    </button>
+                  </>
+                )}
+              </div>
+            ))}
+          </main>
+
+          <section className="toolbar">
+            <button onClick={addPhotoFrame}>Photo</button>
+            <button onClick={addText}>Text</button>
+            <button onClick={() => addSticker("♡")}>Sticker</button>
+            <button onClick={addPage}>Add Page</button>
+            <button onClick={deleteSelected}>Delete</button>
+          </section>
+
+          <section className="backgrounds">
+            {BACKGROUNDS.map((b) => (
+              <button key={b.value} onClick={() => changeBackground(b.value)}>
+                {b.name}
+              </button>
+            ))}
+          </section>
+
+          <section className="stickerRow">
+            {STICKERS.map((s) => (
+              <button key={s} onClick={() => addSticker(s)}>
+                {s}
+              </button>
+            ))}
+          </section>
+        </div>
+      )}
+    </div>
+  );
 }
 
-.home h1 {
-  font-size: 52px;
-  margin-bottom: 4px;
-}
-
-.topBar {
-  display: flex;
-  justify-content: space-between;
-}
-
-.createCard, .bookCard {
-  width: 100%;
-  display: flex;
-  gap: 18px;
-  align-items: center;
-  background: #ffe3ec;
-  margin: 18px 0;
-  box-shadow: 0 5px 18px #0001;
-}
-
-.createCard span {
-  font-size: 38px;
-  background: #ef75a0;
-  color: white;
-  border-radius: 50%;
-  padding: 8px 18px;
-}
-
-.bookCard {
-  background: white;
-  justify-content: space-between;
-}
-
-.bookThumb {
-  width: 95px;
-  height: 70px;
-  border-radius: 14px;
-}
-
-small {
-  display: block;
-  color: #8d7777;
-  margin-top: 4px;
-}
-
-nav {
-  position: sticky;
-  bottom: 0;
-  display: flex;
-  justify-content: space-around;
-  background: white;
-  padding: 10px;
-  border-radius: 28px 28px 0 0;
-  box-shadow: 0 -3px 20px #0001;
-}
-
-nav button {
-  background: transparent;
-  padding: 8px;
-  font-size: 12px;
-}
-
-.templateGrid, .stickerGrid {
-  display: grid;
-  gap: 16px;
-}
-
-.templatePreview {
-  height: 170px;
-  border-radius: 22px;
-  display: grid;
-  place-items: center;
-  font-size: 26px;
-  margin-bottom: 8px;
-}
-
-.girl { background: #ffdce7; }
-.boy { background: #dceeff; }
-
-.editor {
-  max-width: 430px;
-  margin: auto;
-  min-height: 100vh;
-  background: #fff;
-}
-
-.editor header {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  padding: 12px;
-  justify-content: space-between;
-}
-
-.canvas {
-  position: relative;
-  width: 390px;
-  height: 520px;
-  margin: 10px auto;
-  border-radius: 22px;
-  overflow: hidden;
-  box-shadow: 0 6px 20px #0002;
-}
-
-.element {
-  position: absolute;
-  touch-action: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.element.selected {
-  outline: 2px solid #f27aa7;
-}
-
-.element textarea {
-  width: 100%;
-  height: 100%;
-  border: 0;
-  resize: none;
-  background: #fff8efdd;
-  text-align: center;
-  font-family: Georgia, serif;
-}
-
-.photoBox {
-  width: 100%;
-  height: 100%;
-  background: #fffaf4;
-  border: 8px solid white;
-  box-shadow: 0 3px 8px #0002;
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-}
-
-.photoBox img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.sticker {
-  width: 100%;
-  height: 100%;
-  display: grid;
-  place-items: center;
-}
-
-.resizeHandle, .rotateHandle {
-  position: absolute;
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  font-size: 14px;
-  background: #f27aa7;
-  color: white;
-}
-
-.resizeHandle {
-  right: -14px;
-  bottom: -14px;
-}
-
-.rotateHandle {
-  right: -14px;
-  top: -14px;
-}
-
-.toolbar, .backgrounds, .stickerRow {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  padding: 10px;
-}
-
-.bg-cream { background: #fff8ef; }
-.bg-pink { background: #ffdce7; }
-.bg-blue { background: #dceeff; }
-.bg-lavender { background: #eadfff; }
-
-.bg-grid {
-  background-color: #fff8ef;
-  background-image:
-    linear-gradient(#eadde0 1px, transparent 1px),
-    linear-gradient(90deg, #eadde0 1px, transparent 1px);
-  background-size: 24px 24px;
-}
-
-.bg-dots {
-  background-color: #fff8ef;
-  background-image: radial-gradient(#e2b5c2 1.5px, transparent 1.5px);
-  background-size: 18px 18px;
-}
-
-.bg-paper {
-  background:
-    repeating-linear-gradient(
-      #fff8ef,
-      #fff8ef 28px,
-      #eadde0 29px
-    );
-}
-
-.linkBtn {
-  background: transparent;
-  color: #e45d8e;
-}
+createRoot(document.getElementById("root")).render(<App />);
