@@ -1702,6 +1702,6 @@ function Home({ user, flash }) {
     </div>
   );
 
-createRoot(document.getElementById("root")).render(
-  <App />
-);
+  createRoot(document.getElementById("root")).render(
+  React.createElement(App)
+);        
