@@ -424,3 +424,50 @@ nav button {
   color: #5d4545;
   font-size: 15px;
 }
+.profileHeader {
+  text-align: center;
+  margin-top: 30px;
+}
+
+.profilePic {
+  width: 100px;
+  height: 100px;
+  margin: auto;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f4a7c0, #f7d7df);
+  display: grid;
+  place-items: center;
+  font-size: 42px;
+  box-shadow: 0 5px 16px #0002;
+}
+
+.profileHeader h2 {
+  margin-bottom: 4px;
+  margin-top: 18px;
+}
+
+.profileHeader p {
+  color: #8b7a7a;
+}
+
+.settingsList {
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.settingsItem {
+  width: 100%;
+  background: white;
+  border: 1px solid #eddede;
+  text-align: left;
+  padding: 18px;
+  font-size: 16px;
+  border-radius: 18px;
+  box-shadow: 0 3px 10px #00000008;
+}
+
+.logoutBtn {
+  background: #ffe4ea;
+}
