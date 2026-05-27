@@ -1698,6 +1698,8 @@ if (!item || !item.type) return null;
     );
   
   if (section === "settings") {
+  }
+        
     return (
       <div className="phone">
         <div className="screen paper auth-page">
