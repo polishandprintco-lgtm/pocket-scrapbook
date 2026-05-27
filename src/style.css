@@ -471,3 +471,21 @@ nav button {
 .logoutBtn {
   background: #ffe4ea;
 }
+.passwordWrap {
+  position: relative;
+}
+
+.passwordWrap input {
+  padding-right: 78px;
+}
+
+.showPasswordBtn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 8px 10px;
+  background: #ffe4ec;
+  color: #d86f93;
+  font-size: 13px;
+}
