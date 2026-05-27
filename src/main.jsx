@@ -101,9 +101,13 @@ function App() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [selectedBookMenu, setSelectedBookMenu] = useState(null);
+  const [toast, setToast] = useState("");
 
   const page = book?.pages?.[pageIndex];
-
+function showToast(message) {
+  setToast(message);
+  setTimeout(() => setToast(""), 1800);
+}
   useEffect(() => {
     return onAuthStateChanged(auth, async (u) => {
       setUser(u);
@@ -352,6 +356,7 @@ function App() {
 
   return (
     <div className="app">
+      {toast && <div className="toast">{toast}</div>}
       {screen === "home" && (
         <div className="home">
           <div className="topBar">
@@ -670,7 +675,7 @@ function App() {
             <button
               onClick={async () => {
                 await saveBook();
-                alert("Scrapbook saved!");
+                showToast("Scrapbook saved!");
               }}
             >
               Save
