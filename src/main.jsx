@@ -605,7 +605,7 @@ if (action) {
             <button onClick={() => setScreen("subscribe")}>👑 Premium</button>
             <button onClick={() => setScreen("profile")}>👤 Profile</button>
           </nav>
-        </div>
+    
       )}
 {screen === "profile" && (
   <div className="panel">
