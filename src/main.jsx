@@ -997,10 +997,10 @@ function App() {
                               el.src
                             }
                             style={{
-                              objectFit:
-                                el.crop,
-                              objectPosition: `${el.cropX}% ${el.cropY}%`,
-                            }}
+  objectFit: el.crop || "cover",
+  objectPosition: `${el.cropX || 50}% ${el.cropY || 50}%`,
+  transform: `rotate(${el.rotate || 0}deg)`,
+}}
                           />
                         ) : (
                           <span>
