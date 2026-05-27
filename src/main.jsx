@@ -929,32 +929,59 @@ useEffect(() => {
     flash("Export downloaded 💌");
   }
 
+function cleanItem(item) {
+  if (!item || typeof item !== "object") return null;
+
+  return {
+    id: item.id || makeId(),
+    type: item.type || "text",
+    text: item.text || "",
+    url: item.url || "",
+    x: Number(item.x) || 40,
+    y: Number(item.y) || 40,
+    w: Number(item.w || item.width) || 120,
+    h: Number(item.h || item.height) || 120,
+    fontSize: Number(item.fontSize) || 24,
+    fontFamily: item.fontFamily || "Georgia",
+    color: item.color || "#5A463A",
+    rotate: Number(item.rotate) || 0
+  };
+}
+
 function cleanPage(page) {
-  return {
-    background: page?.background || "bgGrid",
-    items: Array.isArray(page?.items) ? page.items : []
-  };
+  const safeItems = Array.isArray(page?.items)
+    ? page.items.map(cleanItem).filter(Boolean)
+    : [];
+
+  return {
+    background: page?.background || "bgGrid",
+    items: safeItems
+  };
 }
 
 function openBook(book) {
-  const safePages =
-    Array.isArray(book.pagesData) && book.pagesData.length
-      ? book.pagesData.map(cleanPage)
-      : [blankPage()];
+  try {
+    const safePages =
+      Array.isArray(book?.pagesData) && book.pagesData.length
+        ? book.pagesData.map(cleanPage)
+        : [blankPage()];
 
-  setActiveBook({
-    ...book,
-    pagesData: safePages,
-    pages: safePages.length,
-    templateType: book.templateType || "blank"
-  });
+    setActiveBook({
+      ...book,
+      pagesData: safePages,
+      pages: safePages.length,
+      templateType: book?.templateType || "blank"
+    });
 
-  setUndoStack([]);
-  setRedoStack([]);
-  setCurrentPage(0);
-  setSelectedItemId(null);
-  setOpenMenuId(null);
-  setSection("editor");
+    setUndoStack([]);
+    setRedoStack([]);
+    setCurrentPage(0);
+    setSelectedItemId(null);
+    setOpenMenuId(null);
+    setSection("editor");
+  } catch (e) {
+    flash("Could not open scrapbook: " + e.message);
+  }
 }
 
   async function saveBook() {
@@ -1303,6 +1330,8 @@ function rotateSelected(amount) {
   }
 
   function renderItem(item, preview = false) {
+    if (!item || !item.type) return null;
+if (item.type === "photo" && !item.url) return null;
     const selected = !preview && selectedItemId === item.id;
 if (!item || !item.type) return null;
     
