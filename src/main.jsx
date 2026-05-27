@@ -442,6 +442,11 @@ function App() {
           placeholder="Email address"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              handleAuth();
+            }
+          }}
         />
 
         <input
@@ -449,6 +454,11 @@ function App() {
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              handleAuth();
+            }
+          }}
         />
 
         <button className="forgotBtn" onClick={resetPassword}>
