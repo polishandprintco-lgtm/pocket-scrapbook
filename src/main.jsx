@@ -102,7 +102,8 @@ function App() {
   const [showPassword, setShowPassword] = useState(false);
   const [selectedBookMenu, setSelectedBookMenu] = useState(null);
   const [toast, setToast] = useState("");
-
+  const [history, setHistory] = useState([]);
+  const [future, setFuture] = useState([]);
   const page = book?.pages?.[pageIndex];
 function showToast(message) {
   setToast(message);
@@ -212,11 +213,14 @@ function showToast(message) {
     setScreen("templates");
   }
 
-  function updatePage(nextPage) {
-    const pages = [...book.pages];
-    pages[pageIndex] = nextPage;
-    setBook({ ...book, pages });
-  }
+  function updatePage(nextPage) {
+  setHistory((prev) => [...prev, JSON.parse(JSON.stringify(book))]);
+  setFuture([]);
+
+  const pages = [...book.pages];
+  pages[pageIndex] = nextPage;
+  setBook({ ...book, pages });
+}
 
   function addPage() {
     setBook({
@@ -353,7 +357,34 @@ function showToast(message) {
       </div>
     );
   }
+function undo() {
+  if (history.length === 0) return;
 
+  const previous = history[history.length - 1];
+  setFuture((prev) => [JSON.parse(JSON.stringify(book)), ...prev]);
+  setHistory((prev) => prev.slice(0, -1));
+  setBook(previous);
+}
+
+function redo() {
+  if (future.length === 0) return;
+
+  const next = future[0];
+  setHistory((prev) => [...prev, JSON.parse(JSON.stringify(book))]);
+  setFuture((prev) => prev.slice(1));
+  setBook(next);
+}
+
+function renameBook() {
+  if (!book) return;
+
+  const newTitle = window.prompt("Rename scrapbook:", book.title || "My Scrapbook");
+
+  if (newTitle && newTitle.trim()) {
+    setBook({ ...book, title: newTitle.trim() });
+    showToast("Scrapbook renamed!");
+  }
+}
   return (
     <div className="app">
       {toast && <div className="toast">{toast}</div>}
@@ -445,6 +476,10 @@ function showToast(message) {
             <button onClick={createBlankBook}>＋</button>
             <button onClick={() => setScreen("stickers")}>♡ Stickers</button>
             <button onClick={() => setScreen("subscribe")}>👑 Premium</button>
+            <button onClick={undo}>Undo</button>
+            <button onClick={redo}>Redo</button>
+            <button onClick={renameBook}>Rename</button>
+
             <button onClick={() => setScreen("profile")}>👤 Profile</button>
           </nav>
         </div>
