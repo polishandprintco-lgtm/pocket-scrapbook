@@ -592,7 +592,7 @@ if (action) {
     </button>
   </div>
 )}
-          ))}
+          )}
 
           <nav>
             <button onClick={() => setScreen("home")}>🏠 Home</button>
