@@ -459,7 +459,15 @@ onClick={() => {
                     📖 View Flipbook
                   </button>
 
-                  <button onClick={renameBook}>Rename</button>
+                  <button
+  onClick={(e) => {
+    e.stopPropagation();
+    renameBook(b);
+    setSelectedBookMenu(null);
+  }}
+>
+  ✏️ Rename
+</button>
                   
                   <button onClick={() => alert("Export option coming soon.")}>
                     ⬇️ Export
