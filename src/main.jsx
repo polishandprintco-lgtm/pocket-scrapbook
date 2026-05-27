@@ -433,49 +433,72 @@ function Home({ user, flash }) {
     }
   }
 async function uploadPhotoToPlaceholder(e, placeholderId) {
-  const file = e.target.files?.[0];
+  const file = e.target.files?.[0];
 
-  if (!file || !activeBook?.id || !user) return;
+  if (!file || !activeBook?.id || !user) return;
 
-  try {
-    rememberUndo();
+  try {
+    rememberUndo();
 
-    const storageRef = ref(
-      storage,
-      `users/${user.uid}/scrapbooks/${activeBook.id}/${Date.now()}-${file.name}`
-    );
+    const storageRef = ref(
+      storage,
+      `users/${user.uid}/scrapbooks/${activeBook.id}/${Date.now()}-${file.name}`
+    );
 
-    await uploadBytes(storageRef, file);
-    const url = await getDownloadURL(storageRef);
+    await uploadBytes(storageRef, file);
+    const url = await getDownloadURL(storageRef);
 
-    updateCurrentItems(
-      currentItems().map((item) =>
-        item.id === placeholderId
-          ? {
-              ...item,
-              type: "photo",
-              url,
-              text: "",
-              rotate: item.rotate || 0
-            }
-          : item
-      ),
-      false
-    );
+    updateCurrentItems(
+      currentItems().map((item) =>
+        item.id === placeholderId
+          ? {
+              ...item,
+              type: "photo",
+              url,
+              text: "",
+              rotate: item.rotate || 0
+            }
+          : item
+      ),
+      false
+    );
 
-  window.addEventListener("keydown", handleKeyDown);
-
-  return () => {
-    window.removeEventListener("keydown", handleKeyDown);
-  };
-}, [selectedItemId, activeBook, currentPage]);
-
-    setSelectedItemId(placeholderId);
-    flash("Photo added 💖");
-  } catch (e) {
-    flash("Photo upload failed: " + e.message);
-  }
+    setSelectedItemId(placeholderId);
+    flash("Photo added 💖");
+  } catch (e) {
+    flash("Photo upload failed: " + e.message);
+  }
 }
+  useEffect(() => {
+  function handleKeyDown(e) {
+    const tag = document.activeElement?.tagName?.toLowerCase();
+
+    if (tag === "input" || tag === "textarea") return;
+
+    if (
+      (e.key === "Delete" || e.key === "Backspace") &&
+      selectedItemId
+    ) {
+      e.preventDefault();
+
+      updateCurrentItems(
+        currentItems().filter(
+          (item) => item.id !== selectedItemId
+        )
+      );
+
+      setSelectedItemId(null);
+
+      flash("Deleted 🗑️");
+    }
+  }
+
+  window.addEventListener("keydown", handleKeyDown);
+
+  return () => {
+    window.removeEventListener("keydown", handleKeyDown);
+  };
+}, [selectedItemId, activeBook, currentPage]);
 
   useEffect(() => {
     loadBooks();
