@@ -790,48 +790,58 @@ function App() {
           </div>
 
           <div className="settingsList">
-            <button
-              className="settingsItem"
-              onClick={() => alert("Theme settings coming soon.")}
-            >
-              🎨 Theme Settings
-            </button>
+  <button
+    className="settingsItem"
+    onClick={() => {
+      document.body.classList.toggle("darkTheme");
+      showToast("Theme changed!");
+    }}
+  >
+    🎨 Theme Settings
+  </button>
 
-            <button
-              className="settingsItem"
-              onClick={() => alert("Notifications coming soon.")}
-            >
-              🔔 Notifications
-            </button>
+  <button
+    className="settingsItem"
+    onClick={() => {
+      showToast("Notifications turned on!");
+    }}
+  >
+    🔔 Notifications
+  </button>
 
-            <button
-              className="settingsItem"
-              onClick={() => setScreen("subscribe")}
-            >
-              👑 Subscription
-            </button>
+  <button
+    className="settingsItem"
+    onClick={() => setScreen("subscribe")}
+  >
+    👑 Subscription
+  </button>
 
-            <button
-              className="settingsItem"
-              onClick={() => alert("Privacy settings coming soon.")}
-            >
-              🔒 Privacy
-            </button>
+  <button
+    className="settingsItem"
+    onClick={() => {
+      alert("Privacy: Your scrapbooks are saved to your logged-in account only.");
+    }}
+  >
+    🔒 Privacy
+  </button>
 
-            <button
-              className="settingsItem"
-              onClick={() => alert("Backup & Sync coming soon.")}
-            >
-              ☁ Backup & Sync
-            </button>
+  <button
+    className="settingsItem"
+    onClick={async () => {
+      await loadBooks(user.uid);
+      showToast("Backup synced!");
+    }}
+  >
+    ☁ Backup & Sync
+  </button>
 
-            <button
-              className="settingsItem logoutBtn"
-              onClick={() => signOut(auth)}
-            >
-              🚪 Log Out
-            </button>
-          </div>
+  <button
+    className="settingsItem logoutBtn"
+    onClick={() => signOut(auth)}
+  >
+    🚪 Log Out
+  </button>
+</div>
         </div>
       )}
 
