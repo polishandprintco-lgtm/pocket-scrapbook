@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./style.css";
 
@@ -25,13 +25,23 @@ import {
 
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
-const COLORS = {
-  pink: "#f8b8ca",
-  blue: "#bcd8f4",
-  lavender: "#d9c8f2",
-  cream: "#fff8ef",
-  tan: "#ead6bd",
-};
+function uid() {
+  return crypto?.randomUUID
+    ? crypto.randomUUID()
+    : `${Date.now()}-${Math.random()}`;
+}
+
+function textEl(text, x, y, w, h, size = 22) {
+  return { id: uid(), type: "text", text, x, y, w, h, rotate: 0, fontSize: size };
+}
+
+function stickerEl(text, x, y) {
+  return { id: uid(), type: "sticker", text, x, y, w: 60, h: 60, rotate: 0, fontSize: 38 };
+}
+
+function frameEl(x, y, w, h) {
+  return { id: uid(), type: "photo", src: "", x, y, w, h, rotate: 0 };
+}
 
 const BACKGROUNDS = [
   { name: "Cream", value: "cream" },
@@ -45,128 +55,37 @@ const BACKGROUNDS = [
 
 const STICKERS = ["♡", "❤", "✿", "🌼", "🎀", "⭐", "🧸", "🍼", "👶", "🦋"];
 
-function uid() {
-  return crypto?.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
-}
+const babyGirlTemplate = {
+  premium: true,
+  title: "Baby Girl First Year",
+  background: "pink",
+  pages: Array.from({ length: 12 }, (_, i) => ({
+    id: uid(),
+    background: "pink",
+    elements: [
+      textEl(`${i + 1}\nmonth${i === 0 ? "" : "s"}`, 28, 35, 110, 90, 28),
+      frameEl(135, 75, 220, 210),
+      textEl("you are so loved ♡", 130, 320, 180, 45, 16),
+      stickerEl(i % 2 ? "🌼" : "🎀", 35, 310),
+    ],
+  })),
+};
 
 const babyBoyTemplate = {
   premium: true,
   title: "Baby Boy First Year",
   background: "blue",
-  pages: [
-    {
-      id: uid(),
-      background: "blue",
-      elements: [
-        textEl("baby’s\nfirst year", 40, 60, 220, 90, 36),
-        textEl("our little boy", 245, 170, 140, 34, 16),
-        frameEl(45, 190, 170, 170),
-        frameEl(240, 205, 115, 115),
-        stickerEl("⭐", 25, 30),
-        stickerEl("🧸", 30, 350),
-      ],
-    },
-    ...Array.from({ length: 12 }, (_, i) => ({
-      id: uid(),
-      background: "blue",
-      elements: [
-        textEl(`${i + 1}\nmonth${i === 0 ? "" : "s"}`, 28, 35, 110, 90, 28),
-        frameEl(150, 70, 220, 210),
-        textEl(
-          ["you are so loved", "growing so fast", "sweet boy", "so happy", "little blessing"][
-            i % 5
-          ],
-          170,
-          315,
-          170,
-          45,
-          16
-        ),
-        stickerEl(i % 2 ? "🧸" : "⭐", 30, 300),
-      ],
-    })),
-  ],
+  pages: Array.from({ length: 12 }, (_, i) => ({
+    id: uid(),
+    background: "blue",
+    elements: [
+      textEl(`${i + 1}\nmonth${i === 0 ? "" : "s"}`, 28, 35, 110, 90, 28),
+      frameEl(135, 75, 220, 210),
+      textEl("sweet boy ♡", 150, 320, 160, 45, 16),
+      stickerEl(i % 2 ? "🧸" : "⭐", 35, 310),
+    ],
+  })),
 };
-
-const babyGirlTemplate = {
-  premium: true,
-  title: "Baby Girl First Year",
-  background: "pink",
-  pages: [
-    {
-      id: uid(),
-      background: "pink",
-      elements: [
-        textEl("baby’s\nfirst year", 40, 60, 220, 90, 36),
-        textEl("our little girl", 245, 170, 140, 34, 16),
-        frameEl(45, 190, 170, 170),
-        frameEl(240, 205, 115, 115),
-        stickerEl("🎀", 25, 30),
-        stickerEl("♡", 30, 350),
-      ],
-    },
-    ...Array.from({ length: 12 }, (_, i) => ({
-      id: uid(),
-      background: "pink",
-      elements: [
-        textEl(`${i + 1}\nmonth${i === 0 ? "" : "s"}`, 28, 35, 110, 90, 28),
-        frameEl(150, 70, 220, 210),
-        textEl(
-          ["you are so loved", "growing so fast", "sweet girl", "so happy", "little blessing"][
-            i % 5
-          ],
-          170,
-          315,
-          170,
-          45,
-          16
-        ),
-        stickerEl(i % 2 ? "🌼" : "🎀", 30, 300),
-      ],
-    })),
-  ],
-};
-
-function textEl(text, x, y, w, h, size = 22) {
-  return {
-    id: uid(),
-    type: "text",
-    text,
-    x,
-    y,
-    w,
-    h,
-    rotate: 0,
-    fontSize: size,
-  };
-}
-
-function stickerEl(text, x, y) {
-  return {
-    id: uid(),
-    type: "sticker",
-    text,
-    x,
-    y,
-    w: 60,
-    h: 60,
-    rotate: 0,
-    fontSize: 38,
-  };
-}
-
-function frameEl(x, y, w, h) {
-  return {
-    id: uid(),
-    type: "photo",
-    src: "",
-    x,
-    y,
-    w,
-    h,
-    rotate: 0,
-  };
-}
 
 function App() {
   const [user, setUser] = useState(null);
@@ -180,9 +99,9 @@ function App() {
   const [authMode, setAuthMode] = useState("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [selectedBookMenu, setSelectedBookMenu] = useState(null);
-  
+  const [showPassword, setShowPassword] = useState(false);
+  const [selectedBookMenu, setSelectedBookMenu] = useState(null);
+
   const page = book?.pages?.[pageIndex];
 
   useEffect(() => {
@@ -210,6 +129,22 @@ function App() {
     setBooks(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
   }
 
+  async function handleAuth() {
+    if (!email || !password) return alert("Enter email and password.");
+
+    if (authMode === "signup") {
+      await createUserWithEmailAndPassword(auth, email, password);
+    } else {
+      await signInWithEmailAndPassword(auth, email, password);
+    }
+  }
+
+  async function resetPassword() {
+    if (!email) return alert("Type your email first.");
+    await sendPasswordResetEmail(auth, email);
+    alert("Password reset sent.");
+  }
+
   async function saveBook(nextBook = book) {
     if (!user || !nextBook) return;
 
@@ -229,22 +164,6 @@ function App() {
     }
 
     loadBooks(user.uid);
-  }
-
-  async function handleAuth() {
-    if (!email || !password) return alert("Enter email and password.");
-
-    if (authMode === "signup") {
-      await createUserWithEmailAndPassword(auth, email, password);
-    } else {
-      await signInWithEmailAndPassword(auth, email, password);
-    }
-  }
-
-  async function resetPassword() {
-    if (!email) return alert("Type your email first.");
-    await sendPasswordResetEmail(auth, email);
-    alert("Password reset sent.");
   }
 
   function createBlankBook() {
@@ -271,19 +190,13 @@ function App() {
 
   function createFromTemplate(template) {
     if (template.premium && !isSubscribed) {
-      const viewOnly = window.confirm(
-        "This is a premium baby template. You can preview it now. Press OK to preview, or Cancel to unlock."
-      );
-
-      if (!viewOnly) {
-        setScreen("subscribe");
-        return;
-      }
+      alert("This template is premium. Unlock Premium first.");
+      setScreen("subscribe");
+      return;
     }
 
     const copied = JSON.parse(JSON.stringify(template));
     copied.id = null;
-    copied.title = template.title;
     setBook(copied);
     setPageIndex(0);
     setScreen("editor");
@@ -304,41 +217,25 @@ function App() {
   function addPage() {
     setBook({
       ...book,
-      pages: [
-        ...book.pages,
-        {
-          id: uid(),
-          background: book.background || "cream",
-          elements: [],
-        },
-      ],
+      pages: [...book.pages, { id: uid(), background: book.background || "cream", elements: [] }],
     });
     setPageIndex(book.pages.length);
   }
 
   function addText() {
-    updatePage({
-      ...page,
-      elements: [...page.elements, textEl("tap to edit", 90, 110, 180, 70, 24)],
-    });
+    updatePage({ ...page, elements: [...page.elements, textEl("tap to edit", 90, 110, 180, 70, 24)] });
   }
 
   function addSticker(s) {
-    updatePage({
-      ...page,
-      elements: [...page.elements, stickerEl(s, 120, 150)],
-    });
+    updatePage({ ...page, elements: [...page.elements, stickerEl(s, 120, 150)] });
   }
 
   function addPhotoFrame() {
-    updatePage({
-      ...page,
-      elements: [...page.elements, frameEl(80, 120, 220, 220)],
-    });
+    updatePage({ ...page, elements: [...page.elements, frameEl(80, 120, 220, 220)] });
   }
 
   async function uploadImage(elementId, file) {
-    if (!file) return;
+    if (!file || !user) return;
 
     const imageRef = ref(storage, `scrapbooks/${user.uid}/${uid()}-${file.name}`);
     await uploadBytes(imageRef, file);
@@ -346,21 +243,13 @@ function App() {
 
     updatePage({
       ...page,
-      elements: page.elements.map((el) =>
-        el.id === elementId ? { ...el, src: url } : el
-      ),
+      elements: page.elements.map((el) => (el.id === elementId ? { ...el, src: url } : el)),
     });
-  }
-
-  function changeBackground(bg) {
-    updatePage({ ...page, background: bg });
   }
 
   function deleteSelected() {
-    updatePage({
-      ...page,
-      elements: page.elements.filter((el) => el.id !== selectedId),
-    });
+    if (!page || !selectedId) return;
+    updatePage({ ...page, elements: page.elements.filter((el) => el.id !== selectedId) });
     setSelectedId(null);
   }
 
@@ -371,18 +260,17 @@ function App() {
     });
   }
 
+  function getPoint(e) {
+    if (e.touches?.[0]) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    return { x: e.clientX, y: e.clientY };
+  }
+
   function startDrag(e, el, mode = "move") {
     e.stopPropagation();
     setSelectedId(el.id);
 
     const point = getPoint(e);
-    setDrag({
-      id: el.id,
-      mode,
-      startX: point.x,
-      startY: point.y,
-      startEl: { ...el },
-    });
+    setDrag({ id: el.id, mode, startX: point.x, startY: point.y, startEl: { ...el } });
   }
 
   function onMove(e) {
@@ -393,123 +281,74 @@ function App() {
     const dy = point.y - drag.startY;
     const el = drag.startEl;
 
-    if (drag.mode === "move") {
-      updateElement(drag.id, {
-        x: el.x + dx,
-        y: el.y + dy,
-      });
-    }
-
-    if (drag.mode === "resize") {
-      updateElement(drag.id, {
-        w: Math.max(40, el.w + dx),
-        h: Math.max(40, el.h + dy),
-      });
-    }
-
-    if (drag.mode === "rotate") {
-      updateElement(drag.id, {
-        rotate: el.rotate + dx,
-      });
-    }
+    if (drag.mode === "move") updateElement(drag.id, { x: el.x + dx, y: el.y + dy });
+    if (drag.mode === "resize") updateElement(drag.id, { w: Math.max(40, el.w + dx), h: Math.max(40, el.h + dy) });
+    if (drag.mode === "rotate") updateElement(drag.id, { rotate: el.rotate + dx });
   }
 
-  function getPoint(e) {
-    if (e.touches?.[0]) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
-    return { x: e.clientX, y: e.clientY };
+  if (!user) {
+    return (
+      <div className="loginPage">
+        <div className="loginHero">
+          <div className="tape">● ● ●</div>
+          <div className="paperTitle">
+            <h1>
+              pocket<br />
+              <span>scrapbook</span>
+            </h1>
+            <p>♡ Cherish every moment</p>
+          </div>
+          <div className="bow">🎀</div>
+        </div>
+
+        <div className="loginCard">
+          <h2>♡ Welcome ♡</h2>
+          <p>Capture, create and keep your memories close</p>
+
+          <input
+            placeholder="Email address"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleAuth();
+            }}
+          />
+
+          <div className="passwordWrap">
+            <input
+              placeholder="Password"
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleAuth();
+              }}
+            />
+
+            <button type="button" className="showPasswordBtn" onClick={() => setShowPassword(!showPassword)}>
+              {showPassword ? "Hide" : "Show"}
+            </button>
+          </div>
+
+          <button className="forgotBtn" onClick={resetPassword}>Forgot password?</button>
+
+          <button className="loginBtn" onClick={handleAuth}>
+            {authMode === "login" ? "Log In" : "Create Account"}
+          </button>
+
+          <button className="switchAuthBtn" onClick={() => setAuthMode(authMode === "login" ? "signup" : "login")}>
+            {authMode === "login" ? "New here? Create an account" : "Already have an account? Log in"}
+          </button>
+        </div>
+
+        <div className="loginFeatures">
+          <div>📖<br />Beautiful<br />Scrapbooks</div>
+          <div>♡<br />Cherished<br />Memories</div>
+          <div>🔒<br />Safe &<br />Private</div>
+        </div>
+      </div>
+    );
   }
-
- if (!user) {
-  return (
-    <div className="loginPage">
-      <div className="loginHero">
-        <div className="tape">● ● ●</div>
-        <div className="paperTitle">
-          <h1>
-            pocket<br />
-            <span>scrapbook</span>
-          </h1>
-          <p>♡ Cherish every moment</p>
-        </div>
-
-        <div className="bow">🎀</div>
-        <div className="flower">🌼</div>
-      </div>
-
-      <div className="loginCard">
-        <h2>♡ Welcome ♡</h2>
-        <p>Capture, create and keep your memories close</p>
-
-        <input
-          placeholder="Email address"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              handleAuth();
-            }
-          }}
-        />
-
-        <div className="passwordWrap">
-  <input
-    placeholder="Password"
-    type={showPassword ? "text" : "password"}
-    value={password}
-    onChange={(e) => setPassword(e.target.value)}
-    onKeyDown={(e) => {
-      if (e.key === "Enter") {
-        handleAuth();
-      }
-    }}
-  />
-
-  <button
-    type="button"
-    className="showPasswordBtn"
-    onClick={() => setShowPassword(!showPassword)}
-  >
-    {showPassword ? "Hide" : "Show"}
-  </button>
-</div>
-
-        <button className="forgotBtn" onClick={resetPassword}>
-          Forgot password?
-        </button>
-
-        <button className="loginBtn" onClick={handleAuth}>
-          {authMode === "login" ? "Log In" : "Create Account"}
-        </button>
-
-        <div className="orLine">
-          <span></span>
-          or
-          <span></span>
-        </div>
-
-        <button className="socialBtn">🌈 Continue with Google</button>
-        <button className="socialBtn"> Continue with Apple</button>
-
-        <button
-          className="switchAuthBtn"
-          onClick={() =>
-            setAuthMode(authMode === "login" ? "signup" : "login")
-          }
-        >
-          {authMode === "login"
-            ? "New here? Create an account"
-            : "Already have an account? Log in"}
-        </button>
-      </div>
-
-      <div className="loginFeatures">
-        <div>📖<br />Beautiful<br />Scrapbooks</div>
-        <div>♡<br />Cherished<br />Memories</div>
-        <div>🔒<br />Safe &<br />Private</div>
-      </div>
-    </div>
-  );
-}
 
   return (
     <div className="app">
@@ -521,7 +360,6 @@ function App() {
           </div>
 
           <h1>Pocket Scrapbook💗</h1>
-          <p>Turn your memories into beautiful stories</p>
 
           <button className="createCard" onClick={createBlankBook}>
             <span>＋</span>
@@ -535,124 +373,103 @@ function App() {
 
           {books.map((b) => (
             <div
-  className="bookCard"
-  key={b.id}
-  onClick={() => {
-    setBook(b);
-    setPageIndex(0);
-    setScreen("editor");
-  }}
->
-  <div className={`bookThumb bg-${b.background || "cream"}`}></div>
+              className="bookCard"
+              key={b.id}
+              onClick={() => {
+                setBook(b);
+                setPageIndex(0);
+                setScreen("editor");
+              }}
+            >
+              <div className={`bookThumb bg-${b.background || "cream"}`}></div>
 
-  <div>
-    <b>{b.title}</b>
-    <small>{b.pages?.length || 1} Pages</small>
-  </div>
+              <div>
+                <b>{b.title}</b>
+                <small>{b.pages?.length || 1} Pages</small>
+              </div>
 
-  <button
-    onClick={(e) => {
-      e.stopPropagation();
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedBookMenu(selectedBookMenu === b.id ? null : b.id);
+                }}
+              >
+                ⋯
+              </button>
 
-      const action = window.confirm(
-  "Press OK to view flipbook.\nPress Cancel for more options."
-);
+              {selectedBookMenu === b.id && (
+                <div className="bookMenu" onClick={(e) => e.stopPropagation()}>
+                  <button
+                    onClick={() => {
+                      setBook(b);
+                      setPageIndex(0);
+                      setScreen("flipbook");
+                    }}
+                  >
+                    📖 View Flipbook
+                  </button>
 
-if (action) {
-  setScreen("flipbook");
-} else {
-  const secondAction = window.confirm(
-    "Press OK to export.\nPress Cancel to delete scrapbook."
-  );
+                  <button onClick={() => alert("Export option coming soon.")}>
+                    ⬇️ Export
+                  </button>
 
-  if (secondAction) {
-    <button
-  onClick={(e) => {
-    e.stopPropagation();
-    setSelectedBookMenu(b.id);
-  }}
->
-  ⋯
-</button>
-
-{selectedBookMenu === b.id && (
-  <div className="bookMenu" onClick={(e) => e.stopPropagation()}>
-    <button onClick={() => setScreen("flipbook")}>📖 View Flipbook</button>
-    <button onClick={() => alert("Export option coming soon.")}>⬇️ Export</button>
-    <button
-      onClick={() => {
-        const sure = window.confirm("Are you sure you want to delete this scrapbook?");
-        if (sure) {
-          deleteDoc(doc(db, "users", user.uid, "books", b.id));
-          loadBooks(user.uid);
-        }
-      }}
-    >
-      🗑 Delete
-    </button>
-  </div>
-)}
+                  <button
+                    onClick={async () => {
+                      const sure = window.confirm("Are you sure you want to delete this scrapbook?");
+                      if (sure) {
+                        await deleteDoc(doc(db, "users", user.uid, "books", b.id));
+                        setSelectedBookMenu(null);
+                        loadBooks(user.uid);
+                      }
+                    }}
+                  >
+                    🗑 Delete
+                  </button>
+                </div>
+              )}
+            </div>
+          ))}
 
           <nav>
             <button onClick={() => setScreen("home")}>🏠 Home</button>
+
             {isSubscribed && (
-            <button onClick={() => setScreen("templates")}>
-    📖 Templates
-  </button>
-)}
+              <button onClick={() => setScreen("templates")}>📖 Templates</button>
+            )}
+
             <button onClick={createBlankBook}>＋</button>
             <button onClick={() => setScreen("stickers")}>♡ Stickers</button>
             <button onClick={() => setScreen("subscribe")}>👑 Premium</button>
-            <button onClick={() => setScreen("profile")}>👤 Profile</button>
+            <button onClick={() => setScreen("profile")}>👤 Profile</button>
           </nav>
+        </div>
       )}
-  
-{screen === "profile" && (
-  <div className="panel">
-    <button onClick={() => setScreen("home")}>← Back</button>
 
-    <div className="profileHeader">
-      <div className="profilePic">💗</div>
+      {screen === "profile" && (
+        <div className="panel">
+          <button onClick={() => setScreen("home")}>← Back</button>
 
-      <h2>{user.email}</h2>
+          <div className="profileHeader">
+            <div className="profilePic">💗</div>
+            <h2>{user.email}</h2>
+            <p>Pocket Scrapbook Member</p>
+          </div>
 
-      <p>Pocket Scrapbook Member</p>
-    </div>
+          <div className="settingsList">
+            <button className="settingsItem">🎨 Theme Settings</button>
+            <button className="settingsItem">🔔 Notifications</button>
+            <button className="settingsItem" onClick={() => setScreen("subscribe")}>👑 Subscription</button>
+            <button className="settingsItem">🔒 Privacy</button>
+            <button className="settingsItem">☁ Backup & Sync</button>
+            <button className="settingsItem logoutBtn" onClick={() => signOut(auth)}>🚪 Log Out</button>
+          </div>
+        </div>
+      )}
 
-    <div className="settingsList">
-      <button className="settingsItem">
-        🎨 Theme Settings
-      </button>
-
-      <button className="settingsItem">
-        🔔 Notifications
-      </button>
-
-      <button className="settingsItem">
-        👑 Subscription
-      </button>
-
-      <button className="settingsItem">
-        🔒 Privacy
-      </button>
-
-      <button className="settingsItem">
-        ☁ Backup & Sync
-      </button>
-
-      <button
-        className="settingsItem logoutBtn"
-        onClick={() => signOut(auth)}
-      >
-        🚪 Log Out
-      </button>
-    </div>
-  </div>
-)}
       {screen === "templates" && (
         <div className="panel">
           <button onClick={() => setScreen("home")}>← Back</button>
-          <h2>Templates</h2>
+          <h2>Premium Templates</h2>
 
           <div className="templateGrid">
             <button onClick={() => createFromTemplate(babyGirlTemplate)}>
@@ -672,9 +489,8 @@ if (action) {
         <div className="panel">
           <button onClick={() => setScreen("home")}>← Back</button>
           <h2>Premium Baby Templates 👑</h2>
-          <p>Baby boy and baby girl first-year templates are premium.</p>
+          <p>Unlock baby boy and baby girl first-year templates.</p>
           <button onClick={unlockPremium}>Unlock Premium for Testing</button>
-          <small>Later you can replace this with Stripe, RevenueCat, or Firebase payments.</small>
         </div>
       )}
 
@@ -690,23 +506,59 @@ if (action) {
         </div>
       )}
 
+      {screen === "flipbook" && book && (
+        <div className="panel">
+          <button onClick={() => setScreen("home")}>← Back</button>
+          <h2>{book.title}</h2>
+          <p>Page {pageIndex + 1} / {book.pages.length}</p>
+
+          <div className={`canvas bg-${page?.background || "cream"}`}>
+            {page?.elements?.map((el) => (
+              <div
+                key={el.id}
+                className="element"
+                style={{
+                  left: el.x,
+                  top: el.y,
+                  width: el.w,
+                  height: el.h,
+                  transform: `rotate(${el.rotate || 0}deg)`,
+                  fontSize: el.fontSize,
+                }}
+              >
+                {el.type === "text" && <div className="viewText">{el.text}</div>}
+                {el.type === "sticker" && <div className="sticker">{el.text}</div>}
+                {el.type === "photo" && (
+                  <div className="photoBox">
+                    {el.src ? <img src={el.src} /> : <span>Photo</span>}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div className="toolbar">
+            <button onClick={() => setPageIndex(Math.max(0, pageIndex - 1))}>← Previous</button>
+            <button onClick={() => setPageIndex(Math.min(book.pages.length - 1, pageIndex + 1))}>Next →</button>
+          </div>
+        </div>
+      )}
+
       {screen === "editor" && book && page && (
         <div className="editor">
           <header>
             <button onClick={() => setScreen("home")}>←</button>
             <button onClick={() => setPageIndex(Math.max(0, pageIndex - 1))}>‹</button>
-            <span>
-              Page {pageIndex + 1} / {book.pages.length}
-            </span>
+            <span>Page {pageIndex + 1} / {book.pages.length}</span>
             <button onClick={() => setPageIndex(Math.min(book.pages.length - 1, pageIndex + 1))}>›</button>
             <button
-  onClick={async () => {
-    await saveBook();
-    alert("Scrapbook saved!");
-  }}
->
-  Save
-</button>
+              onClick={async () => {
+                await saveBook();
+                alert("Scrapbook saved!");
+              }}
+            >
+              Save
+            </button>
           </header>
 
           <main
@@ -749,31 +601,14 @@ if (action) {
                 {el.type === "photo" && (
                   <label className="photoBox">
                     {el.src ? <img src={el.src} /> : <span>＋ Photo</span>}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      hidden
-                      onChange={(e) => uploadImage(el.id, e.target.files[0])}
-                    />
+                    <input hidden type="file" accept="image/*" onChange={(e) => uploadImage(el.id, e.target.files[0])} />
                   </label>
                 )}
 
                 {selectedId === el.id && (
                   <>
-                    <button
-                      className="resizeHandle"
-                      onMouseDown={(e) => startDrag(e, el, "resize")}
-                      onTouchStart={(e) => startDrag(e, el, "resize")}
-                    >
-                      ↘
-                    </button>
-                    <button
-                      className="rotateHandle"
-                      onMouseDown={(e) => startDrag(e, el, "rotate")}
-                      onTouchStart={(e) => startDrag(e, el, "rotate")}
-                    >
-                      ⟳
-                    </button>
+                    <button className="resizeHandle" onMouseDown={(e) => startDrag(e, el, "resize")} onTouchStart={(e) => startDrag(e, el, "resize")}>↘</button>
+                    <button className="rotateHandle" onMouseDown={(e) => startDrag(e, el, "rotate")} onTouchStart={(e) => startDrag(e, el, "rotate")}>⟳</button>
                   </>
                 )}
               </div>
@@ -790,7 +625,7 @@ if (action) {
 
           <section className="backgrounds">
             {BACKGROUNDS.map((b) => (
-              <button key={b.value} onClick={() => changeBackground(b.value)}>
+              <button key={b.value} onClick={() => updatePage({ ...page, background: b.value })}>
                 {b.name}
               </button>
             ))}
@@ -798,9 +633,7 @@ if (action) {
 
           <section className="stickerRow">
             {STICKERS.map((s) => (
-              <button key={s} onClick={() => addSticker(s)}>
-                {s}
-              </button>
+              <button key={s} onClick={() => addSticker(s)}>{s}</button>
             ))}
           </section>
         </div>
