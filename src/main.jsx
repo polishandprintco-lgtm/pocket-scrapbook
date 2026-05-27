@@ -929,20 +929,33 @@ useEffect(() => {
     flash("Export downloaded 💌");
   }
 
-  function openBook(book) {
-    setActiveBook({
-      ...book,
-      pagesData: book.pagesData?.length ? book.pagesData : [blankPage()],
-      templateType: book.templateType || "blank"
-    });
+function cleanPage(page) {
+  return {
+    background: page?.background || "bgGrid",
+    items: Array.isArray(page?.items) ? page.items : []
+  };
+}
 
-    setUndoStack([]);
-    setRedoStack([]);
-    setCurrentPage(0);
-    setSelectedItemId(null);
-    setOpenMenuId(null);
-    setSection("editor");
-  }
+function openBook(book) {
+  const safePages =
+    Array.isArray(book.pagesData) && book.pagesData.length
+      ? book.pagesData.map(cleanPage)
+      : [blankPage()];
+
+  setActiveBook({
+    ...book,
+    pagesData: safePages,
+    pages: safePages.length,
+    templateType: book.templateType || "blank"
+  });
+
+  setUndoStack([]);
+  setRedoStack([]);
+  setCurrentPage(0);
+  setSelectedItemId(null);
+  setOpenMenuId(null);
+  setSection("editor");
+}
 
   async function saveBook() {
     if (!activeBook?.id) return;
@@ -1291,7 +1304,8 @@ function rotateSelected(amount) {
 
   function renderItem(item, preview = false) {
     const selected = !preview && selectedItemId === item.id;
-
+if (!item || !item.type) return null;
+    
     if (item.type === "doodle") {
       const d = (item.points || [])
         .map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`)
