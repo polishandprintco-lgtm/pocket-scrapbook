@@ -462,25 +462,6 @@ async function uploadPhotoToPlaceholder(e, placeholderId) {
       ),
       false
     );
-useEffect(() => {
-  function handleKeyDown(e) {
-    if (
-      (e.key === "Delete" || e.key === "Backspace") &&
-      selectedItemId
-    ) {
-      e.preventDefault();
-
-      updateCurrentItems(
-        currentItems().filter(
-          (item) => item.id !== selectedItemId
-        )
-      );
-
-      setSelectedItemId(null);
-
-      flash("Deleted 🗑️");
-    }
-  }
 
   window.addEventListener("keydown", handleKeyDown);
 
@@ -499,6 +480,26 @@ useEffect(() => {
   useEffect(() => {
     loadBooks();
   }, [user]);
+
+seEffect(() => {
+  function handleKeyDown(e) {
+    if (
+      (e.key === "Delete" || e.key === "Backspace") &&
+      selectedItemId
+    ) {
+      e.preventDefault();
+
+      updateCurrentItems(
+        currentItems().filter(
+          (item) => item.id !== selectedItemId
+        )
+      );
+
+      setSelectedItemId(null);
+
+      flash("Deleted 🗑️");
+    }
+  }
 
   function getPages() {
     return activeBook?.pagesData?.length
@@ -1230,11 +1231,6 @@ function rotateSelected(amount) {
     setSelectedItemId(null);
     flash("Page deleted 🗑️");
   }
-function rotateSelected(amount) {
-  if (!selectedItemId) {
-    flash("Tap something first.");
-    return;
-  }
 
   updateCurrentItems(
     currentItems().map((item) =>
@@ -1637,19 +1633,7 @@ if (!item || !item.type) return null;
     🗑️
     <span>Delete</span>
   </button>
-</div>
-backgroundMenuOpen && (
-  <div className="backgroundPicker">
-    {BACKGROUNDS.map((bg) => (
-      <button
-        key={bg.id}
-        type="button"
-        onClick={() => changeBackground(bg.className)}
-      >
-        {bg.label}
-      </button>
-    ))}
-  </div>
+
 
 {showStickerPicker && <StickerPicker />}
 
