@@ -374,12 +374,6 @@ function redo() {
   setFuture((prev) => prev.slice(1));
   setBook(next);
 }
-
-onClick={() => {
-  renameBook(b);
-  setSelectedBookMenu(null);
-}}
-}
   return (
     <div className="app">
       {toast && <div className="toast">{toast}</div>}
