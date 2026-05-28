@@ -423,7 +423,7 @@ textarea {
 
 .scrapPage {
   position: relative;
-  width: calc(100% - 36px);
+  width: calc(100% - 18px);
   height: 560px;
   margin: 0 auto 16px;
   border-radius: 34px;
