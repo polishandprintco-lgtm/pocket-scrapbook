@@ -252,7 +252,6 @@ function myFirstTemplate() {
 }
 
 function babyTemplate(girl = true) {
-  id: makeID(),
   const bg = girl ? "pinkPlaid" : "bluePlaid";
   const title = girl ? "Baby Girl First Year" : "Baby Boy First Year";
   const mainSticker = girl ? "🎀" : "★";
