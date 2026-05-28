@@ -1237,7 +1237,10 @@ export default function App() {
                     ...books,
                   ]);
 
-                  setSelectedBook(book);
+                  setSelectedBook({
+  ...book,
+  firebaseId: null,
+});
 
                   setSelectedPage(0);
 
