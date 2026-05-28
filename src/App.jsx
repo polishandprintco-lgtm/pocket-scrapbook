@@ -252,6 +252,9 @@ export default function App() {
   const [profileImage, setProfileImage] = useState("");
 
   const dragRef = useRef(null);
+  const [cuteModal, setCuteModal] = useState(null);
+const [darkMode, setDarkMode] = useState(false);
+const [isPremium, setIsPremium] = useState(false);
 
   useEffect(() => {
 
