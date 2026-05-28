@@ -1260,7 +1260,7 @@ export default function App() {
 
               </div>
 
-              <div
+             <div
                 className="templateCard premiumCard"
                 onClick={() => {
 
