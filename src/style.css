@@ -640,9 +640,4 @@ textarea {
   background-image: radial-gradient(#ddd 1px, transparent 1px);
   background-size: 18px 18px;
 }
-<div className="templatePreview bg-bluePlaid">
-  <div className="tinyMonth">1<br />month</div>
-  <div className="tinyPhoto polaroid"></div>
-  <div className="tinyLabel blue">sweet boy ♡</div>
-  <div className="tinySticker">⭐</div>
-</div>
+
