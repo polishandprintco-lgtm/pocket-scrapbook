@@ -12,7 +12,7 @@ import {
   addDoc,
   doc,
   getDocs,
-  getDoc,,
+  getDoc,
   updateDoc,
   deleteDoc,
   orderBy,
