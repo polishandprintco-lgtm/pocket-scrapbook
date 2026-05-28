@@ -1,448 +1,602 @@
-import React, { useEffect, useState } from "react";
-
-const NAV_ITEMS = [
-  { id: "home", label: "Home" },
-  { id: "templates", label: "Templates" },
-  { id: "create", label: "Create" },
-  { id: "premium", label: "Premium" },
-  { id: "profile", label: "Profile" },
-];
+import React, { useState } from "react";
 
 const FREE_STICKERS = [
-  "♡",
-  "✿",
-  "🎀",
-  "⭐",
-  "🧸",
-  "🦋",
-  "☁",
-  "✈",
+  "💖","🎀","🌸","🧸","✨","📸","🌼","☁️",
+  "🦋","🤍","📝","🕊️","🌷","⭐","🎞️","💕"
 ];
 
 const BACKGROUNDS = [
-  "cream",
-  "pink",
-  "blue",
-  "paper",
-  "grid",
+  "#fff7f8",
+  "#fdeef3",
+  "#f6f0ff",
+  "#eef7ff",
+  "#fff8ee"
 ];
 
-function makeId() {
-  return crypto?.randomUUID
-    ? crypto.randomUUID()
-    : `${Date.now()}-${Math.random()}`;
-}
+function App() {
+  const [screen, setScreen] = useState("home");
+  const [darkMode, setDarkMode] = useState(false);
 
-function createPhoto(x, y) {
-  return {
-    id: makeId(),
-    type: "photo",
-    src: "",
-    x,
-    y,
-    w: 180,
-    h: 180,
-    rotate: 0,
-    crop: "cover",
-    cropX: 50,
-    cropY: 50,
-  };
-}
+  const [pages, setPages] = useState([
+    {
+      id: 1,
+      background: "#fff7f8",
+      elements: []
+    }
+  ]);
 
-function createText(text, x, y) {
-  return {
-    id: makeId(),
-    type: "text",
-    text,
-    x,
-    y,
-    w: 220,
-    h: 60,
-    rotate: 0,
-    fontSize: 28,
-    color: "#3d2d34",
-    fontFamily: "Georgia",
-    bold: false,
-  };
-}
+  const [currentPage, setCurrentPage] = useState(0);
 
-function createSticker(sticker, x, y) {
-  return {
-    id: makeId(),
-    type: "sticker",
-    text: sticker,
-    x,
-    y,
-    w: 60,
-    h: 60,
-    rotate: 0,
-    fontSize: 34,
-  };
-}
+  const [showStickerPicker, setShowStickerPicker] = useState(false);
+  const [showBackgroundPicker, setShowBackgroundPicker] = useState(false);
 
-function makeStarterBook() {
-  return {
-    title: "My First Scrapbook",
-    pages: [
-      {
-        id: makeId(),
-        background: "cream",
-        elements: [
-          createText("my first scrapbook ♡", 60, 35),
-          createPhoto(70, 120),
-          createSticker("✿", 300, 90),
-          createSticker("🎀", 40, 340),
-        ],
-      },
-    ],
-  };
-}
+  const current = pages[currentPage];
 
-export default function App() {
-  const [screen, setScreen] = useState("home");
+  function updateCurrentPage(data) {
+    const updated = [...pages];
+    updated[currentPage] = {
+      ...updated[currentPage],
+      ...data
+    };
+    setPages(updated);
+  }
 
-  const [books, setBooks] = useState([]);
+  function addText() {
+    const updated = [...current.elements];
 
-  const [book, setBook] = useState(null);
+    updated.push({
+      type: "text",
+      text: "Double click to edit",
+      x: 120,
+      y: 120,
+      size: 28,
+      color: "#333",
+      rotate: 0
+    });
 
-  const [pageIndex, setPageIndex] = useState(0);
+    updateCurrentPage({
+      elements: updated
+    });
+  }
 
-  const [selectedId, setSelectedId] = useState(null);
+  function addSticker(sticker) {
+    const updated = [...current.elements];
 
-  const [modal, setModal] = useState(null);
+    updated.push({
+      type: "sticker",
+      sticker,
+      x: 140,
+      y: 140,
+      size: 60,
+      rotate: 0
+    });
 
-  const [darkMode, setDarkMode] = useState(false);
+    updateCurrentPage({
+      elements: updated
+    });
 
-  const [drag, setDrag] = useState(null);
+    setShowStickerPicker(false);
+  }
 
-  const page = book?.pages?.[pageIndex];
+  function addPhoto(e) {
+    const file = e.target.files[0];
 
-  useEffect(() => {
-    document.body.classList.toggle(
-      "darkTheme",
-      darkMode
-    );
-  }, [darkMode]);
+    if (!file) return;
 
-  function createBook() {
-    const newBook = makeStarterBook();
+    const reader = new FileReader();
 
-    setBook(newBook);
+    reader.onload = () => {
+      const updated = [...current.elements];
 
-    setPageIndex(0);
+      updated.push({
+        type: "photo",
+        src: reader.result,
+        x: 100,
+        y: 100,
+        width: 180,
+        height: 180,
+        rotate: 0
+      });
 
-    setScreen("editor");
-  }
+      updateCurrentPage({
+        elements: updated
+      });
+    };
 
-  function updatePage(nextPage) {
-    const pages = [...book.pages];
+    reader.readAsDataURL(file);
+  }
 
-    pages[pageIndex] = nextPage;
+  function updateElement(index, data) {
+    const updated = [...current.elements];
 
-    setBook({
-      ...book,
-      pages,
-    });
-  }
+    updated[index] = {
+      ...updated[index],
+      ...data
+    };
 
-  function updateElement(id, changes) {
-    updatePage({
-      ...page,
-      elements: page.elements.map((el) =>
-        el.id === id
-          ? {
-              ...el,
-              ...changes,
-            }
-          : el
-      ),
-    });
-  }
+    updateCurrentPage({
+      elements: updated
+    });
+  }
 
-  function addPhoto() {
-    updatePage({
-      ...page,
-      elements: [
-        ...page.elements,
-        createPhoto(90, 140),
-      ],
-    });
-  }
+  function deleteElement(index) {
+    const updated = [...current.elements];
 
-  function addText() {
-    updatePage({
-      ...page,
-      elements: [
-        ...page.elements,
-        createText("tap to edit", 80, 90),
-      ],
-    });
-  }
+    updated.splice(index, 1);
 
-  function addSticker(sticker) {
-    updatePage({
-      ...page,
-      elements: [
-        ...page.elements,
-        createSticker(sticker, 120, 160),
-      ],
-    });
+    updateCurrentPage({
+      elements: updated
+    });
+  }
 
-    setModal(null);
-  }
+  function addPage() {
+    setPages([
+      ...pages,
+      {
+        id: Date.now(),
+        background: "#fff7f8",
+        elements: []
+      }
+    ]);
 
-  function uploadImage(id, file) {
-    const reader = new FileReader();
+    setCurrentPage(pages.length);
+  }
 
-    reader.onload = () => {
-      updateElement(id, {
-        src: reader.result,
-      });
-    };
+  return (
+    <div className={darkMode ? "app dark" : "app"}>
 
-    reader.readAsDataURL(file);
-  }
+      {screen === "home" && (
+        <div className="homeScreen">
 
-  function getPoint(e) {
-    if (e.touches?.[0]) {
-      return {
-        x: e.touches[0].clientX,
-        y: e.touches[0].clientY,
-      };
-    }
+          <div className="topBar">
+            <h1>Pocket Scrapbook 💖</h1>
 
-    return {
-      x: e.clientX,
-      y: e.clientY,
-    };
-  }
+            <button
+              className="profileBtn"
+              onClick={() => setScreen("profile")}
+            >
+              Profile
+            </button>
+          </div>
 
-  function startDrag(e, el, mode = "move") {
-    e.stopPropagation();
+          <div className="heroCard">
+            <h2>Cherish every moment ✨</h2>
 
-    setSelectedId(el.id);
+            <p>
+              Capture, create and keep your memories close.
+            </p>
 
-    const point = getPoint(e);
+            <button
+              className="mainBtn"
+              onClick={() => setScreen("editor")}
+            >
+              Open Scrapbook
+            </button>
+          </div>
 
-    setDrag({
-      id: el.id,
-      mode,
-      startX: point.x,
-      startY: point.y,
-      startEl: { ...el },
-    });
-  }
-  useEffect(() => {
-    function move(e) {
-      if (!drag || !book) return;
+          <div className="templateSection">
+            <h2>Free Templates</h2>
 
-      const point = getPoint(e);
+            <div className="templateGrid">
 
-      const dx = point.x - drag.startX;
+              <div className="templateCard">
+                <div className="templatePreview pink"></div>
+                <h3>My First Scrapbook</h3>
+                <p>Free</p>
+              </div>
 
-      const dy = point.y - drag.startY;
+              <div className="templateCard premium">
+                <div className="templatePreview blue"></div>
+                <h3>Baby Boy First Year</h3>
+                <p>Premium - $4.99</p>
+              </div>
 
-      const el = drag.startEl;
+              <div className="templateCard premium">
+                <div className="templatePreview rose"></div>
+                <h3>Baby Girl First Year</h3>
+                <p>Premium - $4.99</p>
+              </div>
 
-      if (drag.mode === "move") {
-        updateElement(drag.id, {
-          x: el.x + dx,
-          y: el.y + dy,
-        });
-      }
+            </div>
+          </div>
+        </div>
+      )}
 
-      if (drag.mode === "resize") {
-        updateElement(drag.id, {
-          w: Math.max(60, el.w + dx),
-          h: Math.max(60, el.h + dy),
-        });
-      }
+      {screen === "profile" && (
+        <div className="profileScreen">
 
-      if (drag.mode === "rotate") {
-        updateElement(drag.id, {
-          rotate: el.rotate + dx,
-        });
-      }
-    }
+          <button
+            className="backBtn"
+            onClick={() => setScreen("home")}
+          >
+            ← Back
+          </button>
 
-    function stop() {
-      setDrag(null);
-    }
+          <div className="profileCard">
 
-    window.addEventListener("mousemove", move);
-    window.addEventListener("mouseup", stop);
+            <div className="avatar">
+              💖
+            </div>
 
-    window.addEventListener("touchmove", move);
-    window.addEventListener("touchend", stop);
+            <h2>Pocket Scrapbook Member</h2>
 
-    return () => {
-      window.removeEventListener("mousemove", move);
-      window.removeEventListener("mouseup", stop);
+            <div className="settingsList">
 
-      window.removeEventListener("touchmove", move);
-      window.removeEventListener("touchend", stop);
-    };
-  }, [drag, book]);
+              <div className="settingItem">
+                <span>🌙 Dark Theme</span>
 
-  function renderElement(el) {
-    return (
-      <div
-        key={el.id}
-        className={`scrapElement ${
-          selectedId === el.id ? "selected" : ""
-        }`}
-        style={{
-          left: el.x,
-          top: el.y,
-          width: el.w,
-          height: el.h,
-          transform: `rotate(${el.rotate}deg)`,
-        }}
-        onMouseDown={(e) => startDrag(e, el)}
-        onTouchStart={(e) => startDrag(e, el)}
-        onClick={() => setSelectedId(el.id)}
-      >
-        {el.type === "photo" && (
-          <label className="photoFrame">
-            {el.src ? (
-              <img
-                src={el.src}
-                style={{
-                  objectFit: el.crop,
-                  objectPosition:
-                    `${el.cropX}% ${el.cropY}%`,
-                }}
-              />
-            ) : (
-              <span>+ Photo</span>
-            )}
+                <button
+                  className="toggleBtn"
+                  onClick={() => setDarkMode(!darkMode)}
+                >
+                  {darkMode ? "ON" : "OFF"}
+                </button>
+              </div>
 
-            <input
-              hidden
-              type="file"
-              accept="image/*"
-              onChange={(e) =>
-                uploadImage(
-                  el.id,
-                  e.target.files[0]
-                )
-              }
-            />
-          </label>
-        )}
+              <div className="settingItem">
+                🔔 Notifications
+              </div>
 
-        {el.type === "text" && (
-          <textarea
-            value={el.text}
-            onChange={(e) =>
-              updateElement(el.id, {
-                text: e.target.value,
-              })
-            }
-            style={{
-              fontSize: el.fontSize,
-              color: el.color,
-              fontFamily: el.fontFamily,
-              fontWeight: el.bold
-                ? "700"
-                : "400",
-            }}
-          />
-        )}
+              <div className="settingItem">
+                🔒 Privacy
+              </div>
 
-        {el.type === "sticker" && (
-          <div
-            className="stickerArt"
-            style={{
-              fontSize: el.fontSize,
-            }}
-          >
-            {el.text}
-          </div>
-        )}
+              <div className="settingItem">
+                ☁️ Backup & Sync
+              </div>
 
-        {selectedId === el.id && (
-          <>
-            <button
-              className="handle rotateHandle"
-              onMouseDown={(e) =>
-                startDrag(
-                  e,
-                  el,
-                  "rotate"
-                )
-              }
-              onTouchStart={(e) =>
-                startDrag(
-                  e,
-                  el,
-                  "rotate"
-                )
-              }
-            >
-              ↻
-            </button>
+              <button
+                className="logoutBtn"
+              >
+                Log Out
+              </button>
 
-            <button
-              className="handle resizeHandle"
-              onMouseDown={(e) =>
-                startDrag(
-                  e,
-                  el,
-                  "resize"
-                )
-              }
-              onTouchStart={(e) =>
-                startDrag(
-                  e,
-                  el,
-                  "resize"
-                )
-              }
-            >
-              ↘
-            </button>
-          </>
-        )}
-      </div>
-    );
-  }
+            </div>
+          </div>
+        </div>
+      )}
 
-  return (
-    <div className="app">
+      {screen === "editor" && (
+        <div className="editorScreen">
 
-      {screen === "home" && (
-        <div className="homeScreen">
+          <div className="editorTop">
 
-          <div className="heroCard">
-            <div className="heroDecor heroLeft">
-              🎀
-            </div>
+            <button
+              className="backBtn"
+              onClick={() => setScreen("home")}
+            >
+              ← Home
+            </button>
 
-            <div className="heroDecor heroRight">
-              ♡
-            </div>
+            <div className="pageCounter">
+              Page {currentPage + 1}
+            </div>
 
-            <div className="heroContent">
-              <div className="heroLabel">
-                cherish every moment
-              </div>
+          </div>
 
-              <h1>
-                pocket
-                <br />
-                scrapbook
-              </h1>
+          <div
+            className="scrapbookPage"
+            style={{
+              background: current.background
+            }}
+          >
 
-              <button
-                className="mainPinkBtn"
-                onClick={createBook}
-              >
-                Create Scrapbook
-              </button>
-     
-      </div>
-    );
+            {current.elements.map((el, index) => (
+              <div
+                key={index}
+                className="element"
+                style={{
+                  left: el.x,
+                  top: el.y,
+                  transform: `rotate(${el.rotate}deg)`
+                }}
+              >
+
+                {el.type === "text" && (
+                  <div>
+
+                    <textarea
+                      value={el.text}
+                      className="textElement"
+                      style={{
+                        fontSize: el.size,
+                        color: el.color
+                      }}
+                      onChange={(e) =>
+                        updateElement(index, {
+                          text: e.target.value
+                        })
+                      }
+                    />
+
+                    <div className="controls">
+
+                      <button
+                        onClick={() =>
+                          updateElement(index, {
+                            rotate: el.rotate - 10
+                          })
+                        }
+                      >
+                        ↺
+                      </button>
+
+                      <button
+                        onClick={() =>
+                          updateElement(index, {
+                            rotate: el.rotate + 10
+                          })
+                        }
+                      >
+                        ↻
+                      </button>
+
+                      <button
+                        onClick={() =>
+                          updateElement(index, {
+                            size: el.size + 2
+                          })
+                        }
+                      >
+                        A+
+                      </button>
+
+                      <button
+                        onClick={() =>
+                          deleteElement(index)
+                        }
+                      >
+                        🗑
+                      </button>
+
+                    </div>
+                  </div>
+                )}
+
+                {el.type === "sticker" && (
+                  <div>
+
+                    <div
+                      className="stickerElement"
+                    >
+                      {el.sticker}
+                    </div>
+
+                    <div className="controls">
+
+                      <button
+                        onClick={() =>
+                          updateElement(index, {
+                            rotate: el.rotate - 10
+                          })
+                        }
+                      >
+                        ↺
+                      </button>
+
+                      <button
+                        onClick={() =>
+                          updateElement(index, {
+                            rotate: el.rotate + 10
+                          })
+                        }
+                      >
+                        ↻
+                      </button>
+
+                      <button
+                        onClick={() =>
+                          updateElement(index, {
+                            size: el.size + 10
+                          })
+                        }
+                      >
+                        +
+                      </button>
+
+                      <button
+                        onClick={() =>
+                          deleteElement(index)
+                        }
+                      >
+                        🗑
+                      </button>
+
+                    </div>
+                  </div>
+                )}
+
+                {el.type === "photo" && (
+                  <div>
+
+                    <img
+                      src={el.src}
+                      className="photoElement"
+                      style={{
+                        width: el.width,
+                        height: el.height
+                      }}
+                    />
+
+                    <div className="controls">
+
+                      <button
+                        onClick={() =>
+                          updateElement(index, {
+                            rotate: el.rotate - 10
+                          })
+                        }
+                      >
+                        ↺
+                      </button>
+
+                      <button
+                        onClick={() =>
+                          updateElement(index, {
+                            rotate: el.rotate + 10
+                          })
+                        }
+                      >
+                        ↻
+                      </button>
+
+                      <button
+                        onClick={() =>
+                          updateElement(index, {
+                            width: el.width + 20,
+                            height: el.height + 20
+                          })
+                        }
+                      >
+                        +
+                      </button>
+
+                      <button
+                        onClick={() =>
+                          deleteElement(index)
+                        }
+                      >
+                        🗑
+                      </button>
+
+                    </div>
+                  </div>
+                )}
+
+              </div>
+            ))}
+
+          </div>
+
+          <div className="toolbar">
+
+            <label className="toolBtn">
+              📸 Photo
+
+              <input
+                hidden
+                type="file"
+                accept="image/*"
+                onChange={addPhoto}
+              />
+            </label>
+
+            <button
+              className="toolBtn"
+              onClick={addText}
+            >
+              ✏️ Text
+            </button>
+
+            <button
+              className="toolBtn"
+              onClick={() =>
+                setShowStickerPicker(true)
+              }
+            >
+              💖 Stickers
+            </button>
+
+            <button
+              className="toolBtn"
+              onClick={() =>
+                setShowBackgroundPicker(true)
+              }
+            >
+              🎨 Background
+            </button>
+
+            <button
+              className="toolBtn"
+              onClick={addPage}
+            >
+              ➕ Page
+            </button>
+
+          </div>
+
+          {showStickerPicker && (
+            <div className="popupOverlay">
+
+              <div className="popupWindow">
+
+                <div className="popupHeader">
+                  <h3>Sticker Pack</h3>
+
+                  <button
+                    onClick={() =>
+                      setShowStickerPicker(false)
+                    }
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <div className="stickerGrid">
+
+                  {FREE_STICKERS.map((sticker, index) => (
+                    <button
+                      key={index}
+                      className="stickerBtn"
+                      onClick={() =>
+                        addSticker(sticker)
+                      }
+                    >
+                      {sticker}
+                    </button>
+                  ))}
+
+                </div>
+              </div>
+            </div>
+          )}
+
+          {showBackgroundPicker && (
+            <div className="popupOverlay">
+
+              <div className="popupWindow">
+
+                <div className="popupHeader">
+                  <h3>Choose Background</h3>
+
+                  <button
+                    onClick={() =>
+                      setShowBackgroundPicker(false)
+                    }
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <div className="backgroundGrid">
+
+                  {BACKGROUNDS.map((bg, index) => (
+                    <button
+                      key={index}
+                      className="backgroundBtn"
+                      style={{
+                        background: bg
+                      }}
+                      onClick={() => {
+                        updateCurrentPage({
+                          background: bg
+                        });
+
+                        setShowBackgroundPicker(false);
+                      }}
+                    />
+                  ))}
+
+                </div>
+              </div>
+            </div>
+          )}
+
+        </div>
+      )}
+
+    </div>
+  );
 }
 
 export default App;
