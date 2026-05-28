@@ -490,23 +490,40 @@ if (userSnap.exists()) {
     setScreen("editor");
   }
 
-  async function deleteBook(book) {
+ async function deleteBook(book) {
+  const bookKey = book.firebaseId || book.id;
 
-    if (
-      !window.confirm(
-        `Delete ${book.title}?`
-      )
-    ) return;
+  if (
+    !window.confirm(
+      `Are you sure you want to delete ${book.title}?`
+    )
+  )
+    return;
 
-    const bookDocId = book.firebaseId || book.id;
+  if (book.firebaseId) {
+    await deleteDoc(
+      doc(db, "scrapbooks", book.firebaseId)
+    );
+  }
 
-if (bookDocId) {
+  const filtered = books.filter((b) => {
+    const currentKey =
+      b.firebaseId || b.id;
 
-      await deleteDoc(
-  doc(db, "scrapbooks", bookDocId)
-);
+    return currentKey !== bookKey;
+  });
 
-    }
+  setBooks(filtered);
+
+  if (
+    selectedBook &&
+    (selectedBook.firebaseId ||
+      selectedBook.id) === bookKey
+  ) {
+    setSelectedBook(null);
+    setScreen("home");
+  }
+}
 
     const filtered = books.filter(
   (b) => (b.firebaseId || b.id) !== (book.firebaseId || book.id)
