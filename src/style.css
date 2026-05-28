@@ -1,8 +1,25 @@
 *{box-sizing:border-box}
-body{margin:0;background:#f4eef2;font-family:Trebuchet MS,Arial,sans-serif;color:#35282d}
+body{
+  margin:0;
+  background:#f4edf0;
+  font-family:Arial, sans-serif;
+  display:flex;
+  justify-content:center;
+}
 button{border:0;font-family:inherit;cursor:pointer}
 textarea{border:0;background:transparent;resize:none;outline:none;width:100%;height:100%;text-align:center}
-.phoneShell{max-width:430px;min-height:100vh;margin:0 auto;background:#fff8fb;box-shadow:0 0 45px #0002;overflow:hidden;position:relative}
+.phone-shell{
+  width:100%;
+  max-width:430px;
+  height:100vh;
+  margin:0 auto;
+  background:#fffaf8;
+  position:relative;
+  overflow:hidden;
+  box-shadow:0 0 40px rgba(0,0,0,.08);
+  border-left:1px solid #eee;
+  border-right:1px solid #eee;
+}
 .screen{min-height:100vh;padding:18px 18px 110px;background:#fff8fb}
 .home{background:linear-gradient(#ffffff88,#ffffff88),repeating-linear-gradient(45deg,#ffdce9 0 18px,#fff1f6 18px 36px)}
 .hero{border-radius:36px;background:#fffaf4;padding:28px 20px;box-shadow:0 16px 40px #0002;text-align:center;position:relative}
