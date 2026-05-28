@@ -12,6 +12,7 @@ import {
   addDoc,
   doc,
   getDocs,
+  getDoc,,
   updateDoc,
   deleteDoc,
   orderBy,
@@ -335,6 +336,11 @@ export default function App() {
       setUser(u);
 
       if (u) {
+        const userSnap = await getDoc(doc(db, "users", u.uid));
+
+if (userSnap.exists()) {
+  setProfileImage(userSnap.data().profileImage || "");
+}
 
         const q = query(
           collection(db, "scrapbooks"),
@@ -543,27 +549,31 @@ export default function App() {
   }
 
   async function uploadProfilePicture(e) {
+  const file = e.target.files[0];
 
-    const file = e.target.files[0];
+  if (!file || !user) return;
 
-    if (!file) return;
+  try {
+    const storageRef = ref(
+      storage,
+      `profiles/${user.uid}/profile-${Date.now()}-${file.name}`
+    );
 
-    const storageRef = ref(
-      storage,
-      `profiles/${user.uid}/${file.name}`
-    );
+    await uploadBytes(storageRef, file);
 
-    await uploadBytes(
-      storageRef,
-      file
-    );
+    const url = await getDownloadURL(storageRef);
 
-    const url = await getDownloadURL(
-      storageRef
-    );
+    setProfileImage(url);
 
-    setProfileImage(url);
-  }
+    await updateDoc(doc(db, "users", user.uid), {
+      profileImage: url,
+    });
+
+    alert("Profile picture updated ♡");
+  } catch (error) {
+    alert(error.message);
+  }
+}
 
   function updateElement(updatedEl) {
 
