@@ -505,7 +505,7 @@ export default function App() {
             </div>
 
           </div>
-          )}
+
       {screen === "templates" && (
         <div className="panelScreen">
 
