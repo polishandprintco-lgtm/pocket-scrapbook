@@ -136,6 +136,7 @@ function makeBook(title, bg = "cream") {
 
 function myFirstTemplate() {
   return {
+    id: makeID(),
     title: "My First Scrapbook",
     bg: "cream",
     photoCount: 0,
@@ -251,6 +252,7 @@ function myFirstTemplate() {
 }
 
 function babyTemplate(girl = true) {
+  id: makeID(),
   const bg = girl ? "pinkPlaid" : "bluePlaid";
   const title = girl ? "Baby Girl First Year" : "Baby Boy First Year";
   const mainSticker = girl ? "🎀" : "★";
@@ -350,8 +352,8 @@ export default function App() {
 
           if (data.uid === u.uid) {
             loaded.push({
-              id: docu.id,
               ...data,
+              firebaseID: docu.id,
             });
           }
 
