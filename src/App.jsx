@@ -1260,9 +1260,9 @@ export default function App() {
 
               </div>
 
-              <div
-                className="templateCard premiumCard"
-                onClick={() => {
+             <div
+  className="templateCard premiumCard"
+  onClick={() => {
 
                   const book =
                     babyTemplate(true);
