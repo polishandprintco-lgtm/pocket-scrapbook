@@ -35,21 +35,13 @@ textarea {
 }
 
 .phoneShell {
-  width: 100%;
+  width: 430px;
   max-width: 430px;
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
-  background:
-    linear-gradient(#ffffff99, #ffffff99),
-    repeating-linear-gradient(
-      45deg,
-      #ffdce9 0 18px,
-      #fff1f6 18px 36px
-    );
-  position: relative;
-  overflow-x: hidden;
-  box-shadow: 0 0 40px rgba(0,0,0,.12);
+  margin: 0 auto;
+  background: #fffdfb;
 }
 
 /* AUTH / HERO */
@@ -379,10 +371,10 @@ textarea {
 
 /* EDITOR */
 
-.editorScreen {
-  min-height: 100vh;
-  padding-bottom: 120px;
+.editorWrap {
   width: 100%;
+  padding: 0;
+  margin: 0;
 }
 
 .editorHeader {
@@ -424,14 +416,10 @@ textarea {
   font-weight: 900;
 }
 
-.scrapPage {
-  position: relative;
+.editorInner {
   width: 100%;
-  height: 560px;
-  margin: 0 auto 16px;
-  border-radius: 0 0 34px 34px;
-  overflow: hidden;
-  box-shadow: 0 14px 35px rgba(0,0,0,.16);
+  max-width: 100%;
+  margin: 0;
 }
 
 .scrapElement {
