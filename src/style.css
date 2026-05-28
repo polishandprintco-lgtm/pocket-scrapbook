@@ -1,357 +1,251 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@600;700&display=swap');
+*{box-sizing:border-box}
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+body{
+  margin:0;
+  background:#f4edf0;
+  font-family:Arial,sans-serif;
+  display:flex;
+  justify-content:center;
 }
 
-body {
-  background: #f7f2f4;
-  font-family: 'DM Sans', sans-serif;
-  display: flex;
-  justify-content: center;
-  min-height: 100vh;
-  color: #2c2c2c;
+#root{
+  width:100%;
+  display:flex;
+  justify-content:center;
 }
 
-#root {
-  width: 100%;
-  display: flex;
-  justify-content: center;
+.appBg{
+  width:100%;
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  background:#f4edf0;
 }
 
-/* PHONE SHELL */
-
-.appShell {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  padding: 20px;
+.phoneShell{
+  width:100%;
+  max-width:430px;
+  min-height:100vh;
+  background:
+    linear-gradient(#ffffff88,#ffffff88),
+    repeating-linear-gradient(45deg,#ffdce9 0 18px,#fff1f6 18px 36px);
+  position:relative;
+  overflow:hidden;
+  box-shadow:0 0 40px rgba(0,0,0,.12);
 }
 
-.phoneFrame {
-  width: 390px;
-  min-height: 100vh;
-  background: #fffafc;
-  border-radius: 42px;
-  overflow: hidden;
-  position: relative;
-  box-shadow:
-    0 10px 40px rgba(0,0,0,0.08),
-    0 0 0 10px #ffffff;
+.topHeader{
+  margin:18px;
+  padding:34px 20px;
+  background:#fffaf4;
+  border-radius:34px;
+  text-align:center;
+  box-shadow:0 12px 30px #0001;
 }
 
-/* TOP BAR */
-
-.topBar {
-  height: 44px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 13px;
-  font-weight: 700;
-  background: white;
+.topHeader h1{
+  font-family:Georgia,serif;
+  font-size:34px;
+  margin:0 0 12px;
 }
 
-/* HOME */
-
-.homeScreen {
-  min-height: 100vh;
-  background:
-    repeating-linear-gradient(
-      45deg,
-      #fff8fa,
-      #fff8fa 14px,
-      #fbeef3 14px,
-      #fbeef3 28px
-    );
-  padding-bottom: 120px;
+.topHeader p{
+  margin:0;
+  color:#6f5b62;
 }
 
-/* HERO */
-
-.heroCard {
-  margin: 18px;
-  background: white;
-  border-radius: 34px;
-  padding: 34px 24px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-  text-align: center;
+.mainCreateBtn,
+.authCard button,
+.editorHeader button,
+.toolbar button,
+.bottomNav button,
+.profilePage button{
+  border:0;
+  background:#fff0f6;
+  color:#3b2c32;
+  border-radius:18px;
+  padding:12px 16px;
+  font-weight:800;
+  cursor:pointer;
 }
 
-.logoPill {
-  width: 70px;
-  height: 18px;
-  background: #f8bfd1;
-  border-radius: 999px;
-  margin: 0 auto 18px;
+.mainCreateBtn{
+  display:block;
+  margin:18px auto;
+  background:linear-gradient(135deg,#ff9cc2,#e96e9f);
+  color:white;
+  box-shadow:0 10px 22px #e96e9f55;
 }
 
-.heroTitle {
-  font-family: 'Playfair Display', serif;
-  font-size: 42px;
-  line-height: 0.95;
-  margin-bottom: 14px;
+.sectionTitle{
+  font-family:Georgia,serif;
+  font-size:30px;
+  font-weight:800;
+  margin:20px 22px 14px;
 }
 
-.heroSub {
-  color: #5f5f5f;
-  margin-bottom: 26px;
+.scrapbookList{
+  padding:0 18px 110px;
 }
 
-.mainButton {
-  border: none;
-  background: linear-gradient(
-    135deg,
-    #ff98bd,
-    #ea5f9a
-  );
-  color: white;
-  padding: 16px 28px;
-  border-radius: 999px;
-  font-weight: 700;
-  font-size: 15px;
-  cursor: pointer;
-  box-shadow: 0 10px 20px rgba(234,95,154,0.25);
+.scrapbookCard{
+  background:white;
+  border-radius:26px;
+  padding:18px;
+  margin-bottom:14px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  box-shadow:0 10px 26px #0001;
 }
 
-/* SECTION */
-
-.sectionTitle {
-  font-family: 'Playfair Display', serif;
-  font-size: 28px;
-  padding: 0 22px;
-  margin-top: 8px;
-  margin-bottom: 18px;
+.scrapbookCard h3{
+  margin:0 0 5px;
 }
 
-/* SCRAPBOOK CARD */
-
-.bookCard {
-  margin: 0 18px 16px;
-  background: white;
-  border-radius: 28px;
-  padding: 18px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.05);
+.scrapbookCard p{
+  margin:0;
+  color:#7c6870;
 }
 
-.bookLeft {
-  display: flex;
-  gap: 14px;
-  align-items: center;
+.dotsBtn{
+  background:#fff0f6;
+  border:0;
+  width:38px;
+  height:38px;
+  border-radius:50%;
+  font-size:22px;
 }
 
-.bookThumb {
-  width: 64px;
-  height: 64px;
-  border-radius: 18px;
-  background:
-    repeating-linear-gradient(
-      45deg,
-      #ffdce8,
-      #ffdce8 10px,
-      #fff3f7 10px,
-      #fff3f7 20px
-    );
+.bottomNav{
+  position:fixed;
+  bottom:12px;
+  left:50%;
+  transform:translateX(-50%);
+  width:100%;
+  max-width:430px;
+  padding:10px;
+  display:flex;
+  justify-content:center;
+  gap:8px;
+  background:#ffffffdd;
+  backdrop-filter:blur(10px);
 }
 
-.bookInfo h3 {
-  font-size: 18px;
-  margin-bottom: 4px;
+.bottomNav button{
+  font-size:12px;
+  padding:10px 12px;
 }
 
-.bookInfo p {
-  font-size: 13px;
-  color: #777;
+.authCard{
+  margin:80px 18px;
+  padding:30px;
+  background:white;
+  border-radius:34px;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  text-align:center;
+  box-shadow:0 14px 35px #0001;
 }
 
-.menuDots {
-  font-size: 22px;
-  cursor: pointer;
-  padding: 6px 10px;
-  border-radius: 12px;
+.authCard h1{
+  font-family:Georgia,serif;
+  margin:0;
 }
 
-.menuDots:hover {
-  background: #f7f2f4;
+.authCard input{
+  padding:14px;
+  border-radius:18px;
+  border:1px solid #ead6df;
 }
 
-/* BOTTOM NAV */
-
-.bottomNav {
-  position: fixed;
-  bottom: 20px;
-  width: 390px;
-  display: flex;
-  justify-content: center;
-  pointer-events: none;
+.secondaryBtn{
+  background:#fff0f6!important;
+  color:#d95f91!important;
 }
 
-.navInner {
-  background: rgba(255,255,255,0.92);
-  backdrop-filter: blur(12px);
-  padding: 10px;
-  border-radius: 26px;
-  display: flex;
-  gap: 8px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-  pointer-events: auto;
+.panel,
+.profilePage{
+  padding:20px 18px 110px;
 }
 
-.navButton {
-  border: none;
-  background: transparent;
-  padding: 12px 16px;
-  border-radius: 16px;
-  font-weight: 600;
-  color: #555;
-  cursor: pointer;
-  transition: 0.2s;
+.backBtn{
+  background:white!important;
+  margin-bottom:20px;
 }
 
-.navButton:hover {
-  background: #f9eef3;
+.editorHeader{
+  background:white;
+  padding:14px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  box-shadow:0 4px 14px #0001;
 }
 
-.navActive {
-  background: linear-gradient(
-    135deg,
-    #ff98bd,
-    #ea5f9a
-  );
-  color: white;
+.editorHeader h2{
+  font-size:15px;
+  margin:0;
+  max-width:190px;
+  text-align:center;
 }
 
-/* EDITOR */
-
-.editorScreen {
-  background: #fff8fa;
-  min-height: 100vh;
-  padding-bottom: 120px;
+.scrapbookPaper{
+  width:calc(100% - 36px);
+  height:560px;
+  margin:22px auto;
+  background:#fff8ee;
+  border-radius:34px;
+  padding:24px;
+  box-shadow:0 14px 35px #0002;
 }
 
-.editorHeader {
-  background: white;
-  padding: 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+.photoFrame{
+  width:160px;
+  height:160px;
+  background:white;
+  border-radius:16px;
+  box-shadow:0 8px 18px #0002;
+  margin-bottom:20px;
 }
 
-.editorTitle {
-  font-size: 20px;
-  font-weight: 700;
+.toolbar{
+  margin:0 18px 120px;
+  background:white;
+  border-radius:24px;
+  padding:12px;
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  box-shadow:0 10px 26px #0001;
 }
 
-.pageCanvasWrap {
-  display: flex;
-  justify-content: center;
-  padding: 24px;
+.toolbar button{
+  flex:1;
+  min-width:92px;
 }
 
-.pageCanvas {
-  width: 320px;
-  height: 480px;
-  background: #fffdfb;
-  border-radius: 28px;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+.profilePage{
+  text-align:center;
 }
 
-.canvasItem {
-  position: absolute;
-  cursor: grab;
-  user-select: none;
+.profilePage h2{
+  font-family:Georgia,serif;
 }
 
-.canvasPhoto {
-  width: 120px;
-  border-radius: 12px;
+.profilePage button{
+  width:100%;
+  margin:8px 0;
+  text-align:left;
 }
 
-.canvasSticker {
-  width: 70px;
+.logoutBtn{
+  background:linear-gradient(135deg,#ff9cc2,#e96e9f)!important;
+  color:white!important;
+  text-align:center!important;
 }
 
-.canvasText {
-  font-size: 26px;
-  font-weight: 700;
-}
-
-/* TOOLBAR */
-
-.toolbar {
-  margin: 0 18px;
-  background: white;
-  border-radius: 24px;
-  padding: 14px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  box-shadow: 0 10px 24px rgba(0,0,0,0.05);
-}
-
-.toolButton {
-  border: none;
-  background: #fff1f6;
-  color: #d9548d;
-  padding: 12px 14px;
-  border-radius: 16px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-/* PROFILE */
-
-.profileCard {
-  margin: 18px;
-  background: white;
-  border-radius: 30px;
-  padding: 24px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-}
-
-.profileImage {
-  width: 90px;
-  height: 90px;
-  border-radius: 999px;
-  background: #f9dbe6;
-  margin: 0 auto 16px;
-}
-
-.profileName {
-  text-align: center;
-  font-size: 22px;
-  font-weight: 700;
-  margin-bottom: 24px;
-}
-
-.settingsButton {
-  width: 100%;
-  border: none;
-  background: #fff3f7;
-  padding: 16px;
-  border-radius: 18px;
-  margin-bottom: 12px;
-  text-align: left;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.logoutButton {
-  width: 100%;
-  border: none;
-  background: #ffedf1;
-  color: #d44b6c;
-  padding: 16px;
-  border-radius: 18px;
-  margin-top: 16px;
-  font-weight: 700;
-  cursor: pointer;
+.loading{
+  padding:40px;
 }
