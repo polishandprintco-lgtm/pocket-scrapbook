@@ -373,6 +373,16 @@ export default function App() {
             <div className="setting">Notifications</div>
             <div className="setting">Privacy</div>
             <div className="setting">Backup & Sync</div>
+            <button
+  className="logoutBtn"
+  onClick={() => {
+    setScreen("home");
+    setSelected(null);
+    setModal(null);
+  }}
+>
+  Log Out
+</button>
           </div>
         </div>
       )}
