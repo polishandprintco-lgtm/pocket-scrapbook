@@ -1,595 +1,957 @@
-
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  font-family: "Trebuchet MS", Arial, sans-serif;
-  background: #fff7fb;
-  color: #3d2d34;
-}
-
-button,
-input,
-textarea {
-  font-family: inherit;
-}
-
-button {
-  border: none;
-  cursor: pointer;
-}
-
-.app {
-  min-height: 100vh;
-}
-
-/* HOME */
-
-.homeScreen {
-  min-height: 100vh;
-  padding: 20px 20px 120px;
-  background:
-    linear-gradient(rgba(255,255,255,.45), rgba(255,255,255,.45)),
-    repeating-linear-gradient(
-      45deg,
-      #ffdceb 0px,
-      #ffdceb 18px,
-      #fff0f6 18px,
-      #fff0f6 36px
-    );
-}
-
-.heroCard {
-  position: relative;
-  overflow: hidden;
-  border-radius: 38px;
-  padding: 38px 26px;
-  background: #fffaf6;
-  box-shadow: 0 18px 45px rgba(0,0,0,.12);
-  border: 2px solid rgba(255,255,255,.8);
-}
-
-.heroCard::before {
-  content: "";
-  position: absolute;
-  top: 14px;
-  left: 50%;
-  width: 130px;
-  height: 32px;
-  background: rgba(255, 214, 150, .65);
-  transform: translateX(-50%) rotate(-2deg);
-  border-radius: 4px;
-}
-
-.heroContent {
-  position: relative;
-  z-index: 2;
-  text-align: center;
-}
-
-.heroLabel {
-  display: inline-block;
-  background: #ffdcea;
-  color: #9b6475;
-  padding: 8px 14px;
-  border-radius: 999px;
-  font-size: 13px;
-  letter-spacing: 1px;
-  margin-bottom: 14px;
-}
-
-.heroContent h1 {
-  margin: 0 0 24px;
-  font-family: Georgia, serif;
-  font-size: 54px;
-  line-height: .92;
-  color: #4b333b;
-}
-
-.heroDecor {
-  position: absolute;
-  font-size: 54px;
-  opacity: .5;
-}
-
-.heroLeft {
-  left: 18px;
-  bottom: 20px;
-}
-
-.heroRight {
-  right: 22px;
-  top: 18px;
-}
-
-.mainPinkBtn {
-  background: linear-gradient(135deg, #ff9cc2, #ec6f9f);
-  color: white;
-  padding: 15px 20px;
-  border-radius: 22px;
-  font-weight: 800;
-  box-shadow: 0 10px 22px rgba(236,111,159,.32);
-}
-
-.homeActions {
-  display: flex;
-  gap: 12px;
-  margin: 24px 0;
-  overflow-x: auto;
-}
-
-.homeActions button {
-  min-width: 125px;
-  padding: 15px;
-  border-radius: 22px;
-  background: rgba(255,255,255,.92);
-  box-shadow: 0 8px 24px rgba(0,0,0,.08);
-  font-weight: 800;
-  color: #4b333b;
-}
-
-.sectionTitle,
-.pageTitle {
-  font-family: Georgia, serif;
-  color: #4b333b;
-  font-size: 32px;
-}
-
-/* CARDS */
-
-.booksGrid,
-.templateGrid,
-.premiumGrid {
-  display: grid;
-  gap: 18px;
-}
-
-.bookCard,
-.templateCard,
-.premiumCard,
-.profileCard {
-  position: relative;
-  background: #fffaf6;
-  border-radius: 30px;
-  overflow: hidden;
-  box-shadow: 0 14px 38px rgba(0,0,0,.1);
-}
-
-.bookPreview,
-.templatePreview {
-  height: 210px;
-  display: grid;
-  place-items: center;
-  font-family: Georgia, serif;
-  font-size: 26px;
-  text-align: center;
-  padding: 20px;
-}
-
-.freePreview {
-  background:
-    linear-gradient(rgba(255,255,255,.5), rgba(255,255,255,.5)),
-    repeating-linear-gradient(
-      45deg,
-      #ffe0ec 0px,
-      #ffe0ec 18px,
-      #fff5f8 18px,
-      #fff5f8 36px
-    );
-  color: #b85f83;
-}
-
-.pinkBabyPreview {
-  background:
-    linear-gradient(rgba(255,255,255,.45), rgba(255,255,255,.45)),
-    repeating-linear-gradient(
-      45deg,
-      #ffd5e6 0px,
-      #ffd5e6 18px,
-      #fff0f6 18px,
-      #fff0f6 36px
-    );
-}
-
-.blueBabyPreview {
-  background:
-    linear-gradient(rgba(255,255,255,.45), rgba(255,255,255,.45)),
-    repeating-linear-gradient(
-      45deg,
-      #d9ecff 0px,
-      #d9ecff 18px,
-      #f1f8ff 18px,
-      #f1f8ff 36px
-    );
-}
-
-.bookInfo,
-.templateInfo {
-  padding: 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.bookTitle {
-  font-weight: 900;
-  font-size: 18px;
-}
-
-.bookPages {
-  color: #8f6e78;
-  font-size: 14px;
-}
-
-/* PANEL */
-
-.panelScreen {
-  min-height: 100vh;
-  padding: 22px 20px 120px;
-  background: #fff7fb;
-}
-
-.backBtn {
-  background: white;
-  border-radius: 18px;
-  padding: 13px 18px;
-  font-weight: 800;
-  box-shadow: 0 8px 20px rgba(0,0,0,.06);
-  margin-bottom: 18px;
-}
-
-.premiumCard {
-  padding: 24px;
-}
-
-.premiumPrice {
-  font-size: 40px;
-  color: #dc6f99;
-  font-weight: 900;
-}
-
-/* PROFILE */
-
-.profileCard {
-  padding: 26px;
-  text-align: center;
-}
-
-.profileAvatar {
-  width: 90px;
-  height: 90px;
-  margin: 0 auto 14px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  background: linear-gradient(135deg, #ffafd0, #ffdceb);
-  font-size: 44px;
-}
-
-.settingsList {
-  display: grid;
-  gap: 14px;
-  margin-top: 22px;
-}
-
-.settingRow,
-.settingsButton,
-.logoutButton {
-  background: #fff0f6;
-  border-radius: 22px;
-  padding: 17px;
-  font-weight: 800;
-}
-
-.settingRow {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.logoutButton {
-  background: #ec6f9f;
-  color: white;
-}
-
-.toggleSwitch {
-  position: relative;
-  width: 58px;
-  height: 32px;
-}
-
-.toggleSwitch input {
-  display: none;
-}
-
-.toggleSlider {
-  position: absolute;
-  inset: 0;
-  background: #d7c2cb;
-  border-radius: 999px;
-}
-
-.toggleSlider::before {
-  content: "";
-  position: absolute;
-  width: 24px;
-  height: 24px;
-  left: 4px;
-  top: 4px;
-  border-radius: 50%;
-  background: white;
-  transition: .25s;
-}
-
-.toggleSwitch input:checked + .toggleSlider {
-  background: #ec6f9f;
-}
-
-.toggleSwitch input:checked + .toggleSlider::before {
-  transform: translateX(26px);
-}
-
-/* EDITOR */
-
-.editorScreen {
-  min-height: 100vh;
-  padding-bottom: 130px;
-  background: #fff7fb;
-}
-
-.editorHeader,
-.pageTabs {
-  display: flex;
-  gap: 10px;
-  padding: 12px;
-  justify-content: center;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.editorHeader button,
-.pageTabs button {
-  background: white;
-  border-radius: 18px;
-  padding: 12px 16px;
-  font-weight: 800;
-  box-shadow: 0 6px 18px rgba(0,0,0,.06);
-}
-
-.scrapbookPage {
-  position: relative;
-  width: calc(100% - 24px);
-  max-width: 420px;
-  height: 640px;
-  margin: 8px auto 20px;
-  overflow: hidden;
-  border-radius: 36px;
-  box-shadow: 0 18px 45px rgba(0,0,0,.14);
-}
-
-/* BACKGROUNDS */
-
-.bg-cream {
-  background: #fff8ee;
-}
-
-.bg-pink {
-  background: #ffddea;
-}
-
-.bg-blue {
-  background: #dceeff;
-}
-
-.bg-lavender {
-  background: #efe5ff;
-}
-
-.bg-grid {
-  background-color: white;
-  background-image:
-    linear-gradient(#eadfe3 1px, transparent 1px),
-    linear-gradient(90deg, #eadfe3 1px, transparent 1px);
-  background-size: 24px 24px;
-}
-
-.bg-dots {
-  background-color: white;
-  background-image: radial-gradient(#d9cbd0 1.5px, transparent 1.5px);
-  background-size: 18px 18px;
-}
-
-/* SCRAP ELEMENTS */
-
-.scrapElement {
-  position: absolute;
-  touch-action: none;
-}
-
-.scrapElement.selected {
-  outline: 3px dashed #ec6f9f;
-}
-
-.photoFrame {
-  width: 100%;
-  height: 100%;
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-  background: white;
-  border: 8px solid white;
-  border-radius: 14px;
-  box-shadow: 0 8px 18px rgba(0,0,0,.15);
-  color: #b28695;
-  font-weight: 900;
-}
-
-.photoFrame img {
-  width: 100%;
-  height: 100%;
-}
-
-.scrapElement textarea {
-  width: 100%;
-  height: 100%;
-  resize: none;
-  border: none;
-  outline: none;
-  background: transparent;
-  text-align: center;
-}
-
-.stickerArt {
-  width: 100%;
-  height: 100%;
-  display: grid;
-  place-items: center;
-  filter: drop-shadow(0 6px 8px rgba(0,0,0,.12));
-}
-
-.handle {
-  position: absolute;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: #ec6f9f;
-  color: white;
-  font-weight: 900;
-  z-index: 50;
-  box-shadow: 0 5px 12px rgba(0,0,0,.16);
-}
-
-.rotateHandle {
-  top: -16px;
-  right: -16px;
-}
-
-.resizeHandle {
-  bottom: -16px;
-  right: -16px;
-}
-
-/* TOOLBAR */
-
-.bottomToolbar {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(255,255,255,.94);
-  backdrop-filter: blur(12px);
-  padding: 16px;
-  display: flex;
-  gap: 12px;
-  overflow-x: auto;
-  z-index: 200;
-  box-shadow: 0 -8px 28px rgba(0,0,0,.1);
-}
-
-.bottomToolbar button {
-  min-width: 120px;
-  padding: 14px;
-  border-radius: 20px;
-  background: #fff0f6;
-  font-weight: 900;
-  color: #4b333b;
-}
-
-/* POPUPS */
-
-.popupOverlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.28);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 500;
-  padding: 20px;
-}
-
-.popupWindow {
-  width: 100%;
-  max-width: 430px;
-  background: white;
-  border-radius: 32px;
-  padding: 22px;
-  box-shadow: 0 18px 50px rgba(0,0,0,.2);
-}
-
-.largePopup {
-  max-height: 85vh;
-  overflow: auto;
-}
-
-.popupHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.popupHeader button {
-  width: 40px;
-  height: 40px;
-  border-radius: 14px;
-  background: #fff0f6;
-  font-size: 18px;
-}
-
-.backgroundGrid,
-.stickerGrid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-  margin-top: 18px;
-}
-
-.bgChoice,
-.stickerButton {
-  min-height: 88px;
-  border-radius: 22px;
-  background: #fff0f6;
-  font-weight: 900;
-}
-
-.stickerButton {
-  font-size: 30px;
-}
-
-/* DARK THEME */
-
-.darkTheme {
-  background: #2c2328;
-  color: white;
-}
-
-.darkTheme .homeScreen,
-.darkTheme .panelScreen,
-.darkTheme .editorScreen {
-  background: #2c2328;
-}
-
-.darkTheme .heroCard,
-.darkTheme .bookCard,
-.darkTheme .templateCard,
-.darkTheme .premiumCard,
-.darkTheme .profileCard,
-.darkTheme .popupWindow,
-.darkTheme .bottomToolbar,
-.darkTheme .editorHeader button,
-.darkTheme .pageTabs button,
-.darkTheme .homeActions button,
-.darkTheme .backBtn {
-  background: #3b3138;
-  color: white;
-}
-
-.darkTheme .settingsButton,
-.darkTheme .settingRow,
-.darkTheme .bgChoice,
-.darkTheme .stickerButton {
-  background: #4a3d45;
-  color: white;
-}
+import React, { useEffect, useState } from "react";
+
+const NAV_ITEMS = [
+  { id: "home", label: "Home" },
+  { id: "templates", label: "Templates" },
+  { id: "create", label: "Create" },
+  { id: "premium", label: "Premium" },
+  { id: "profile", label: "Profile" },
+];
+
+const FREE_STICKERS = [
+  "♡",
+  "✿",
+  "🎀",
+  "⭐",
+  "🧸",
+  "🦋",
+  "☁",
+  "✈",
+];
+
+const BACKGROUNDS = [
+  "cream",
+  "pink",
+  "blue",
+  "paper",
+  "grid",
+];
+
+function makeId() {
+  return crypto?.randomUUID
+    ? crypto.randomUUID()
+    : `${Date.now()}-${Math.random()}`;
+}
+
+function createPhoto(x, y) {
+  return {
+    id: makeId(),
+    type: "photo",
+    src: "",
+    x,
+    y,
+    w: 180,
+    h: 180,
+    rotate: 0,
+    crop: "cover",
+    cropX: 50,
+    cropY: 50,
+  };
+}
+
+function createText(text, x, y) {
+  return {
+    id: makeId(),
+    type: "text",
+    text,
+    x,
+    y,
+    w: 220,
+    h: 60,
+    rotate: 0,
+    fontSize: 28,
+    color: "#3d2d34",
+    fontFamily: "Georgia",
+    bold: false,
+  };
+}
+
+function createSticker(sticker, x, y) {
+  return {
+    id: makeId(),
+    type: "sticker",
+    text: sticker,
+    x,
+    y,
+    w: 60,
+    h: 60,
+    rotate: 0,
+    fontSize: 34,
+  };
+}
+
+function makeStarterBook() {
+  return {
+    title: "My First Scrapbook",
+    pages: [
+      {
+        id: makeId(),
+        background: "cream",
+        elements: [
+          createText("my first scrapbook ♡", 60, 35),
+          createPhoto(70, 120),
+          createSticker("✿", 300, 90),
+          createSticker("🎀", 40, 340),
+        ],
+      },
+    ],
+  };
+}
+
+export default function App() {
+  const [screen, setScreen] = useState("home");
+
+  const [books, setBooks] = useState([]);
+
+  const [book, setBook] = useState(null);
+
+  const [pageIndex, setPageIndex] = useState(0);
+
+  const [selectedId, setSelectedId] = useState(null);
+
+  const [modal, setModal] = useState(null);
+
+  const [darkMode, setDarkMode] = useState(false);
+
+  const [drag, setDrag] = useState(null);
+
+  const page = book?.pages?.[pageIndex];
+
+  useEffect(() => {
+    document.body.classList.toggle(
+      "darkTheme",
+      darkMode
+    );
+  }, [darkMode]);
+
+  function createBook() {
+    const newBook = makeStarterBook();
+
+    setBook(newBook);
+
+    setPageIndex(0);
+
+    setScreen("editor");
+  }
+
+  function updatePage(nextPage) {
+    const pages = [...book.pages];
+
+    pages[pageIndex] = nextPage;
+
+    setBook({
+      ...book,
+      pages,
+    });
+  }
+
+  function updateElement(id, changes) {
+    updatePage({
+      ...page,
+      elements: page.elements.map((el) =>
+        el.id === id
+          ? {
+              ...el,
+              ...changes,
+            }
+          : el
+      ),
+    });
+  }
+
+  function addPhoto() {
+    updatePage({
+      ...page,
+      elements: [
+        ...page.elements,
+        createPhoto(90, 140),
+      ],
+    });
+  }
+
+  function addText() {
+    updatePage({
+      ...page,
+      elements: [
+        ...page.elements,
+        createText("tap to edit", 80, 90),
+      ],
+    });
+  }
+
+  function addSticker(sticker) {
+    updatePage({
+      ...page,
+      elements: [
+        ...page.elements,
+        createSticker(sticker, 120, 160),
+      ],
+    });
+
+    setModal(null);
+  }
+
+  function uploadImage(id, file) {
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      updateElement(id, {
+        src: reader.result,
+      });
+    };
+
+    reader.readAsDataURL(file);
+  }
+
+  function getPoint(e) {
+    if (e.touches?.[0]) {
+      return {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+      };
+    }
+
+    return {
+      x: e.clientX,
+      y: e.clientY,
+    };
+  }
+
+  function startDrag(e, el, mode = "move") {
+    e.stopPropagation();
+
+    setSelectedId(el.id);
+
+    const point = getPoint(e);
+
+    setDrag({
+      id: el.id,
+      mode,
+      startX: point.x,
+      startY: point.y,
+      startEl: { ...el },
+    });
+  }
+  useEffect(() => {
+    function move(e) {
+      if (!drag || !book) return;
+
+      const point = getPoint(e);
+
+      const dx = point.x - drag.startX;
+
+      const dy = point.y - drag.startY;
+
+      const el = drag.startEl;
+
+      if (drag.mode === "move") {
+        updateElement(drag.id, {
+          x: el.x + dx,
+          y: el.y + dy,
+        });
+      }
+
+      if (drag.mode === "resize") {
+        updateElement(drag.id, {
+          w: Math.max(60, el.w + dx),
+          h: Math.max(60, el.h + dy),
+        });
+      }
+
+      if (drag.mode === "rotate") {
+        updateElement(drag.id, {
+          rotate: el.rotate + dx,
+        });
+      }
+    }
+
+    function stop() {
+      setDrag(null);
+    }
+
+    window.addEventListener("mousemove", move);
+    window.addEventListener("mouseup", stop);
+
+    window.addEventListener("touchmove", move);
+    window.addEventListener("touchend", stop);
+
+    return () => {
+      window.removeEventListener("mousemove", move);
+      window.removeEventListener("mouseup", stop);
+
+      window.removeEventListener("touchmove", move);
+      window.removeEventListener("touchend", stop);
+    };
+  }, [drag, book]);
+
+  function renderElement(el) {
+    return (
+      <div
+        key={el.id}
+        className={`scrapElement ${
+          selectedId === el.id ? "selected" : ""
+        }`}
+        style={{
+          left: el.x,
+          top: el.y,
+          width: el.w,
+          height: el.h,
+          transform: `rotate(${el.rotate}deg)`,
+        }}
+        onMouseDown={(e) => startDrag(e, el)}
+        onTouchStart={(e) => startDrag(e, el)}
+        onClick={() => setSelectedId(el.id)}
+      >
+        {el.type === "photo" && (
+          <label className="photoFrame">
+            {el.src ? (
+              <img
+                src={el.src}
+                style={{
+                  objectFit: el.crop,
+                  objectPosition:
+                    `${el.cropX}% ${el.cropY}%`,
+                }}
+              />
+            ) : (
+              <span>+ Photo</span>
+            )}
+
+            <input
+              hidden
+              type="file"
+              accept="image/*"
+              onChange={(e) =>
+                uploadImage(
+                  el.id,
+                  e.target.files[0]
+                )
+              }
+            />
+          </label>
+        )}
+
+        {el.type === "text" && (
+          <textarea
+            value={el.text}
+            onChange={(e) =>
+              updateElement(el.id, {
+                text: e.target.value,
+              })
+            }
+            style={{
+              fontSize: el.fontSize,
+              color: el.color,
+              fontFamily: el.fontFamily,
+              fontWeight: el.bold
+                ? "700"
+                : "400",
+            }}
+          />
+        )}
+
+        {el.type === "sticker" && (
+          <div
+            className="stickerArt"
+            style={{
+              fontSize: el.fontSize,
+            }}
+          >
+            {el.text}
+          </div>
+        )}
+
+        {selectedId === el.id && (
+          <>
+            <button
+              className="handle rotateHandle"
+              onMouseDown={(e) =>
+                startDrag(
+                  e,
+                  el,
+                  "rotate"
+                )
+              }
+              onTouchStart={(e) =>
+                startDrag(
+                  e,
+                  el,
+                  "rotate"
+                )
+              }
+            >
+              ↻
+            </button>
+
+            <button
+              className="handle resizeHandle"
+              onMouseDown={(e) =>
+                startDrag(
+                  e,
+                  el,
+                  "resize"
+                )
+              }
+              onTouchStart={(e) =>
+                startDrag(
+                  e,
+                  el,
+                  "resize"
+                )
+              }
+            >
+              ↘
+            </button>
+          </>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="app">
+
+      {screen === "home" && (
+        <div className="homeScreen">
+
+          <div className="heroCard">
+            <div className="heroDecor heroLeft">
+              🎀
+            </div>
+
+            <div className="heroDecor heroRight">
+              ♡
+            </div>
+
+            <div className="heroContent">
+              <div className="heroLabel">
+                cherish every moment
+              </div>
+
+              <h1>
+                pocket
+                <br />
+                scrapbook
+              </h1>
+
+              <button
+                className="mainPinkBtn"
+                onClick={createBook}
+              >
+                Create Scrapbook
+              </button>
+            </div>
+          </div>
+
+          <div className="homeActions">
+            <button
+              onClick={() =>
+                setScreen("templates")
+              }
+            >
+              Templates
+            </button>
+
+            <button
+              onClick={() =>
+                setScreen("premium")
+              }
+            >
+              Premium
+            </button>
+
+            <button
+              onClick={() =>
+                setScreen("profile")
+              }
+            >
+              Profile
+            </button>
+          </div>
+
+          <h2 className="sectionTitle">
+            My Scrapbooks
+          </h2>
+
+          <div className="booksGrid">
+
+            <div className="bookCard">
+              <div className="bookPreview freePreview">
+                ♡ My First Scrapbook
+              </div>
+
+              <div className="bookInfo">
+                <div>
+                  <div className="bookTitle">
+                    {book?.title ||
+                      "My First Scrapbook"}
+                  </div>
+
+                  <div className="bookPages">
+                    {book?.pages?.length || 1}
+                    {" "}page
+                  </div>
+                </div>
+
+                <button
+                  className="mainPinkBtn"
+                  onClick={() =>
+                    setScreen("editor")
+                  }
+                >
+                  Open
+                </button>
+              </div>
+            </div>
+
+          </div>
+          )}
+
+      {screen === "templates" && (
+        <div className="panelScreen">
+
+          <button
+            className="backBtn"
+            onClick={() => setScreen("home")}
+          >
+            ← Back
+          </button>
+
+          <h1 className="pageTitle">
+            Templates
+          </h1>
+
+          <div className="templateGrid">
+
+            <div className="templateCard">
+              <div className="templatePreview pinkBabyPreview">
+                baby girl first year ♡
+              </div>
+
+              <div className="templateInfo">
+                <div>
+                  <div className="bookTitle">
+                    Baby Girl First Year
+                  </div>
+
+                  <div className="bookPages">
+                    Premium Template
+                  </div>
+                </div>
+
+                <button className="mainPinkBtn">
+                  Locked
+                </button>
+              </div>
+            </div>
+
+            <div className="templateCard">
+              <div className="templatePreview blueBabyPreview">
+                baby boy first year ♡
+              </div>
+
+              <div className="templateInfo">
+                <div>
+                  <div className="bookTitle">
+                    Baby Boy First Year
+                  </div>
+
+                  <div className="bookPages">
+                    Premium Template
+                  </div>
+                </div>
+
+                <button className="mainPinkBtn">
+                  Locked
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {screen === "premium" && (
+        <div className="panelScreen">
+
+          <button
+            className="backBtn"
+            onClick={() => setScreen("home")}
+          >
+            ← Back
+          </button>
+
+          <h1 className="pageTitle">
+            Premium
+          </h1>
+
+          <div className="premiumGrid">
+
+            <div className="premiumCard">
+              <h2>Monthly Premium</h2>
+
+              <div className="premiumPrice">
+                $4.99
+              </div>
+
+              <p>
+                Unlock baby templates,
+                premium stickers,
+                advanced text effects,
+                and future scrapbook packs.
+              </p>
+
+              <button className="mainPinkBtn">
+                Coming Soon
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {screen === "profile" && (
+        <div className="panelScreen">
+
+          <button
+            className="backBtn"
+            onClick={() => setScreen("home")}
+          >
+            ← Back
+          </button>
+
+          <div className="profileCard">
+
+            <div className="profileAvatar">
+              ♡
+            </div>
+
+            <h2>Pocket Scrapbook</h2>
+
+            <p>
+              Your memories beautifully saved.
+            </p>
+
+            <div className="settingsList">
+
+              <div className="settingRow">
+                <span>
+                  Dark Theme
+                </span>
+
+                <label className="toggleSwitch">
+                  <input
+                    type="checkbox"
+                    checked={darkMode}
+                    onChange={() =>
+                      setDarkMode(
+                        !darkMode
+                      )
+                    }
+                  />
+
+                  <span className="toggleSlider"></span>
+                </label>
+              </div>
+
+              <button className="settingsButton">
+                Notifications
+              </button>
+
+              <button className="settingsButton">
+                Privacy
+              </button>
+
+              <button className="settingsButton">
+                Backup & Sync
+              </button>
+
+              <button
+                className="logoutButton"
+                onClick={() =>
+                  setScreen("home")
+                }
+              >
+                Log Out
+              </button>
+
+            </div>
+          </div>
+        </div>
+      )}
+
+      {screen === "editor" &&
+        book && (
+          <div className="editorScreen">
+
+            <div className="editorHeader">
+
+              <button
+                onClick={() =>
+                  setScreen("home")
+                }
+              >
+                Home
+              </button>
+
+              <button
+                onClick={() => {
+                  const title =
+                    window.prompt(
+                      "Rename scrapbook:",
+                      book.title
+                    );
+
+                  if (
+                    title &&
+                    title.trim()
+                  ) {
+                    setBook({
+                      ...book,
+                      title: title.trim(),
+                    });
+                  }
+                }}
+              >
+                Rename
+              </button>
+
+              <button
+                onClick={() => {
+                  const pages = [
+                    ...book.pages,
+                  ];
+
+                  pages.push({
+                    id: makeId(),
+                    background:
+                      "cream",
+                    elements: [],
+                  });
+
+                  setBook({
+                    ...book,
+                    pages,
+                  });
+
+                  setPageIndex(
+                    pages.length - 1
+                  );
+                }}
+              >
+                Add Page
+              </button>
+
+            </div>
+
+            <div className="pageTabs">
+
+              <button
+                disabled={pageIndex === 0}
+                onClick={() =>
+                  setPageIndex(
+                    pageIndex - 1
+                  )
+                }
+              >
+                ←
+              </button>
+
+              <div>
+                Page{" "}
+                {pageIndex + 1}
+              </div>
+
+              <button
+                disabled={
+                  pageIndex ===
+                  book.pages.length - 1
+                }
+                onClick={() =>
+                  setPageIndex(
+                    pageIndex + 1
+                  )
+                }
+              >
+                →
+              </button>
+
+            </div>
+
+            <div
+              className={`scrapbookPage bg-${page.background}`}
+              onClick={() =>
+                setSelectedId(null)
+              }
+            >
+              {page.elements.map(
+                renderElement
+              )}
+            </div>
+             <div className="bottomToolbar">
+
+              <button
+                onClick={() =>
+                  setShowBackgrounds(true)
+                }
+              >
+                Backgrounds
+              </button>
+
+              <button
+                onClick={() =>
+                  setShowStickers(true)
+                }
+              >
+                Stickers
+              </button>
+
+              <button
+                onClick={() =>
+                  addText()
+                }
+              >
+                Text
+              </button>
+
+              <button
+                onClick={() =>
+                  addPhoto()
+                }
+              >
+                Photo
+              </button>
+
+            </div>
+
+            {showBackgrounds && (
+              <div className="popupOverlay">
+                <div className="popupWindow">
+
+                  <div className="popupHeader">
+                    <h2>
+                      Choose Background
+                    </h2>
+
+                    <button
+                      onClick={() =>
+                        setShowBackgrounds(
+                          false
+                        )
+                      }
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  <div className="backgroundGrid">
+
+                    {[
+                      "cream",
+                      "pink",
+                      "blue",
+                      "lavender",
+                      "grid",
+                      "dots",
+                    ].map((bg) => (
+                      <button
+                        key={bg}
+                        className={`bgChoice ${bg}`}
+                        onClick={() => {
+                          updatePageBackground(
+                            bg
+                          );
+
+                          setShowBackgrounds(
+                            false
+                          );
+                        }}
+                      >
+                        {bg}
+                      </button>
+                    ))}
+
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {showStickers && (
+              <div className="popupOverlay">
+                <div className="popupWindow largePopup">
+
+                  <div className="popupHeader">
+                    <h2>
+                      Sticker Pack
+                    </h2>
+
+                    <button
+                      onClick={() =>
+                        setShowStickers(
+                          false
+                        )
+                      }
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  <div className="stickerGrid">
+
+                    {[
+                      "♡",
+                      "✿",
+                      "☁",
+                      "✈",
+                      "☕",
+                      "🎀",
+                      "📸",
+                      "🧸",
+                      "🌸",
+                      "🦋",
+                      "⭐",
+                      "🌿",
+                      "🐻",
+                      "🐰",
+                      "💌",
+                      "🎂",
+                      "🎈",
+                      "🍂",
+                    ].map(
+                      (sticker) => (
+                        <button
+                          key={sticker}
+                          className="stickerButton"
+                          onClick={() => {
+                            addSticker(
+                              sticker
+                            );
+
+                            setShowStickers(
+                              false
+                            );
+                          }}
+                        >
+                          {sticker}
+                        </button>
+                      )
+                    )}
+
+                  </div>
+                </div>
+              </div>
+            )}
+
+          </div>
+        )}
+    </div>
+  );
+}
+
+createRoot(
+  document.getElementById(
+    "root"
+  )
+).render(
+  <App />
+);
