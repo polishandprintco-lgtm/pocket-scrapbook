@@ -709,3 +709,7 @@ textarea {
   bottom: 8px;
   font-size: 16px;
 }
+.templatePreview,
+.templatePreview * {
+  pointer-events: none;
+}
