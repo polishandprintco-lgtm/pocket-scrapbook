@@ -244,8 +244,14 @@ function myFirstTemplate() {
 
 function babyTemplate(girl = true) {
   const bg = girl ? "pinkPlaid" : "bluePlaid";
+  const title = girl ? "Baby Girl First Year" : "Baby Boy First Year";
+  const accent = girl ? "#d96f94" : "#6f9dcc";
+  const mainSticker = girl ? "🎀" : "★";
+  const softSticker = girl ? "🌸" : "🧸";
+  const label = girl ? "sweet girl ♡" : "sweet boy ♡";
+
   return {
-    title: girl ? "Baby Girl First Year" : "Baby Boy First Year",
+    title,
     bg,
     photoCount: 0,
     premium: true,
@@ -253,12 +259,26 @@ function babyTemplate(girl = true) {
       id: makeId(),
       bg,
       elements: [
-        textEl(`${i + 1}\nmonth${i === 0 ? "" : "s"}`, 35, 35, { size: 24, w: 90 }),
-        photoEl(135, 90, 205, 205),
-        textEl(girl ? "sweet girl ♡" : "sweet boy ♡", 135, 325, { size: 16, w: 175 }),
-        stickerEl(girl ? "🎀" : "★", 35, 320),
-        stickerEl("🌿", 300, 280),
-        stickerEl("♡", 290, 370),
+        textEl(`${i + 1}\nmonth${i === 0 ? "" : "s"}`, 28, 32, {
+          size: 23,
+          w: 95,
+          h: 80,
+          color: "#2f2528",
+        }),
+
+        photoEl(135, 88, 200, 190),
+
+        textEl(label, 120, 315, {
+          size: 15,
+          w: 185,
+          h: 45,
+          color: "#2f2528",
+        }),
+
+        stickerEl(mainSticker, 36, 310),
+        stickerEl(softSticker, 285, 292),
+        stickerEl("♡", 300, 365),
+        stickerEl("🌿", 40, 230),
       ],
     })),
   };
