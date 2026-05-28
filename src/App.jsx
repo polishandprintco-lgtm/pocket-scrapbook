@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { signOut } from "firebase/auth";
+import { auth } from "./firebase";
 
 const backgrounds = [
   { id: "pinkPlaid", name: "Pink Plaid" },
@@ -374,11 +376,10 @@ export default function App() {
             <div className="setting">Privacy</div>
             <div className="setting">Backup & Sync</div>
             <button
+  <button
   className="logoutBtn"
-  onClick={() => {
-    setScreen("home");
-    setSelected(null);
-    setModal(null);
+  onClick={async () => {
+    await signOut(auth);
   }}
 >
   Log Out
