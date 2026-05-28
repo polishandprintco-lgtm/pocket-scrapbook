@@ -498,22 +498,19 @@ if (userSnap.exists()) {
       )
     ) return;
 
-    if (book.firebaseId) {
+    const bookDocId = book.firebaseId || book.id;
+
+if (bookDocId) {
 
       await deleteDoc(
-        doc(
-          db,
-          "scrapbooks",
-          book.firebaseId
-        )
-      );
+  doc(db, "scrapbooks", bookDocId)
+);
 
     }
 
     const filtered = books.filter(
-      (b) => b.id !== book.id
-    );
-
+  (b) => (b.firebaseId || b.id) !== (book.firebaseId || book.id)
+);
     setBooks(filtered);
 
     setScreen("home");
