@@ -804,6 +804,18 @@ export default function App() {
 
   function renderElement(el) {
     const isSelected = selectedElement?.id === el.id;
+    
+ function TemplatePreview({ type }) {
+    if (type === "first") {
+      return (
+        <div className="templatePreview bg-cream">
+          <div className="tinyTitle">About Me ♡</div>
+          <div className="tinyPhoto"></div>
+          <div className="tinyPaper"></div>
+          <div className="tinyFlower">🌿</div>
+        </div>
+      );
+    }
 
     return (
       <div
@@ -907,18 +919,7 @@ export default function App() {
       </div>
     );
   }
-  function TemplatePreview({ type }) {
-    if (type === "first") {
-      return (
-        <div className="templatePreview bg-cream">
-          <div className="tinyTitle">About Me ♡</div>
-          <div className="tinyPhoto"></div>
-          <div className="tinyPaper"></div>
-          <div className="tinyFlower">🌿</div>
-        </div>
-      );
-    }
-
+ 
     if (type === "girl") {
       return (
         <div className="templatePreview bg-pinkPlaid">
