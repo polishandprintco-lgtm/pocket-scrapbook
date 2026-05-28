@@ -56,33 +56,66 @@ function sticker(kind, x, y) {
 }
 
 function firstTemplate() {
-  return {
-    title: "My First Scrapbook",
-    pages: [
-      {
-        bg: "cream",
-        elements: [
-          text("About Me ♡", 86, 28),
-          photo(54, 115, 150, 150),
-          text("My name:\nBirthday:\nFavorite color:", 42, 305),
-          sticker("flower", 298, 292),
-          sticker("tape", 230, 84),
-        ],
-      },
-      {
-        bg: "cream",
-        elements: [
-          text("My Family ♡", 82, 28),
-          photo(50, 105, 170, 150),
-          photo(70, 330, 90, 95),
-          photo(172, 330, 90, 95),
-          photo(274, 330, 90, 95),
-          sticker("leaf", 310, 300),
-          sticker("tape", 190, 85),
-        ],
-      },
-    ],
-  };
+  return {
+    title: "My First Scrapbook",
+    pages: [
+      {
+        bg: "cream",
+        elements: [
+          text("About Me ♡", 86, 28),
+          photo(54, 115, 150, 150),
+          text("My name:\nBirthday:\nFavorite color:", 42, 305),
+          sticker("flower", 298, 292),
+          sticker("tape", 230, 84),
+        ],
+      },
+      {
+        bg: "cream",
+        elements: [
+          text("My Family ♡", 82, 28),
+          photo(50, 105, 170, 150),
+          text("People I love most:", 60, 275),
+          photo(70, 340, 90, 95),
+          photo(172, 340, 90, 95),
+          photo(274, 340, 90, 95),
+          sticker("leaf", 310, 300),
+        ],
+      },
+      {
+        bg: "cream",
+        elements: [
+          text("My Best Friends ♡", 55, 28),
+          photo(55, 120, 130, 160),
+          photo(225, 120, 130, 160),
+          text("Friend:\nFavorite memory:", 60, 315),
+          text("Friend:\nFavorite memory:", 225, 315),
+          sticker("heart", 320, 70),
+        ],
+      },
+      {
+        bg: "cream",
+        elements: [
+          text("Places I’ve Been ♡", 50, 28),
+          photo(55, 110, 140, 140),
+          photo(220, 110, 140, 140),
+          text("Favorite place:\nWhy I loved it:", 60, 300),
+          sticker("camera", 300, 330),
+          sticker("tape", 130, 85),
+        ],
+      },
+      {
+        bg: "cream",
+        elements: [
+          text("Special Memories ♡", 45, 28),
+          photo(45, 100, 130, 130),
+          photo(210, 100, 130, 130),
+          photo(45, 280, 130, 130),
+          photo(210, 280, 130, 130),
+          sticker("star", 330, 240),
+        ],
+      },
+    ],
+  };
 }
 
 function babyTemplate(girl = true) {
