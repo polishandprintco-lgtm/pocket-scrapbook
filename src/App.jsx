@@ -18,6 +18,7 @@ import {
   orderBy,
   query,
   serverTimestamp,
+  setDoc,
 } from "firebase/firestore";
 
 import {
@@ -30,36 +31,11 @@ import { auth, db, storage } from "./firebase";
 
 const BACKGROUNDS = [
   { id: "pinkPlaid", name: "Pink Plaid" },
-  { id: "cream", name: "Cream Paper" },
   { id: "bluePlaid", name: "Blue Plaid" },
+  { id: "cream", name: "Cream" },
   { id: "lavender", name: "Lavender" },
   { id: "grid", name: "Grid" },
   { id: "dots", name: "Dots" },
-];
-
-const STICKERS = [
-  "♡", "♥", "✿", "❀", "★", "✦", "☁", "☾",
-  "🎀", "🧸", "📷", "✈️", "🌸", "🌿", "💌", "🦋",
-  "🐻", "🐰", "🐶", "🐱", "🦊", "🐾", "🎂", "🎈",
-  "🍂", "🌼", "📝", "☕", "📚", "🎞️", "🌎", "🧡",
-];
-
-const FONTS = [
-  "Georgia",
-  "Arial",
-  "Courier New",
-  "Trebuchet MS",
-  "Times New Roman",
-  "Comic Sans MS",
-];
-
-const COLORS = [
-  "#2f2528",
-  "#d96f94",
-  "#7fa6ce",
-  "#8e78b8",
-  "#b58b62",
-  "#ffffff",
 ];
 
 function makeId() {
@@ -68,7 +44,7 @@ function makeId() {
     : `${Date.now()}-${Math.random()}`;
 }
 
-function photoEl(x, y, w = 150, h = 150) {
+function photoEl(x, y, w, h) {
   return {
     id: makeId(),
     type: "photo",
@@ -91,10 +67,10 @@ function textEl(value, x, y, options = {}) {
     value,
     x,
     y,
-    w: options.w || 210,
+    w: options.w || 200,
     h: options.h || 70,
     r: 0,
-    size: options.size || 24,
+    size: options.size || 22,
     color: options.color || "#2f2528",
     font: options.font || "Georgia",
     bold: false,
@@ -109,8 +85,8 @@ function stickerEl(value, x, y) {
     value,
     x,
     y,
-    w: 65,
-    h: 65,
+    w: 60,
+    h: 60,
     r: 0,
     size: 36,
   };
@@ -118,6 +94,7 @@ function stickerEl(value, x, y) {
 
 function makeBook(title, bg = "cream") {
   return {
+    id: makeId(),
     title,
     bg,
     photoCount: 0,
@@ -126,9 +103,9 @@ function makeBook(title, bg = "cream") {
         id: makeId(),
         bg,
         elements: [
-          textEl(title, 70, 40, { size: 26 }),
-          photoEl(85, 140, 190, 190),
-          stickerEl("♡", 260, 340),
+          textEl(title, 105, 40, { size: 26, w: 220 }),
+          photoEl(95, 150, 210, 210),
+          stickerEl("♡", 300, 390),
         ],
       },
     ],
@@ -137,7 +114,7 @@ function makeBook(title, bg = "cream") {
 
 function myFirstTemplate() {
   return {
-    id: makeID(),
+    id: makeId(),
     title: "My First Scrapbook",
     bg: "cream",
     photoCount: 0,
@@ -146,33 +123,33 @@ function myFirstTemplate() {
         id: makeId(),
         bg: "cream",
         elements: [
-          textEl("About Me ♡", 115, 28, { size: 30, w: 220, h: 55 }),
-          photoEl(48, 120, 155, 155),
-          textEl("Some of my favorite\nthings:\nColor:\nFood:\nBook:\nSong:", 232, 120, {
+          textEl("About Me ♡", 110, 28, { size: 30, w: 230, h: 55 }),
+          photoEl(45, 120, 155, 155),
+          textEl("Some of my favorite\nthings:\nColor:\nFood:\nBook:\nSong:", 230, 120, {
             size: 13,
-            w: 145,
-            h: 135,
+            w: 150,
+            h: 140,
           }),
-          textEl("My name:\nBirthday:\nFavorite color:", 85, 335, {
+          textEl("My name:\nBirthday:\nFavorite color:", 80, 335, {
             size: 20,
-            w: 230,
+            w: 240,
             h: 95,
           }),
-          stickerEl("✿", 300, 325),
-          stickerEl("♡", 318, 405),
+          stickerEl("✿", 300, 320),
+          stickerEl("♡", 315, 405),
         ],
       },
       {
         id: makeId(),
         bg: "cream",
         elements: [
-          textEl("My Family ♡", 112, 28, { size: 30, w: 220 }),
+          textEl("My Family ♡", 115, 28, { size: 30, w: 220 }),
           photoEl(45, 110, 165, 140),
           textEl("About my family:", 230, 110, { size: 15, w: 145 }),
           textEl("The people I love most:", 92, 275, { size: 16, w: 240 }),
-          photoEl(60, 330, 85, 90),
+          photoEl(55, 330, 85, 90),
           photoEl(165, 330, 85, 90),
-          photoEl(270, 330, 85, 90),
+          photoEl(275, 330, 85, 90),
           stickerEl("🌿", 320, 285),
         ],
       },
@@ -180,8 +157,7 @@ function myFirstTemplate() {
         id: makeId(),
         bg: "cream",
         elements: [
-          textEl("My Best Friends ♡", 82, 28, { size: 28, w: 260 }),
-          textEl("friends are the family we choose ♡", 88, 78, { size: 13, w: 260 }),
+          textEl("My Best Friends ♡", 75, 28, { size: 28, w: 280 }),
           photoEl(55, 130, 130, 155),
           photoEl(230, 130, 130, 155),
           textEl("Name:\nWe met:", 60, 305, { size: 13, w: 120 }),
@@ -193,59 +169,14 @@ function myFirstTemplate() {
         id: makeId(),
         bg: "cream",
         elements: [
-          textEl("My Personality ♡", 82, 28, { size: 28, w: 260 }),
+          textEl("My Personality ♡", 78, 28, { size: 28, w: 280 }),
           textEl("I am...", 50, 120, { size: 17, w: 130 }),
-          textEl("Words that describe me:\n○\n○\n○\n○", 220, 110, { size: 14, w: 150 }),
+          textEl("Words that describe me:\n○\n○\n○\n○", 220, 110, {
+            size: 14,
+            w: 150,
+          }),
           textEl("I’m proud of:", 90, 330, { size: 16, w: 250 }),
           stickerEl("🌿", 42, 240),
-        ],
-      },
-      {
-        id: makeId(),
-        bg: "cream",
-        elements: [
-          textEl("My Hobbies ♡", 100, 28, { size: 30, w: 230 }),
-          textEl("Things I love to do:", 45, 125, { size: 16, w: 160 }),
-          stickerEl("📷", 220, 135),
-          stickerEl("🎨", 295, 135),
-          stickerEl("📚", 220, 205),
-          stickerEl("✈️", 295, 205),
-          textEl("Notes:", 60, 340, { size: 18 }),
-          stickerEl("🌿", 40, 260),
-        ],
-      },
-      {
-        id: makeId(),
-        bg: "cream",
-        elements: [
-          textEl("Places I’ve Been ♡", 72, 28, { size: 28, w: 280 }),
-          stickerEl("🌎", 155, 130),
-          textEl("Favorite place\nand why:", 55, 320, { size: 15, w: 160 }),
-          photoEl(265, 315, 95, 110),
-          stickerEl("♡", 45, 205),
-        ],
-      },
-      {
-        id: makeId(),
-        bg: "cream",
-        elements: [
-          textEl("Special Memories ♡", 68, 28, { size: 28, w: 290 }),
-          photoEl(45, 105, 125, 120),
-          photoEl(215, 105, 125, 120),
-          photoEl(45, 260, 125, 120),
-          photoEl(215, 260, 125, 120),
-          textEl("Some moments I never want to forget:", 285, 165, { size: 13, w: 90 }),
-        ],
-      },
-      {
-        id: makeId(),
-        bg: "cream",
-        elements: [
-          textEl("Goals & Dreams ♡", 72, 28, { size: 28, w: 280 }),
-          textEl("Things I want to do:\n○\n○\n○", 45, 130, { size: 15, w: 150 }),
-          textEl("My dreams:", 215, 130, { size: 15, w: 150 }),
-          textEl("Notes to my future self:", 65, 350, { size: 14, w: 260 }),
-          stickerEl("★", 330, 100),
         ],
       },
     ],
@@ -260,6 +191,7 @@ function babyTemplate(girl = true) {
   const label = girl ? "sweet girl ♡" : "sweet boy ♡";
 
   return {
+    id: makeId(),
     title,
     bg,
     photoCount: 0,
@@ -301,25 +233,17 @@ export default function App() {
 
   const [selectedElement, setSelectedElement] = useState(null);
 
-  const [showLogin, setShowLogin] = useState(false);
-
-  const [showSignup, setShowSignup] = useState(false);
-
-  const [showPassword, setShowPassword] = useState(false);
-
   const [email, setEmail] = useState("");
 
   const [password, setPassword] = useState("");
+
+  const [showPassword, setShowPassword] = useState(false);
 
   const [newBookName, setNewBookName] = useState("");
 
   const [newBookBg, setNewBookBg] = useState("pinkPlaid");
 
   const [showCreateModal, setShowCreateModal] = useState(false);
-
-  const [showNotifications, setShowNotifications] = useState(false);
-
-  const [showPrivacy, setShowPrivacy] = useState(false);
 
   const [showTemplateMenu, setShowTemplateMenu] = useState(false);
 
@@ -335,12 +259,12 @@ export default function App() {
 
       setUser(u);
 
-      if (u) {
-        const userSnap = await getDoc(doc(db, "users", u.uid));
+      if (!u) {
+        setBooks([]);
+        return;
+      }
 
-if (userSnap.exists()) {
-  setProfileImage(userSnap.data().profileImage || "");
-}
+      try {
 
         const q = query(
           collection(db, "scrapbooks"),
@@ -356,22 +280,40 @@ if (userSnap.exists()) {
           const data = docu.data();
 
           if (data.uid === u.uid) {
+
             loaded.push({
               ...data,
-              firebaseID: docu.id,
+              firebaseId: docu.id,
             });
+
           }
 
         });
 
         setBooks(loaded);
 
-        setScreen("home");
+        try {
 
-      } else {
+          const profileRef = doc(db, "profiles", u.uid);
 
-        setBooks([]);
+          const profileSnap = await getDoc(profileRef);
 
+          if (profileSnap.exists()) {
+
+            const profileData = profileSnap.data();
+
+            if (profileData.photoURL) {
+              setProfileImage(profileData.photoURL);
+            }
+
+          }
+
+        } catch (err) {
+          console.log(err);
+        }
+
+      } catch (err) {
+        console.log(err);
       }
 
     });
@@ -390,9 +332,6 @@ if (userSnap.exists()) {
       password
     );
 
-    setShowSignup(false);
-
-    setScreen("home");
   }
 
   async function login() {
@@ -405,16 +344,12 @@ if (userSnap.exists()) {
       password
     );
 
-    setShowLogin(false);
-
-    setScreen("home");
   }
 
   async function logoutUser() {
 
     await signOut(auth);
 
-    setScreen("home");
   }
 
   async function saveBooks(updatedBooks) {
@@ -461,10 +396,7 @@ if (userSnap.exists()) {
     );
 
     const updated = [
-      {
-        ...newBook,
-        firebaseId: null,
-      },
+      newBook,
       ...books,
     ];
 
@@ -474,11 +406,12 @@ if (userSnap.exists()) {
 
     setSelectedPage(0);
 
-    setShowCreateModal(false);
-
     setScreen("editor");
 
+    setShowCreateModal(false);
+
     setNewBookName("");
+
   }
 
   function openBook(book) {
@@ -488,50 +421,67 @@ if (userSnap.exists()) {
     setSelectedPage(0);
 
     setScreen("editor");
+
   }
 
+  async function deleteBook(book) {
 
-    const filtered = books.filter(
-  (b) => (b.firebaseId || b.id) !== (book.firebaseId || book.id)
-);
-    setBooks(filtered);
+    const bookKey =
+      book.firebaseId || book.id;
 
-    setScreen("home");
+    if (
+      !window.confirm(
+        `Delete ${book.title}?`
+      )
+    ) return;
+
+    try {
+
+      if (book.firebaseId) {
+
+        await deleteDoc(
+          doc(
+            db,
+            "scrapbooks",
+            book.firebaseId
+          )
+        );
+
+      }
+
+      const filtered = books.filter(
+        (b) => {
+
+          const currentKey =
+            b.firebaseId || b.id;
+
+          return currentKey !== bookKey;
+
+        }
+      );
+
+      setBooks(filtered);
+
+      if (
+        selectedBook &&
+        (selectedBook.firebaseId ||
+          selectedBook.id) === bookKey
+      ) {
+
+        setSelectedBook(null);
+
+        setScreen("home");
+
+      }
+
+    } catch (err) {
+
+      console.log(err);
+
+    }
+
   }
-async function deleteBook(book) {
-  const bookKey = book.firebaseId || book.id;
 
-  if (
-    !window.confirm(
-      `Are you sure you want to delete ${book.title}?`
-    )
-  )
-    return;
-
-  if (book.firebaseId) {
-    await deleteDoc(
-      doc(db, "scrapbooks", book.firebaseId)
-    );
-  }
-
-  const filtered = books.filter((b) => {
-    const currentKey =
-      b.firebaseId || b.id;
-
-    return currentKey !== bookKey;
-  });
-
-  setBooks(filtered);
-
-  if (
-    selectedBook &&
-    (selectedBook.firebaseId ||
-      selectedBook.id) === bookKey
-  ) {
-    setSelectedBook(null);
-    setScreen("home");
-  }
-}
   async function renameBook(book) {
 
     const renamed = prompt(
@@ -542,7 +492,8 @@ async function deleteBook(book) {
     if (!renamed) return;
 
     const updated = books.map((b) =>
-      b.id === book.id
+      (b.firebaseId || b.id) ===
+      (book.firebaseId || book.id)
         ? {
             ...b,
             title: renamed,
@@ -552,190 +503,136 @@ async function deleteBook(book) {
 
     await saveBooks(updated);
 
-    if (selectedBook?.id === book.id) {
-      setSelectedBook({
-        ...book,
-        title: renamed,
-      });
-    }
+    setBooks(updated);
 
   }
 
   async function uploadProfilePicture(e) {
-  const file = e.target.files[0];
 
-  if (!file || !user) return;
+    try {
 
-  try {
-    const storageRef = ref(
-      storage,
-      `profiles/${user.uid}/profile.jpg`
-    );
+      const file = e.target.files[0];
 
-    await uploadBytes(storageRef, file);
+      if (!file || !user) return;
 
-    const url = await getDownloadURL(storageRef);
-
-    setProfileImage(url);
-
-    await updateDoc(doc(db, "users", user.uid), {
-      profileImage: url,
-    });
-
-    alert("Profile picture updated ♡");
-  } catch (error) {
-    alert(error.message);
-  }
-}
-
-  function updateElement(updatedEl) {
-
-    const updatedBooks = books.map((b) => {
-
-      if (b.id !== selectedBook.id) return b;
-
-      const updatedPages = b.pages.map(
-        (p, i) => {
-
-          if (i !== selectedPage) return p;
-
-          return {
-            ...p,
-            elements: p.elements.map((el) =>
-              el.id === updatedEl.id
-                ? updatedEl
-                : el
-            ),
-          };
-
-        }
+      const storageRef = ref(
+        storage,
+        `profiles/${user.uid}/${Date.now()}-${file.name}`
       );
 
-      return {
-        ...b,
-        pages: updatedPages,
-      };
+      await uploadBytes(
+        storageRef,
+        file
+      );
 
-    });
+      const url =
+        await getDownloadURL(
+          storageRef
+        );
 
-    setBooks(updatedBooks);
+      setProfileImage(url);
 
-    const updatedBook = updatedBooks.find(
-      (b) => b.id === selectedBook.id
+      await setDoc(
+        doc(db, "profiles", user.uid),
+        {
+          photoURL: url,
+        },
+        { merge: true }
+      );
+
+    } catch (err) {
+
+      console.log(err);
+
+      alert(
+        "Upload failed. Check Firebase Storage rules."
+      );
+
+    }
+
+  }
+  function selectedPageData() {
+    if (!selectedBook) return null;
+    return selectedBook.pages[selectedPage];
+  }
+
+  function updateBook(updatedBook) {
+    const updatedBooks = books.map((b) =>
+      (b.firebaseId || b.id) ===
+      (updatedBook.firebaseId || updatedBook.id)
+        ? updatedBook
+        : b
     );
 
+    setBooks(updatedBooks);
     setSelectedBook(updatedBook);
-
     saveBooks(updatedBooks);
   }
-  function updateSelectedElement(changes) {
 
-    if (!selectedElement) return;
+  function updateElement(updatedEl) {
+    if (!selectedBook) return;
 
-    updateElement({
-      ...selectedElement,
-      ...changes,
+    const updatedPages = selectedBook.pages.map((p, i) => {
+      if (i !== selectedPage) return p;
+
+      return {
+        ...p,
+        elements: p.elements.map((el) =>
+          el.id === updatedEl.id ? updatedEl : el
+        ),
+      };
     });
 
-  }
-
-  function selectedPageData() {
-
-    if (!selectedBook) return null;
-
-    return selectedBook.pages[selectedPage];
-
+    updateBook({
+      ...selectedBook,
+      pages: updatedPages,
+    });
   }
 
   function addElementToPage(element) {
-
     if (!selectedBook) return;
 
-    const updatedBooks = books.map((b) => {
-
-      if (b.id !== selectedBook.id) return b;
-
-      const updatedPages = b.pages.map((p, i) => {
-
-        if (i !== selectedPage) return p;
-
-        return {
-          ...p,
-          elements: [
-            ...p.elements,
-            element,
-          ],
-        };
-
-      });
+    const updatedPages = selectedBook.pages.map((p, i) => {
+      if (i !== selectedPage) return p;
 
       return {
-        ...b,
-        pages: updatedPages,
+        ...p,
+        elements: [...p.elements, element],
       };
-
     });
 
-    setBooks(updatedBooks);
-
-    const updatedBook = updatedBooks.find(
-      (b) => b.id === selectedBook.id
-    );
-
-    setSelectedBook(updatedBook);
+    updateBook({
+      ...selectedBook,
+      pages: updatedPages,
+    });
 
     setSelectedElement(element);
-
-    saveBooks(updatedBooks);
-
   }
 
   function deleteSelectedElement() {
+    if (!selectedElement || !selectedBook) return;
 
-    if (!selectedElement) return;
-
-    const updatedBooks = books.map((b) => {
-
-      if (b.id !== selectedBook.id) return b;
-
-      const updatedPages = b.pages.map((p, i) => {
-
-        if (i !== selectedPage) return p;
-
-        return {
-          ...p,
-          elements: p.elements.filter(
-            (el) => el.id !== selectedElement.id
-          ),
-        };
-
-      });
+    const updatedPages = selectedBook.pages.map((p, i) => {
+      if (i !== selectedPage) return p;
 
       return {
-        ...b,
-        pages: updatedPages,
+        ...p,
+        elements: p.elements.filter(
+          (el) => el.id !== selectedElement.id
+        ),
       };
-
     });
 
-    setBooks(updatedBooks);
-
-    const updatedBook = updatedBooks.find(
-      (b) => b.id === selectedBook.id
-    );
-
-    setSelectedBook(updatedBook);
+    updateBook({
+      ...selectedBook,
+      pages: updatedPages,
+    });
 
     setSelectedElement(null);
-
     setShowElementMenu(false);
-
-    saveBooks(updatedBooks);
-
   }
 
   function duplicateSelectedElement() {
-
     if (!selectedElement) return;
 
     const copy = {
@@ -746,68 +643,52 @@ async function deleteBook(book) {
     };
 
     addElementToPage(copy);
-
     setShowElementMenu(false);
-
   }
 
   function addPage() {
+    if (!selectedBook) return;
 
-    const updatedBooks = books.map((b) => {
+    const updatedBook = {
+      ...selectedBook,
+      pages: [
+        ...selectedBook.pages,
+        {
+          id: makeId(),
+          bg: selectedBook.bg || "cream",
+          elements: [],
+        },
+      ],
+    };
 
-      if (b.id !== selectedBook.id) return b;
-
-      return {
-        ...b,
-        pages: [
-          ...b.pages,
-          {
-            id: makeId(),
-            bg: b.bg || "cream",
-            elements: [],
-          },
-        ],
-      };
-
-    });
-
-    setBooks(updatedBooks);
-
-    const updatedBook = updatedBooks.find(
-      (b) => b.id === selectedBook.id
-    );
-
-    setSelectedBook(updatedBook);
-
+    updateBook(updatedBook);
     setSelectedPage(updatedBook.pages.length - 1);
-
-    saveBooks(updatedBooks);
-
   }
 
   async function uploadPhotoToElement(el, file) {
-
     if (!file || !user) return;
 
-    const storageRef = ref(
-      storage,
-      `scrapbooks/${user.uid}/${Date.now()}-${file.name}`
-    );
+    try {
+      const storageRef = ref(
+        storage,
+        `scrapbooks/${user.uid}/${Date.now()}-${file.name}`
+      );
 
-    await uploadBytes(storageRef, file);
+      await uploadBytes(storageRef, file);
 
-    const url = await getDownloadURL(storageRef);
+      const url = await getDownloadURL(storageRef);
 
-    updateElement({
-      ...el,
-      src: url,
-      fit: "cover",
-    });
-
+      updateElement({
+        ...el,
+        src: url,
+      });
+    } catch (err) {
+      console.log(err);
+      alert("Photo upload failed. Check Firebase Storage rules.");
+    }
   }
 
   function pointer(e) {
-
     if (e.touches?.[0]) {
       return {
         x: e.touches[0].clientX,
@@ -819,11 +700,9 @@ async function deleteBook(book) {
       x: e.clientX,
       y: e.clientY,
     };
-
   }
 
   function startDrag(e, el, mode = "move") {
-
     e.stopPropagation();
 
     setSelectedElement(el);
@@ -832,18 +711,13 @@ async function deleteBook(book) {
 
     dragRef.current = {
       mode,
-      id: el.id,
       startX: p.x,
       startY: p.y,
-      original: {
-        ...el,
-      },
+      original: { ...el },
     };
-
   }
 
   function moveDrag(e) {
-
     if (!dragRef.current) return;
 
     const p = pointer(e);
@@ -854,67 +728,47 @@ async function deleteBook(book) {
     const original = dragRef.current.original;
 
     if (dragRef.current.mode === "move") {
-
       updateElement({
         ...original,
         x: original.x + dx,
         y: original.y + dy,
       });
-
     }
 
     if (dragRef.current.mode === "resize") {
-
       updateElement({
         ...original,
         w: Math.max(40, original.w + dx),
         h: Math.max(40, original.h + dy),
       });
-
     }
 
     if (dragRef.current.mode === "rotate") {
-
       updateElement({
         ...original,
         r: original.r + dx,
       });
-
     }
-
   }
 
   function stopDrag() {
-
     dragRef.current = null;
-
   }
 
   useEffect(() => {
-
     window.addEventListener("mousemove", moveDrag);
-
     window.addEventListener("mouseup", stopDrag);
-
     window.addEventListener("touchmove", moveDrag);
-
     window.addEventListener("touchend", stopDrag);
 
     return () => {
-
       window.removeEventListener("mousemove", moveDrag);
-
       window.removeEventListener("mouseup", stopDrag);
-
       window.removeEventListener("touchmove", moveDrag);
-
       window.removeEventListener("touchend", stopDrag);
-
     };
-
   });
-
-  function renderElement(el) {
+ function renderElement(el) {
 
     const isSelected =
       selectedElement?.id === el.id;
@@ -922,7 +776,9 @@ async function deleteBook(book) {
     return (
       <div
         key={el.id}
-        className={`scrapElement ${isSelected ? "selected" : ""}`}
+        className={`scrapElement ${
+          isSelected ? "selected" : ""
+        }`}
         style={{
           left: el.x,
           top: el.y,
@@ -942,15 +798,20 @@ async function deleteBook(book) {
           setShowElementMenu(true);
         }}
       >
+
         {el.type === "photo" && (
           <label className="photoFrame">
+
             {el.src ? (
               <img
                 src={el.src}
                 alt=""
                 style={{
-                  objectFit: el.fit || "cover",
-                  objectPosition: `${el.cropX || 50}% ${el.cropY || 50}%`,
+                  objectFit:
+                    el.fit || "cover",
+                  objectPosition: `${
+                    el.cropX || 50
+                  }% ${el.cropY || 50}%`,
                 }}
               />
             ) : (
@@ -968,6 +829,7 @@ async function deleteBook(book) {
                 )
               }
             />
+
           </label>
         )}
 
@@ -984,8 +846,13 @@ async function deleteBook(book) {
               fontSize: el.size,
               color: el.color,
               fontFamily: el.font,
-              fontWeight: el.bold ? "700" : "400",
-              textDecoration: el.underline ? "underline" : "none",
+              fontWeight: el.bold
+                ? "700"
+                : "400",
+              textDecoration:
+                el.underline
+                  ? "underline"
+                  : "none",
             }}
           />
         )}
@@ -994,7 +861,8 @@ async function deleteBook(book) {
           <div
             className="stickerElement"
             style={{
-              fontSize: el.size || 36,
+              fontSize:
+                el.size || 36,
             }}
           >
             {el.value}
@@ -1006,10 +874,18 @@ async function deleteBook(book) {
             <button
               className="handle rotateHandle"
               onMouseDown={(e) =>
-                startDrag(e, el, "rotate")
+                startDrag(
+                  e,
+                  el,
+                  "rotate"
+                )
               }
               onTouchStart={(e) =>
-                startDrag(e, el, "rotate")
+                startDrag(
+                  e,
+                  el,
+                  "rotate"
+                )
               }
             >
               ↻
@@ -1018,21 +894,31 @@ async function deleteBook(book) {
             <button
               className="handle resizeHandle"
               onMouseDown={(e) =>
-                startDrag(e, el, "resize")
+                startDrag(
+                  e,
+                  el,
+                  "resize"
+                )
               }
               onTouchStart={(e) =>
-                startDrag(e, el, "resize")
+                startDrag(
+                  e,
+                  el,
+                  "resize"
+                )
               }
             >
               ↘
             </button>
           </>
         )}
+
       </div>
     );
 
+  }
 
-   return (
+  return (
     <div className="appBg">
 
       <div className="phoneShell">
@@ -1073,7 +959,9 @@ async function deleteBook(book) {
                   placeholder="Password"
                   value={password}
                   onChange={(e) =>
-                    setPassword(e.target.value)
+                    setPassword(
+                      e.target.value
+                    )
                   }
                 />
 
@@ -1110,649 +998,689 @@ async function deleteBook(book) {
           </div>
         )}
 
-        {user && screen === "home" && (
-          <div className="homeScreen">
-
-            <div className="heroCard">
-
-              <div className="logoTape"></div>
-
-              <h1>
-                pocket
-                <br />
-                scrapbook
-              </h1>
-
-              <p>
-                cherish every moment ♡
-              </p>
-
-              <button
-                className="mainBtn"
-                onClick={() =>
-                  setShowCreateModal(true)
-                }
-              >
-                Create Scrapbook
-              </button>
-
-            </div>
-
-            <div className="sectionTitle">
-              My Scrapbooks
-            </div>
-
-            <div className="booksList">
-
-              {books.map((book) => (
-
-                <div
-                  key={book.id}
-                  className="bookCard"
-                >
-
-                  <div
-                    className={`bookPreview bg-${book.bg}`}
-                    onClick={() =>
-                      openBook(book)
-                    }
-                  ></div>
-
-                  <div
-                    className="bookInfo"
-                    onClick={() =>
-                      openBook(book)
-                    }
-                  >
-                    <h3>{book.title}</h3>
-
-                    <p>
-                      {book.pages.length} pages
-                    </p>
-                  </div>
-
-                  <button
-                    className="dotsBtn"
-                    onClick={() =>
-                      setShowTemplateMenu(
-                        book
-                      )
-                    }
-                  >
-                    ⋮
-                  </button>
-
-                </div>
-
-              ))}
-
-            </div>
-
-            <div className="bottomNav">
-
-              <button
-                className="active"
-                onClick={() =>
-                  setScreen("home")
-                }
-              >
-                Home
-              </button>
-
-              <button
-                onClick={() =>
-                  setScreen("templates")
-                }
-              >
-                Templates
-              </button>
-
-              <button
-                onClick={() =>
-                  setScreen("premium")
-                }
-              >
-                Premium
-              </button>
-
-              <button
-                onClick={() =>
-                  setScreen("profile")
-                }
-              >
-                Profile
-              </button>
-
-            </div>
-
-          </div>
-        )}
-
         {user &&
-  screen === "templates" && (
-    <div className="screen">
+          screen === "home" && (
+            <div className="homeScreen">
 
-      <button
-        className="backBtn"
-        onClick={() => setScreen("home")}
-      >
-        ← Back
-      </button>
+              <div className="heroCard">
 
-      <h2>Templates</h2>
+                <div className="logoTape"></div>
 
-      <div
-        className="templateCard"
-        onClick={() => {
-          const book = myFirstTemplate();
-
-          const updatedBooks = [
-            {
-              ...book,
-              firebaseId: null,
-            },
-            ...books,
-          ];
-
-          setBooks(updatedBooks);
-          setSelectedBook(updatedBooks[0]);
-          setSelectedPage(0);
-          setScreen("editor");
-        }}
-      >
-        <div className="templatePreview bg-cream">
-          <div className="tinyTitle">About Me ♡</div>
-          <div className="tinyPhoto"></div>
-          <div className="tinyPaper"></div>
-          <div className="tinyFlower">🌿</div>
-        </div>
-
-        <div>
-          <h3>My First Scrapbook</h3>
-          <p>Free</p>
-        </div>
-      </div>
-
-      <div
-        className="templateCard premiumCard"
-        onClick={() => {
-          const book = babyTemplate(true);
-
-          const updatedBooks = [
-            {
-              ...book,
-              firebaseId: null,
-            },
-            ...books,
-          ];
-
-          setBooks(updatedBooks);
-          setSelectedBook(updatedBooks[0]);
-          setSelectedPage(0);
-          setScreen("editor");
-        }}
-      >
-        <div className="templatePreview bg-pinkPlaid">
-          <div className="tinyMonth">1<br />month</div>
-          <div className="tinyPhoto polaroid"></div>
-          <div className="tinyLabel">sweet girl ♡</div>
-          <div className="tinySticker">🎀</div>
-        </div>
-
-        <div>
-          <h3>Baby Girl First Year</h3>
-          <p>$1.99</p>
-        </div>
-      </div>
-
-      <div
-        className="templateCard premiumCard"
-        onClick={() => {
-          const book = babyTemplate(false);
-
-          const updatedBooks = [
-            {
-              ...book,
-              firebaseId: null,
-            },
-            ...books,
-          ];
-
-          setBooks(updatedBooks);
-          setSelectedBook(updatedBooks[0]);
-          setSelectedPage(0);
-          setScreen("editor");
-        }}
-      >
-        <div className="templatePreview bg-bluePlaid">
-          <div className="tinyMonth">1<br />month</div>
-          <div className="tinyPhoto polaroid"></div>
-          <div className="tinyLabel blue">sweet boy ♡</div>
-          <div className="tinySticker">⭐</div>
-        </div>
-
-        <div>
-          <h3>Baby Boy First Year</h3>
-          <p>$1.99</p>
-        </div>
-      </div>
-
-    </div>
-)}
-        {user &&
-          screen === "premium" && (
-            <div className="screen">
-
-              <button
-                className="backBtn"
-                onClick={() =>
-                  setScreen("home")
-                }
-              >
-                ← Back
-              </button>
-
-              <h2>
-                Premium
-              </h2>
-
-              <div className="premiumTable">
-
-                <div className="premiumRow header">
-                  <div>Feature</div>
-                  <div>Free</div>
-                  <div>Premium</div>
-                </div>
-
-                <div className="premiumRow">
-                  <div>Photos</div>
-                  <div>15</div>
-                  <div>Unlimited</div>
-                </div>
-
-                <div className="premiumRow">
-                  <div>Fonts</div>
-                  <div>Basic</div>
-                  <div>All Fonts</div>
-                </div>
-
-                <div className="premiumRow">
-                  <div>Text Effects</div>
-                  <div>—</div>
-                  <div>✓</div>
-                </div>
-
-                <div className="premiumRow">
-                  <div>Templates</div>
-                  <div>Limited</div>
-                  <div>All</div>
-                </div>
-
-              </div>
-
-              <div className="premiumPrice">
-
-                <h3>
-                  Pocket Scrapbook+
-                </h3>
+                <h1>
+                  pocket
+                  <br />
+                  scrapbook
+                </h1>
 
                 <p>
-                  $4.99/month
+                  cherish every moment ♡
                 </p>
 
-              </div>
-
-            </div>
-          )}
-
-        {user &&
-          screen === "profile" && (
-            <div className="screen">
-
-              <button
-                className="backBtn"
-                onClick={() =>
-                  setScreen("home")
-                }
-              >
-                ← Back
-              </button>
-
-              <div className="profileCard">
-
-                <label className="profileImageWrap">
-
-                  {profileImage ? (
-                    <img
-                      src={profileImage}
-                      alt=""
-                      className="profileImage"
-                    />
-                  ) : (
-                    <div className="profilePlaceholder">
-                      ♡
-                    </div>
-                  )}
-
-                  <input
-                    hidden
-                    type="file"
-                    accept="image/*"
-                    onChange={
-                      uploadProfilePicture
-                    }
-                  />
-
-                </label>
-
-                <h2>
-                  Pocket Scrapbook
-                </h2>
-
                 <button
-                  className="settingsBtn"
+                  className="mainBtn"
                   onClick={() =>
-                    setShowNotifications(
+                    setShowCreateModal(
                       true
                     )
                   }
                 >
-                  Notifications
-                </button>
-
-                <button
-                  className="settingsBtn"
-                  onClick={() =>
-                    setShowPrivacy(true)
-                  }
-                >
-                  Privacy
-                </button>
-
-                <button
-                  className="logoutBtn"
-                  onClick={logoutUser}
-                >
-                  Logout
+                  Create Scrapbook
                 </button>
 
               </div>
 
-            </div>
-          )}
-
-        {user &&
-          screen === "editor" &&
-          selectedBook && (
-            <div className="editorScreen">
-
-              <div className="editorHeader">
-
-                <button
-                  onClick={() =>
-                    setScreen("home")
-                  }
-                >
-                  ←
-                </button>
-
-                <h2>
-                  {selectedBook.title}
-                </h2>
-
-                <button
-                  onClick={() =>
-                    setShowTemplateMenu(
-                      selectedBook
-                    )
-                  }
-                >
-                  ⋮
-                </button>
-
+              <div className="sectionTitle">
+                My Scrapbooks
               </div>
 
-              <div className="pageNav">
+              <div className="booksList">
 
-                <button
-                  disabled={
-                    selectedPage === 0
-                  }
-                  onClick={() =>
-                    setSelectedPage(
-                      selectedPage - 1
-                    )
-                  }
-                >
-                  ‹
-                </button>
+                {books.map((book) => (
 
-                <span>
-                  Page {selectedPage + 1}/
-                  {
-                    selectedBook.pages
-                      .length
-                  }
-                </span>
+                  <div
+                    key={
+                      book.firebaseId ||
+                      book.id
+                    }
+                    className="bookCard"
+                  >
 
-                <button
-                  disabled={
-                    selectedPage ===
-                    selectedBook.pages
-                      .length -
-                      1
-                  }
-                  onClick={() =>
-                    setSelectedPage(
-                      selectedPage + 1
-                    )
-                  }
-                >
-                  ›
-                </button>
-
-              </div>
-
-              <div
-                className={`scrapPage bg-${
-                  selectedPageData()?.bg
-                }`}
-                onClick={() => {
-                  setSelectedElement(
-                    null
-                  );
-                  setShowElementMenu(
-                    false
-                  );
-                }}
-              >
-
-                {selectedPageData()?.elements.map(
-                  renderElement
-                )}
-
-              </div>
-
-              <div className="toolBar">
-
-                <button
-                  onClick={() =>
-                    addElementToPage(
-                      photoEl(
-                        100,
-                        130
-                      )
-                    )
-                  }
-                >
-                  Photo
-                </button>
-
-                <button
-                  onClick={() =>
-                    addElementToPage(
-                      textEl(
-                        "tap to edit",
-                        80,
-                        80
-                      )
-                    )
-                  }
-                >
-                  Text
-                </button>
-
-                <button
-                  onClick={() =>
-                    addElementToPage(
-                      stickerEl(
-                        "♡",
-                        150,
-                        180
-                      )
-                    )
-                  }
-                >
-                  Sticker
-                </button>
-
-                <button
-                  onClick={addPage}
-                >
-                  Add Page
-                </button>
-
-                <button
-                  onClick={() => {
-
-                    if (
-                      selectedElement?.type !==
-                      "photo"
-                    )
-                      return;
-
-                    updateSelectedElement(
-                      {
-                        fit:
-                          selectedElement.fit ===
-                          "cover"
-                            ? "contain"
-                            : "cover",
+                    <div
+                      className={`bookPreview bg-${book.bg}`}
+                      onClick={() =>
+                        openBook(book)
                       }
-                    );
+                    ></div>
 
-                  }}
-                >
-                  Crop
-                </button>
-
-              </div>
-
-              {showElementMenu &&
-                selectedElement && (
-                  <div className="bubbleMenu">
-
-                    <button
-                      onClick={
-                        duplicateSelectedElement
+                    <div
+                      className="bookInfo"
+                      onClick={() =>
+                        openBook(book)
                       }
                     >
-                      Duplicate
-                    </button>
+
+                      <h3>
+                        {book.title}
+                      </h3>
+
+                      <p>
+                        {
+                          book.pages.length
+                        }{" "}
+                        pages
+                      </p>
+
+                    </div>
 
                     <button
-                      onClick={
-                        deleteSelectedElement
+                      className="dotsBtn"
+                      onClick={() =>
+                        setShowTemplateMenu(
+                          book
+                        )
                       }
                     >
-                      Delete
+                      ⋮
                     </button>
 
                   </div>
-                )}
 
-            </div>
-          )}
+                ))}
 
-        {showTemplateMenu && (
+              </div>
+              <div className="bottomNav">
+
+                <button
+                  className="active"
+                  onClick={() =>
+                    setScreen("home")
+                  }
+                >
+                  Home
+                </button>
+
+                <button
+                  onClick={() =>
+                    setScreen(
+                      "templates"
+                    )
+                  }
+                >
+                  Templates
+                </button>
+
+                <button
+                  onClick={() =>
+                    setScreen(
+                      "premium"
+                    )
+                  }
+                >
+                  Premium
+                </button>
+
+                <button
+                  onClick={() =>
+                    setScreen(
+                      "profile"
+                    )
+                  }
+                >
+                  Profile
+                </button>
+
+              </div>
+
+            </div>
+          )}
+
+        {user &&
+          screen === "templates" && (
+            <div className="screen">
+
+              <button
+                className="backBtn"
+                onClick={() =>
+                  setScreen("home")
+                }
+              >
+                ← Back
+              </button>
+
+              <h2>Templates</h2>
+
+              <div
+                className="templateCard"
+                onClick={() => {
+
+                  const book =
+                    myFirstTemplate();
+
+                  const updated = [
+                    book,
+                    ...books,
+                  ];
+
+                  saveBooks(updated);
+
+                  setSelectedBook(
+                    updated[0]
+                  );
+
+                  setSelectedPage(0);
+
+                  setScreen("editor");
+
+                }}
+              >
+
+                <div className="templatePreview bg-cream">
+
+                  <div className="tinyTitle">
+                    About Me ♡
+                  </div>
+
+                  <div className="tinyPhoto"></div>
+
+                  <div className="tinyPaper"></div>
+
+                  <div className="tinyFlower">
+                    🌿
+                  </div>
+
+                </div>
+
+                <div>
+
+                  <h3>
+                    My First Scrapbook
+                  </h3>
+
+                  <p>Free</p>
+
+                </div>
+
+              </div>
+
+              <div
+                className="templateCard premiumCard"
+                onClick={() => {
+
+                  const book =
+                    babyTemplate(true);
+
+                  const updated = [
+                    book,
+                    ...books,
+                  ];
+
+                  saveBooks(updated);
+
+                  setSelectedBook(
+                    updated[0]
+                  );
+
+                  setSelectedPage(0);
+
+                  setScreen("editor");
+
+                }}
+              >
+
+                <div className="templatePreview bg-pinkPlaid">
+
+                  <div className="tinyMonth">
+                    1
+                    <br />
+                    month
+                  </div>
+
+                  <div className="tinyPhoto polaroid"></div>
+
+                  <div className="tinyLabel">
+                    sweet girl ♡
+                  </div>
+
+                  <div className="tinySticker">
+                    🎀
+                  </div>
+
+                </div>
+
+                <div>
+
+                  <h3>
+                    Baby Girl First Year
+                  </h3>
+
+                  <p>$1.99</p>
+
+                </div>
+
+              </div>
+
+              <div
+                className="templateCard premiumCard"
+                onClick={() => {
+
+                  const book =
+                    babyTemplate(false);
+
+                  const updated = [
+                    book,
+                    ...books,
+                  ];
+
+                  saveBooks(updated);
+
+                  setSelectedBook(
+                    updated[0]
+                  );
+
+                  setSelectedPage(0);
+
+                  setScreen("editor");
+
+                }}
+              >
+
+                <div className="templatePreview bg-bluePlaid">
+
+                  <div className="tinyMonth">
+                    1
+                    <br />
+                    month
+                  </div>
+
+                  <div className="tinyPhoto polaroid"></div>
+
+                  <div className="tinyLabel blue">
+                    sweet boy ♡
+                  </div>
+
+                  <div className="tinySticker">
+                    ⭐
+                  </div>
+
+                </div>
+
+                <div>
+
+                  <h3>
+                    Baby Boy First Year
+                  </h3>
+
+                  <p>$1.99</p>
+
+                </div>
+
+              </div>
+
+            </div>
+          )}
+
+        {user &&
+          screen === "premium" && (
+            <div className="screen">
+
+              <button
+                className="backBtn"
+                onClick={() =>
+                  setScreen("home")
+                }
+              >
+                ← Back
+              </button>
+
+              <h2>Premium</h2>
+
+              <div className="premiumTable">
+
+                <div className="premiumRow header">
+                  <div>Feature</div>
+                  <div>Free</div>
+                  <div>Premium</div>
+                </div>
+
+                <div className="premiumRow">
+                  <div>Photos</div>
+                  <div>15</div>
+                  <div>Unlimited</div>
+                </div>
+
+                <div className="premiumRow">
+                  <div>Templates</div>
+                  <div>Limited</div>
+                  <div>All</div>
+                </div>
+
+                <div className="premiumRow">
+                  <div>Fonts</div>
+                  <div>Basic</div>
+                  <div>All</div>
+                </div>
+
+                <div className="premiumRow">
+                  <div>Effects</div>
+                  <div>—</div>
+                  <div>✓</div>
+                </div>
+
+              </div>
+
+              <div className="premiumPrice">
+
+                <h3>
+                  Pocket Scrapbook+
+                </h3>
+
+                <p>$4.99/month</p>
+
+              </div>
+
+            </div>
+          )}
+        {user &&
+          screen === "profile" && (
+            <div className="screen">
+
+              <button
+                className="backBtn"
+                onClick={() =>
+                  setScreen("home")
+                }
+              >
+                ← Back
+              </button>
+
+              <div className="profileCard">
+
+                <label className="profileImageWrap">
+
+                  {profileImage ? (
+                    <img
+                      src={profileImage}
+                      alt=""
+                      className="profileImage"
+                    />
+                  ) : (
+                    <div className="profilePlaceholder">
+                      ♡
+                    </div>
+                  )}
+
+                  <input
+                    hidden
+                    type="file"
+                    accept="image/*"
+                    onChange={uploadProfilePicture}
+                  />
+
+                </label>
+
+                <h2>Pocket Scrapbook</h2>
+
+                <button
+                  className="settingsBtn"
+                  onClick={() =>
+                    alert(
+                      "Notification settings coming soon: email updates, new templates, offers, or none."
+                    )
+                  }
+                >
+                  Notifications
+                </button>
+
+                <button
+                  className="settingsBtn"
+                  onClick={() =>
+                    alert(
+                      "Privacy: Pocket Scrapbook does not sell your personal information. Your scrapbook data and photos are stored securely in your account."
+                    )
+                  }
+                >
+                  Privacy
+                </button>
+
+                <button
+                  className="logoutBtn"
+                  onClick={logoutUser}
+                >
+                  Logout
+                </button>
+
+              </div>
+
+            </div>
+          )}
+
+        {user &&
+          screen === "editor" &&
+          selectedBook && (
+            <div className="editorScreen">
+
+              <div className="editorHeader">
+
+                <button
+                  onClick={() =>
+                    setScreen("home")
+                  }
+                >
+                  ←
+                </button>
+
+                <h2>{selectedBook.title}</h2>
+
+                <button
+                  onClick={() =>
+                    setShowTemplateMenu(
+                      selectedBook
+                    )
+                  }
+                >
+                  ⋮
+                </button>
+
+              </div>
+
+              <div className="pageNav">
+
+                <button
+                  disabled={selectedPage === 0}
+                  onClick={() =>
+                    setSelectedPage(
+                      selectedPage - 1
+                    )
+                  }
+                >
+                  ‹
+                </button>
+
+                <span>
+                  Page {selectedPage + 1}/
+                  {selectedBook.pages.length}
+                </span>
+
+                <button
+                  disabled={
+                    selectedPage ===
+                    selectedBook.pages.length - 1
+                  }
+                  onClick={() =>
+                    setSelectedPage(
+                      selectedPage + 1
+                    )
+                  }
+                >
+                  ›
+                </button>
+
+              </div>
+
+              <div
+                className={`scrapPage bg-${
+                  selectedPageData()?.bg
+                }`}
+                onClick={() => {
+                  setSelectedElement(null);
+                  setShowElementMenu(false);
+                }}
+              >
+                {selectedPageData()?.elements.map(
+                  renderElement
+                )}
+              </div>
+
+              <div className="toolBar">
+
+                <button
+                  onClick={() =>
+                    addElementToPage(
+                      photoEl(100, 130, 150, 150)
+                    )
+                  }
+                >
+                  Photo
+                </button>
+
+                <button
+                  onClick={() =>
+                    addElementToPage(
+                      textEl(
+                        "tap to edit",
+                        90,
+                        90
+                      )
+                    )
+                  }
+                >
+                  Text
+                </button>
+
+                <button
+                  onClick={() =>
+                    addElementToPage(
+                      stickerEl("♡", 160, 180)
+                    )
+                  }
+                >
+                  Sticker
+                </button>
+
+                <button onClick={addPage}>
+                  Add Page
+                </button>
+
+                <button
+                  onClick={() => {
+                    if (
+                      selectedElement?.type !==
+                      "photo"
+                    )
+                      return;
+
+                    updateElement({
+                      ...selectedElement,
+                      fit:
+                        selectedElement.fit ===
+                        "cover"
+                          ? "contain"
+                          : "cover",
+                    });
+                  }}
+                >
+                  Crop
+                </button>
+
+              </div>
+
+              {showElementMenu &&
+                selectedElement && (
+                  <div className="bubbleMenu">
+
+                    <button
+                      onClick={
+                        duplicateSelectedElement
+                      }
+                    >
+                      Duplicate
+                    </button>
+
+                    <button
+                      onClick={
+                        deleteSelectedElement
+                      }
+                    >
+                      Delete
+                    </button>
+
+                  </div>
+                )}
+
+            </div>
+          )}
+
+        {showTemplateMenu && (
+          <div className="bottomSheet">
+
+            <button
+              onClick={() => {
+                openBook(showTemplateMenu);
+                setShowTemplateMenu(false);
+              }}
+            >
+              Edit
+            </button>
+
+            <button
+              onClick={() =>
+                alert("Flipbook view coming next.")
+              }
+            >
+              View Flipbook
+            </button>
+
+            <button
+              onClick={() =>
+                alert("Export coming soon.")
+              }
+            >
+              Export
+            </button>
+
+            <button
+              onClick={() => {
+                renameBook(showTemplateMenu);
+                setShowTemplateMenu(false);
+              }}
+            >
+              Rename
+            </button>
+
+            <button
+              className="danger"
+              onClick={() => {
+                deleteBook(showTemplateMenu);
+                setShowTemplateMenu(false);
+              }}
+            >
+              Delete
+            </button>
+
+            <button
+              onClick={() =>
+                setShowTemplateMenu(false)
+              }
+            >
+              Cancel
+            </button>
+
+          </div>
+        )}
+        {showCreateModal && (
           <div className="bottomSheet">
 
-            <button
-              onClick={() => {
-
-                openBook(
-                  showTemplateMenu
-                );
-
-                setShowTemplateMenu(
-                  false
-                );
-
-              }}
-            >
-              Edit
-            </button>
-
-            <button>
-              View Flipbook
-            </button>
-
-            <button>
-              Export
-            </button>
-
-            <button
-              onClick={() => {
-
-                renameBook(
-                  showTemplateMenu
-                );
-
-                setShowTemplateMenu(
-                  false
-                );
-
-              }}
-            >
-              Rename
-            </button>
-
-            <button
-              className="danger"
-              onClick={() => {
-
-                deleteBook(
-                  showTemplateMenu
-                );
-
-                setShowTemplateMenu(
-                  false
-                );
-
-              }}
-            >
-              Delete
-            </button>
-
-            <button
-              onClick={() =>
-                setShowTemplateMenu(
-                  false
-                )
-              }
-            >
-              Cancel
-            </button>
-
-          </div>
-        )}
-
-        {showCreateModal && (
-          <div className="bottomSheet">
-
-            <h3>
-              Create Scrapbook
-            </h3>
+            <h3>Create Scrapbook</h3>
 
             <input
               placeholder="Scrapbook name"
@@ -1772,9 +1700,7 @@ async function deleteBook(book) {
                   key={bg.id}
                   className={`bgChoice bg-${bg.id}`}
                   onClick={() =>
-                    setNewBookBg(
-                      bg.id
-                    )
+                    setNewBookBg(bg.id)
                   }
                 ></button>
 
@@ -1791,81 +1717,10 @@ async function deleteBook(book) {
 
             <button
               onClick={() =>
-                setShowCreateModal(
-                  false
-                )
+                setShowCreateModal(false)
               }
             >
               Cancel
-            </button>
-
-          </div>
-        )}
-
-        {showNotifications && (
-          <div className="bottomSheet">
-
-            <h3>
-              Notification Settings
-            </h3>
-
-            <button>
-              Email Notifications
-            </button>
-
-            <button>
-              Text Notifications
-            </button>
-
-            <button>
-              New Templates
-            </button>
-
-            <button>
-              Offers & Discounts
-            </button>
-
-            <button>
-              None
-            </button>
-
-            <button
-              onClick={() =>
-                setShowNotifications(
-                  false
-                )
-              }
-            >
-              Close
-            </button>
-
-          </div>
-        )}
-
-        {showPrivacy && (
-          <div className="bottomSheet">
-
-            <h3>
-              Privacy
-            </h3>
-
-            <p>
-              Pocket Scrapbook
-              values your privacy.
-              We never sell your
-              personal information.
-              Your scrapbook data
-              and uploaded photos
-              stay securely stored
-              within your account.
-            </p>
-
-            <button
-              onClick={() =>
-                setShowPrivacy(false)
-              }
-            >
-              Close
             </button>
 
           </div>
