@@ -713,3 +713,166 @@ textarea {
 .templatePreview * {
   pointer-events: none;
 }
+.cuteOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(30, 20, 28, .55);
+  backdrop-filter: blur(8px);
+  z-index: 999;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+
+.cuteModal {
+  width: 100%;
+  max-width: 360px;
+  background: #fff8f2;
+  border: 4px solid #ffd3e1;
+  border-radius: 30px;
+  padding: 34px 24px 24px;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 20px 45px rgba(0,0,0,.25);
+}
+
+.cuteModal::before {
+  content: "✦   ♡   ✦";
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  color: #f28ab3;
+}
+
+.cuteModal::after {
+  content: "♡   ✦";
+  position: absolute;
+  bottom: 22px;
+  right: 22px;
+  color: #c99be8;
+}
+
+.modalTape {
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-3deg);
+  width: 120px;
+  height: 32px;
+  background: repeating-linear-gradient(
+    45deg,
+    #ff9fc2 0 10px,
+    #ffd1df 10px 20px
+  );
+  border-radius: 5px;
+}
+
+.modalX {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #ff91b7;
+  font-size: 24px;
+}
+
+.modalIcon {
+  font-size: 54px;
+  margin-bottom: 10px;
+}
+
+.cuteModal h2 {
+  font-family: Georgia, serif;
+  font-size: 26px;
+  margin: 8px 0;
+}
+
+.cuteModal p {
+  line-height: 1.5;
+  color: #4a3a40;
+}
+
+.modalBtn {
+  margin-top: 12px;
+  background: linear-gradient(135deg, #ff9cc2, #df5d91);
+  color: white;
+  border-radius: 18px;
+  padding: 14px 28px;
+  font-weight: 900;
+}
+
+.settingsRow {
+  background: #fff0f6;
+  border-radius: 22px;
+  padding: 14px;
+  margin: 10px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.settingsRow p {
+  margin: 3px 0 0;
+  font-size: 12px;
+  color: #8a6b76;
+}
+
+.toggle {
+  width: 58px;
+  height: 32px;
+  border-radius: 999px;
+  background: #ead8df;
+  padding: 4px;
+}
+
+.toggle span {
+  display: block;
+  width: 24px;
+  height: 24px;
+  background: white;
+  border-radius: 50%;
+  transition: .2s;
+}
+
+.toggle.on {
+  background: #e66fa1;
+}
+
+.toggle.on span {
+  transform: translateX(26px);
+}
+
+.premiumSettings {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.premiumSettings span {
+  color: #d96f94;
+  font-size: 12px;
+}
+
+.appBg.dark {
+  background: #111;
+}
+
+.appBg.dark .phoneShell {
+  background: #151518;
+  color: white;
+}
+
+.appBg.dark .profileCard,
+.appBg.dark .screen,
+.appBg.dark .heroCard {
+  background: #1f2024;
+  color: white;
+}
+
+.appBg.dark .settingsBtn,
+.appBg.dark .settingsRow {
+  background: #2b2c31;
+  color: white;
+}
