@@ -1206,142 +1206,116 @@ export default function App() {
         )}
 
         {user &&
-          screen === "templates" && (
-            <div className="screen">
+  screen === "templates" && (
+    <div className="screen">
 
-              <button
-                className="backBtn"
-                onClick={() =>
-                  setScreen("home")
-                }
-              >
-                ← Back
-              </button>
+      <button
+        className="backBtn"
+        onClick={() => setScreen("home")}
+      >
+        ← Back
+      </button>
 
-              <h2>
-                Templates
-              </h2>
+      <h2>Templates</h2>
 
-              <button
-  type="button"
-  className="templateCard templateButton"
-  onClick={() => {
-    const book = {
-      ...myFirstTemplate(),
-      firebaseId: null,
-    };
+      <div
+        className="templateCard"
+        onClick={() => {
+          const book = myFirstTemplate();
 
-    setBooks([book, ...books]);
-    setSelectedBook(book);
-    setSelectedPage(0);
-    setScreen("editor");
-  }}
->
-  <div className="templatePreview bg-cream">
-    <div className="tinyTitle">About Me ♡</div>
-    <div className="tinyPhoto"></div>
-    <div className="tinyPaper"></div>
-    <div className="tinyFlower">🌿</div>
-  </div>
+          const updatedBooks = [
+            {
+              ...book,
+              firebaseId: null,
+            },
+            ...books,
+          ];
 
-  <div>
-    <h3>My First Scrapbook</h3>
-    <p>Free</p>
-  </div>
-</button>
+          setBooks(updatedBooks);
+          setSelectedBook(updatedBooks[0]);
+          setSelectedPage(0);
+          setScreen("editor");
+        }}
+      >
+        <div className="templatePreview bg-cream">
+          <div className="tinyTitle">About Me ♡</div>
+          <div className="tinyPhoto"></div>
+          <div className="tinyPaper"></div>
+          <div className="tinyFlower">🌿</div>
+        </div>
 
-                <div>
-                  <h3>
-                    My First Scrapbook
-                  </h3>
+        <div>
+          <h3>My First Scrapbook</h3>
+          <p>Free</p>
+        </div>
+      </div>
 
-                  <p>Free</p>
-                </div>
+      <div
+        className="templateCard premiumCard"
+        onClick={() => {
+          const book = babyTemplate(true);
 
-              </div>
+          const updatedBooks = [
+            {
+              ...book,
+              firebaseId: null,
+            },
+            ...books,
+          ];
 
-             <div
-  className="templateCard premiumCard"
-  onClick={() => {
+          setBooks(updatedBooks);
+          setSelectedBook(updatedBooks[0]);
+          setSelectedPage(0);
+          setScreen("editor");
+        }}
+      >
+        <div className="templatePreview bg-pinkPlaid">
+          <div className="tinyMonth">1<br />month</div>
+          <div className="tinyPhoto polaroid"></div>
+          <div className="tinyLabel">sweet girl ♡</div>
+          <div className="tinySticker">🎀</div>
+        </div>
 
-                  const book =
-                    babyTemplate(true);
+        <div>
+          <h3>Baby Girl First Year</h3>
+          <p>$1.99</p>
+        </div>
+      </div>
 
-                  setBooks([
-                    {
-                      ...book,
-                      firebaseId: null,
-                    },
-                    ...books,
-                  ]);
+      <div
+        className="templateCard premiumCard"
+        onClick={() => {
+          const book = babyTemplate(false);
 
-                  setSelectedBook(book);
+          const updatedBooks = [
+            {
+              ...book,
+              firebaseId: null,
+            },
+            ...books,
+          ];
 
-                  setSelectedPage(0);
+          setBooks(updatedBooks);
+          setSelectedBook(updatedBooks[0]);
+          setSelectedPage(0);
+          setScreen("editor");
+        }}
+      >
+        <div className="templatePreview bg-bluePlaid">
+          <div className="tinyMonth">1<br />month</div>
+          <div className="tinyPhoto polaroid"></div>
+          <div className="tinyLabel blue">sweet boy ♡</div>
+          <div className="tinySticker">⭐</div>
+        </div>
 
-                  setScreen("editor");
+        <div>
+          <h3>Baby Boy First Year</h3>
+          <p>$1.99</p>
+        </div>
+      </div>
 
-                }}
-              >
-                <div className="templatePreview bg-pinkPlaid">
-  <div className="tinyMonth">1<br />month</div>
-  <div className="tinyPhoto polaroid"></div>
-  <div className="tinyLabel">sweet girl ♡</div>
-  <div className="tinySticker">🎀</div>
-</div>
-
-                <div>
-                  <h3>
-                    Baby Girl First Year
-                  </h3>
-
-                  <p>$1.99</p>
-                </div>
-
-              </div>
-
-              <div
-                className="templateCard premiumCard"
-                onClick={() => {
-
-                  const book =
-                    babyTemplate(false);
-
-                  setBooks([
-                    {
-                      ...book,
-                      firebaseId: null,
-                    },
-                    ...books,
-                  ]);
-
-                  setSelectedBook(book);
-
-                  setSelectedPage(0);
-
-                  setScreen("editor");
-
-                }}
-              >
-                <div className="templatePreview bg-bluePlaid">
-  <div className="tinyMonth">1<br />month</div>
-  <div className="tinyPhoto polaroid"></div>
-  <div className="tinyLabel blue">sweet boy ♡</div>
-  <div className="tinySticker">⭐</div>
-</div>
-
-                <div>
-                  <h3>
-                    Baby Boy First Year
-                  </h3>
-
-                  <p>$1.99</p>
-                </div>
-
-              </div>
-
-            </div>
-          )}
+    </div>
+)}
         {user &&
           screen === "premium" && (
             <div className="screen">
