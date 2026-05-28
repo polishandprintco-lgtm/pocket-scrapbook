@@ -1222,38 +1222,33 @@ export default function App() {
                 Templates
               </h2>
 
-              <div
-                className="templateCard"
-                onClick={() => {
+              <button
+  type="button"
+  className="templateCard templateButton"
+  onClick={() => {
+    const book = {
+      ...myFirstTemplate(),
+      firebaseId: null,
+    };
 
-                  const book =
-                    myFirstTemplate();
+    setBooks([book, ...books]);
+    setSelectedBook(book);
+    setSelectedPage(0);
+    setScreen("editor");
+  }}
+>
+  <div className="templatePreview bg-cream">
+    <div className="tinyTitle">About Me ♡</div>
+    <div className="tinyPhoto"></div>
+    <div className="tinyPaper"></div>
+    <div className="tinyFlower">🌿</div>
+  </div>
 
-                  setBooks([
-                    {
-                      ...book,
-                      firebaseId: null,
-                    },
-                    ...books,
-                  ]);
-
-                  setSelectedBook({
-  ...book,
-  firebaseId: null,
-});
-
-                  setSelectedPage(0);
-
-                  setScreen("editor");
-
-                }}
-              >
-                <div className="templatePreview bg-cream">
-  <div className="tinyTitle">About Me ♡</div>
-  <div className="tinyPhoto"></div>
-  <div className="tinyPaper"></div>
-  <div className="tinyFlower">🌿</div>
-</div>
+  <div>
+    <h3>My First Scrapbook</h3>
+    <p>Free</p>
+  </div>
+</button>
 
                 <div>
                   <h3>
