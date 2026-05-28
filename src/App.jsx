@@ -1242,7 +1242,12 @@ export default function App() {
 
                 }}
               >
-                <div className="templatePreview bg-cream"></div>
+                <div className="templatePreview bg-cream">
+  <div className="tinyTitle">About Me ♡</div>
+  <div className="tinyPhoto"></div>
+  <div className="tinyPaper"></div>
+  <div className="tinyFlower">🌿</div>
+</div>
 
                 <div>
                   <h3>
@@ -1277,7 +1282,12 @@ export default function App() {
 
                 }}
               >
-                <div className="templatePreview bg-pinkPlaid"></div>
+                <div className="templatePreview bg-pinkPlaid">
+  <div className="tinyMonth">1<br />month</div>
+  <div className="tinyPhoto polaroid"></div>
+  <div className="tinyLabel">sweet girl ♡</div>
+  <div className="tinySticker">🎀</div>
+</div>
 
                 <div>
                   <h3>
@@ -1312,7 +1322,12 @@ export default function App() {
 
                 }}
               >
-                <div className="templatePreview bg-bluePlaid"></div>
+                <div className="templatePreview bg-bluePlaid">
+  <div className="tinyMonth">1<br />month</div>
+  <div className="tinyPhoto polaroid"></div>
+  <div className="tinyLabel blue">sweet boy ♡</div>
+  <div className="tinySticker">⭐</div>
+</div>
 
                 <div>
                   <h3>
