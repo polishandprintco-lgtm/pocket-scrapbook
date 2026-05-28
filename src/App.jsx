@@ -440,7 +440,7 @@ export default function App() {
               >
                 Create Scrapbook
               </button>
-           )}
+     
       </div>
     );
 }
