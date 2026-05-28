@@ -556,7 +556,7 @@ if (userSnap.exists()) {
   try {
     const storageRef = ref(
       storage,
-      `profiles/${user.uid}/profile-${Date.now()}-${file.name}`
+      `profiles/${user.uid}/profile.jpg`
     );
 
     await uploadBytes(storageRef, file);
