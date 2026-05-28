@@ -20,6 +20,7 @@ import {
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { auth, db, storage } from "./firebase";
+import "./style.css";
 
 const BACKGROUNDS = [
   { id: "cream", name: "Cream Paper" },
