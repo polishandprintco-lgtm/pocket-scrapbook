@@ -505,8 +505,7 @@ export default function App() {
             </div>
 
           </div>
-
-      {screen === "templates" && (
+           {screen === "templates" && (
         <div className="panelScreen">
 
           <button
@@ -787,7 +786,7 @@ export default function App() {
                 renderElement
               )}
             </div>
-             <div className="bottomToolbar">
+            <div className="bottomToolbar">
 
               <button
                 onClick={() =>
