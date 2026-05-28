@@ -1,80 +1,357 @@
-*{box-sizing:border-box}
-body{
-  margin:0;
-  background:#f4edf0;
-  font-family:Arial, sans-serif;
-  display:flex;
-  justify-content:center;
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@600;700&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
-button{border:0;font-family:inherit;cursor:pointer}
-textarea{border:0;background:transparent;resize:none;outline:none;width:100%;height:100%;text-align:center}
-.phone-shell{
-  width:100%;
-  max-width:430px;
-  height:100vh;
-  margin:0 auto;
-  background:#fffaf8;
-  position:relative;
-  overflow:hidden;
-  box-shadow:0 0 40px rgba(0,0,0,.08);
-  border-left:1px solid #eee;
-  border-right:1px solid #eee;
+
+body {
+  background: #f7f2f4;
+  font-family: 'DM Sans', sans-serif;
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+  color: #2c2c2c;
 }
-.screen{min-height:100vh;padding:18px 18px 110px;background:#fff8fb}
-.home{background:linear-gradient(#ffffff88,#ffffff88),repeating-linear-gradient(45deg,#ffdce9 0 18px,#fff1f6 18px 36px)}
-.hero{border-radius:36px;background:#fffaf4;padding:28px 20px;box-shadow:0 16px 40px #0002;text-align:center;position:relative}
-.paperLogo{background:#fff8ee;border-radius:22px;padding:28px 14px;box-shadow:0 10px 28px #0001;position:relative}
-.tape{position:absolute;top:-12px;left:50%;transform:translateX(-50%) rotate(-2deg);width:120px;height:30px;background:#f4b8c9cc;border-radius:4px}
-.paperLogo h1{font-family:Georgia,serif;font-size:50px;line-height:.9;margin:0;color:#3a2b2f}
-.paperLogo p{background:#f4b8c9;color:#5a3d45;display:inline-block;padding:7px 14px;border-radius:4px}
-.pinkBtn,.mainPinkBtn{background:linear-gradient(135deg,#ff9cc2,#e96e9f);color:white;padding:14px 18px;border-radius:20px;font-weight:900;margin-top:18px}
-h2{font-family:Georgia,serif;font-size:30px}
-.bookCard,.template,.priceCard,.profileCard{background:white;border-radius:28px;padding:16px;box-shadow:0 12px 30px #0001;margin:14px 0}
-.bookCard{display:flex;gap:14px;align-items:center}
-.bookCard small{display:block;color:#8d7079}
-.miniBook{width:95px;height:95px;border-radius:18px;position:relative;overflow:hidden;box-shadow:inset 0 0 0 5px #fff}
-.miniEl{position:absolute;font-size:8px}.miniEl img{width:28px;height:28px;object-fit:cover}
-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);max-width:430px;width:100%;display:flex;gap:4px;background:#fffffff2;padding:10px;box-shadow:0 -8px 25px #0001}
-nav button{flex:1;border-radius:16px;background:#fff0f6;padding:10px;font-size:12px;font-weight:800}
-.back{background:white;border-radius:18px;padding:12px 16px;font-weight:900;box-shadow:0 7px 18px #0001}
-.template{width:100%;text-align:left;font-weight:900;font-size:18px}.template span{float:right;color:#d96f94}
-.premium{background:#fff0f6}.priceCard b{font-size:40px;color:#d96f94}
-.avatar{width:90px;height:90px;border-radius:50%;background:#ffd5e6;margin:0 auto;display:grid;place-items:center;font-size:42px}
-.setting{background:#fff0f6;border-radius:20px;padding:16px;margin:10px 0;font-weight:800;display:flex;justify-content:space-between}
-.logoutBtn{
-  width:100%;
-  background:linear-gradient(135deg,#ff8db8,#e96e9f);
-  color:white;
-  border-radius:20px;
-  padding:16px;
-  font-weight:900;
-  margin-top:12px;
-  box-shadow:0 10px 22px #e96e9f55;
+
+#root {
+  width: 100%;
+  display: flex;
+  justify-content: center;
 }
-.editor header,.pageCount{display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap}
-.editor header button,.pageCount button{background:white;border-radius:16px;padding:11px 14px;font-weight:900}
-.scrapPage{width:100%;height:610px;border-radius:34px;margin:16px auto;position:relative;overflow:hidden;box-shadow:0 18px 45px #0002}
-.bg-pinkPlaid{background:linear-gradient(#ffffff66,#ffffff66),repeating-linear-gradient(45deg,#ffd5e6 0 18px,#fff0f6 18px 36px)}
-.bg-bluePlaid{background:linear-gradient(#ffffff66,#ffffff66),repeating-linear-gradient(45deg,#d9ecff 0 18px,#f1f8ff 18px 36px)}
-.bg-cream{background:#fff8ee}.bg-lavender{background:#eee4ff}
-.bg-grid{background-color:white;background-image:linear-gradient(#eee 1px,transparent 1px),linear-gradient(90deg,#eee 1px,transparent 1px);background-size:24px 24px}
-.bg-dots{background-color:white;background-image:radial-gradient(#ddd 1px,transparent 1px);background-size:18px 18px}
-.scrapElement{position:absolute;touch-action:none}
-.selected{outline:3px dashed #e96e9f}
-.photoFrame{width:100%;height:100%;background:white;border:8px solid white;border-radius:14px;display:grid;place-items:center;overflow:hidden;box-shadow:0 8px 18px #0003;color:#b36c85;font-weight:900}
-.photoFrame img{width:100%;height:100%}
-.stickerArt{width:100%;height:100%;display:grid;place-items:center;font-size:38px;filter:drop-shadow(0 6px 8px #0002)}
-.stickerArt.tape span{width:80px;height:24px;background:#f5c0cacc;display:block;border-radius:4px;transform:rotate(-3deg)}
-.stickerArt.label{background:#fff7dc;border-radius:10px;padding:10px;font-size:15px}
-.stickerArt.frame{border:8px solid white;background:#fafafa}
-.handle{position:absolute;width:32px;height:32px;border-radius:50%;background:#e96e9f;color:white;z-index:20;font-weight:900}
-.rotate{top:-16px;right:-16px}.resize{bottom:-16px;right:-16px}
-.toolBar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);max-width:430px;width:100%;background:#fffffff2;padding:12px;display:flex;gap:8px;overflow-x:auto;box-shadow:0 -8px 25px #0001}
-.toolBar button{min-width:96px;background:#fff0f6;border-radius:18px;padding:12px;font-weight:900}
-.modal{position:fixed;inset:0;background:#0004;display:grid;place-items:center;z-index:50;padding:18px}
-.modalBox{max-width:390px;width:100%;max-height:82vh;overflow:auto;background:white;border-radius:30px;padding:22px;position:relative}
-.x{position:absolute;right:16px;top:16px;background:#fff0f6;border-radius:14px;width:38px;height:38px;font-size:22px}
-.pickerGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.pickerGrid button{background:#fff0f6;border-radius:18px;padding:14px;font-weight:900}
-.bgPick{height:84px}.row{display:flex;gap:8px;flex-wrap:wrap}.row button{background:#fff0f6;border-radius:16px;padding:12px;font-weight:900}
-.colorRow{display:flex;gap:8px;margin-top:14px}.colorRow button{width:42px;height:42px;border-radius:14px;border:2px solid #eee}
-.darkTheme .phoneShell,.darkTheme .screen{background:#2c2328;color:white}.darkTheme .hero,.darkTheme .bookCard,.darkTheme .template,.darkTheme .priceCard,.darkTheme .profileCard,.darkTheme .modalBox{background:#3b3138;color:white}
+
+/* PHONE SHELL */
+
+.appShell {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
+
+.phoneFrame {
+  width: 390px;
+  min-height: 100vh;
+  background: #fffafc;
+  border-radius: 42px;
+  overflow: hidden;
+  position: relative;
+  box-shadow:
+    0 10px 40px rgba(0,0,0,0.08),
+    0 0 0 10px #ffffff;
+}
+
+/* TOP BAR */
+
+.topBar {
+  height: 44px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 700;
+  background: white;
+}
+
+/* HOME */
+
+.homeScreen {
+  min-height: 100vh;
+  background:
+    repeating-linear-gradient(
+      45deg,
+      #fff8fa,
+      #fff8fa 14px,
+      #fbeef3 14px,
+      #fbeef3 28px
+    );
+  padding-bottom: 120px;
+}
+
+/* HERO */
+
+.heroCard {
+  margin: 18px;
+  background: white;
+  border-radius: 34px;
+  padding: 34px 24px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+  text-align: center;
+}
+
+.logoPill {
+  width: 70px;
+  height: 18px;
+  background: #f8bfd1;
+  border-radius: 999px;
+  margin: 0 auto 18px;
+}
+
+.heroTitle {
+  font-family: 'Playfair Display', serif;
+  font-size: 42px;
+  line-height: 0.95;
+  margin-bottom: 14px;
+}
+
+.heroSub {
+  color: #5f5f5f;
+  margin-bottom: 26px;
+}
+
+.mainButton {
+  border: none;
+  background: linear-gradient(
+    135deg,
+    #ff98bd,
+    #ea5f9a
+  );
+  color: white;
+  padding: 16px 28px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  box-shadow: 0 10px 20px rgba(234,95,154,0.25);
+}
+
+/* SECTION */
+
+.sectionTitle {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px;
+  padding: 0 22px;
+  margin-top: 8px;
+  margin-bottom: 18px;
+}
+
+/* SCRAPBOOK CARD */
+
+.bookCard {
+  margin: 0 18px 16px;
+  background: white;
+  border-radius: 28px;
+  padding: 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.05);
+}
+
+.bookLeft {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+.bookThumb {
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  background:
+    repeating-linear-gradient(
+      45deg,
+      #ffdce8,
+      #ffdce8 10px,
+      #fff3f7 10px,
+      #fff3f7 20px
+    );
+}
+
+.bookInfo h3 {
+  font-size: 18px;
+  margin-bottom: 4px;
+}
+
+.bookInfo p {
+  font-size: 13px;
+  color: #777;
+}
+
+.menuDots {
+  font-size: 22px;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 12px;
+}
+
+.menuDots:hover {
+  background: #f7f2f4;
+}
+
+/* BOTTOM NAV */
+
+.bottomNav {
+  position: fixed;
+  bottom: 20px;
+  width: 390px;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.navInner {
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(12px);
+  padding: 10px;
+  border-radius: 26px;
+  display: flex;
+  gap: 8px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  pointer-events: auto;
+}
+
+.navButton {
+  border: none;
+  background: transparent;
+  padding: 12px 16px;
+  border-radius: 16px;
+  font-weight: 600;
+  color: #555;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.navButton:hover {
+  background: #f9eef3;
+}
+
+.navActive {
+  background: linear-gradient(
+    135deg,
+    #ff98bd,
+    #ea5f9a
+  );
+  color: white;
+}
+
+/* EDITOR */
+
+.editorScreen {
+  background: #fff8fa;
+  min-height: 100vh;
+  padding-bottom: 120px;
+}
+
+.editorHeader {
+  background: white;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+}
+
+.editorTitle {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.pageCanvasWrap {
+  display: flex;
+  justify-content: center;
+  padding: 24px;
+}
+
+.pageCanvas {
+  width: 320px;
+  height: 480px;
+  background: #fffdfb;
+  border-radius: 28px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+.canvasItem {
+  position: absolute;
+  cursor: grab;
+  user-select: none;
+}
+
+.canvasPhoto {
+  width: 120px;
+  border-radius: 12px;
+}
+
+.canvasSticker {
+  width: 70px;
+}
+
+.canvasText {
+  font-size: 26px;
+  font-weight: 700;
+}
+
+/* TOOLBAR */
+
+.toolbar {
+  margin: 0 18px;
+  background: white;
+  border-radius: 24px;
+  padding: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.05);
+}
+
+.toolButton {
+  border: none;
+  background: #fff1f6;
+  color: #d9548d;
+  padding: 12px 14px;
+  border-radius: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* PROFILE */
+
+.profileCard {
+  margin: 18px;
+  background: white;
+  border-radius: 30px;
+  padding: 24px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+.profileImage {
+  width: 90px;
+  height: 90px;
+  border-radius: 999px;
+  background: #f9dbe6;
+  margin: 0 auto 16px;
+}
+
+.profileName {
+  text-align: center;
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 24px;
+}
+
+.settingsButton {
+  width: 100%;
+  border: none;
+  background: #fff3f7;
+  padding: 16px;
+  border-radius: 18px;
+  margin-bottom: 12px;
+  text-align: left;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.logoutButton {
+  width: 100%;
+  border: none;
+  background: #ffedf1;
+  color: #d44b6c;
+  padding: 16px;
+  border-radius: 18px;
+  margin-top: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
