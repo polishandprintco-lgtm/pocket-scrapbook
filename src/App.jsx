@@ -922,7 +922,7 @@ const [isPremium, setIsPremium] = useState(false);
   }
 
   return (
-    <div className="appBg">
+    <div className={`appBg ${darkMode ? "dark" : ""}`}>
 
       <div className="phoneShell">
 
@@ -1411,7 +1411,27 @@ const [isPremium, setIsPremium] = useState(false);
                       ♡
                     </div>
                   )}
+<div className="settingsRow">
+  <div>
+    <strong>Dark Theme</strong>
+    <p>Easier on your eyes at night</p>
+  </div>
 
+  <button
+    className={`toggle ${darkMode ? "on" : ""}`}
+    onClick={() => setDarkMode(!darkMode)}
+  >
+    <span></span>
+  </button>
+</div>
+
+<button
+  className="settingsBtn premiumSettings"
+  onClick={() => setScreen("premium")}
+>
+  👑 Premium
+  <span>{isPremium ? "Active" : "Free Plan"}</span>
+</button>
                   <input
                     hidden
                     type="file"
@@ -1423,28 +1443,35 @@ const [isPremium, setIsPremium] = useState(false);
 
                 <h2>Pocket Scrapbook</h2>
 
-                <button
-                  className="settingsBtn"
-                  onClick={() =>
-                    alert(
-                      "Notification settings coming soon: email updates, new templates, offers, or none."
-                    )
-                  }
-                >
-                  Notifications
-                </button>
+               <button
+  className="settingsBtn"
+  onClick={() =>
+    setCuteModal({
+      type: "notification",
+      title: "Notification settings",
+      text: "Coming soon! You’ll be able to choose email updates, new templates, offers, or none.",
+      icon: "💌",
+      button: "Got it! ♡",
+    })
+  }
+>
+  Notifications
+</button>
 
                 <button
-                  className="settingsBtn"
-                  onClick={() =>
-                    alert(
-                      "Privacy: Pocket Scrapbook does not sell your personal information. Your scrapbook data and photos are stored securely in your account."
-                    )
-                  }
-                >
-                  Privacy
-                </button>
-
+  className="settingsBtn"
+  onClick={() =>
+    setCuteModal({
+      type: "privacy",
+      title: "Your privacy matters ♡",
+      text: "Pocket Scrapbook does not sell your personal information. Your scrapbook data and photos are stored securely in your account.",
+      icon: "🔒",
+      button: "Thanks for trusting us!",
+    })
+  }
+>
+  Privacy
+</button>
                 <button
                   className="logoutBtn"
                   onClick={logoutUser}
@@ -1711,6 +1738,33 @@ const [isPremium, setIsPremium] = useState(false);
 
             </div>
 
+            {cuteModal && (
+  <div className="cuteOverlay">
+    <div className={`cuteModal ${cuteModal.type}`}>
+      <div className="modalTape"></div>
+
+      <button
+        className="modalX"
+        onClick={() => setCuteModal(null)}
+      >
+        ×
+      </button>
+
+      <div className="modalIcon">{cuteModal.icon}</div>
+
+      <h2>{cuteModal.title}</h2>
+
+      <p>{cuteModal.text}</p>
+
+      <button
+        className="modalBtn"
+        onClick={() => setCuteModal(null)}
+      >
+        {cuteModal.button}
+      </button>
+    </div>
+  </div>
+)}
             <button
               className="mainBtn"
               onClick={createBook}
