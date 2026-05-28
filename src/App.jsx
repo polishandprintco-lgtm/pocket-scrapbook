@@ -1031,7 +1031,7 @@ async function deleteBook(book) {
       </div>
     );
 
-  }
+
    return (
     <div className="appBg">
 
