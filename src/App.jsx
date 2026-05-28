@@ -490,7 +490,15 @@ if (userSnap.exists()) {
     setScreen("editor");
   }
 
- async function deleteBook(book) {
+
+    const filtered = books.filter(
+  (b) => (b.firebaseId || b.id) !== (book.firebaseId || book.id)
+);
+    setBooks(filtered);
+
+    setScreen("home");
+  }
+async function deleteBook(book) {
   const bookKey = book.firebaseId || book.id;
 
   if (
@@ -524,15 +532,6 @@ if (userSnap.exists()) {
     setScreen("home");
   }
 }
-
-    const filtered = books.filter(
-  (b) => (b.firebaseId || b.id) !== (book.firebaseId || book.id)
-);
-    setBooks(filtered);
-
-    setScreen("home");
-  }
-
   async function renameBook(book) {
 
     const renamed = prompt(
