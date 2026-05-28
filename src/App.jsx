@@ -266,7 +266,7 @@ function babyTemplate(girl = true) {
           color: "#2f2528",
         }),
 
-        photoEl(135, 88, 200, 190),
+        photoEl(125, 88, 190, 190),
 
         textEl(label, 120, 315, {
           size: 15,
