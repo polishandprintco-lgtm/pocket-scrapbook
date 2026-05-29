@@ -314,7 +314,25 @@ nav button{
   color: #3a2b31;
   margin-bottom: 10px;
 }
-h1{
-  color: hotpink !important;
-  font-size: 80px !important;
+.loginCard h1{
+  font-family: Georgia, serif;
+  font-size: 56px !important;
+  line-height: .82;
+  color: #3a2b31 !important;
+  letter-spacing: -2px;
+  margin-bottom: 12px;
+}
+
+.loginCard p{
+  color:#8a6b77;
+  font-size:15px;
+  margin-bottom:18px;
+}
+
+.loginCard{
+  border:2px solid #ffe5ef;
+  background:
+    radial-gradient(circle at top right,#ffe1ec 0 70px,transparent 72px),
+    radial-gradient(circle at bottom left,#eee3ff 0 65px,transparent 67px),
+    white;
 }
