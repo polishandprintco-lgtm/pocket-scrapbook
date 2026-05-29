@@ -159,7 +159,8 @@ function babyTemplate(girl=true){
   const bg=girl?"pinkPlaid":"bluePlaid";
   const title=girl?"Baby Girl First Year":"Baby Boy First Year";
   return{id:makeId(),title,bg,premium:true,pages:Array.from({length:12},(_,i)=>({id:makeId(),bg,elements:[
-    textEl(`${i+1}\\nmonth${i===0?"":"s"}`,35,35,24),
+    textEl(`${i + 1}
+month${i === 0 ? "" : "s"}`,35,35,24),
     photoEl(150,95,190,185),
     textEl(girl?"sweet girl ♡":"sweet boy ♡",155,320,16),
     stickerEl(girl?"🎀":"★",45,315),
