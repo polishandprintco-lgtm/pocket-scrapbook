@@ -330,9 +330,22 @@ nav button{
 }
 
 .loginCard{
-  border:2px solid #ffe5ef;
+  margin-top:60px;
+  padding:30px;
+  border-radius:30px;
+
   background:
-    radial-gradient(circle at top right,#ffe1ec 0 70px,transparent 72px),
-    radial-gradient(circle at bottom left,#eee3ff 0 65px,transparent 67px),
-    white;
+  repeating-linear-gradient(
+    45deg,
+    #ffdbe8,
+    #ffdbe8 18px,
+    #fff4f8 18px,
+    #fff4f8 36px
+  );
+
+  border:3px solid white;
+
+  box-shadow:
+    0 10px 30px rgba(0,0,0,.08),
+    inset 0 0 0 8px rgba(255,255,255,.4);
 }
