@@ -245,6 +245,19 @@ function App(){
   async function createFromTemplate(fn){const book=fn();const updated=[book,...books];await saveBooks(updated);openBook(updated[0])}
   async function renameBook(book){const name=prompt("Rename scrapbook:",book.title);if(!name?.trim())return;const updated=books.map(b=>(b.firebaseId||b.id)===(book.firebaseId||book.id)?{...b,title:name.trim()}:b);await saveBooks(updated);if(selectedBook&&(selectedBook.firebaseId||selectedBook.id)===(book.firebaseId||book.id))setSelectedBook({...selectedBook,title:name.trim()})}
   async function deleteBook(book){const key=book.firebaseId||book.id;if(book.firebaseId)await deleteDoc(doc(db,"scrapbooks",book.firebaseId));setBooks(books.filter(b=>(b.firebaseId||b.id)!==key));setConfirmDelete(null);setActionBook(null);if(selectedBook&&(selectedBook.firebaseId||selectedBook.id)===key){setSelectedBook(null);setScreen("home")}}
+  function openFlipbook(book){
+  setFlipBook(book);
+  setFlipPage(0);
+}
+
+function exportBook(book){
+  setFlipBook(book);
+  setFlipPage(0);
+
+  setTimeout(()=>{
+    window.print();
+  },500);
+}
   function page(){return selectedBook?.pages?.[selectedPage]}
 
   function updateBook(book){const updated=books.map(b=>(b.firebaseId||b.id)===(book.firebaseId||book.id)?book:b);setBooks(updated);setSelectedBook(book);saveBooks(updated)}
