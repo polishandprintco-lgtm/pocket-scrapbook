@@ -38,7 +38,10 @@ const bgOptions = [
 ];
 
 const stickers = ["♡", "✿", "☆", "☁", "🧸", "🎀", "📷", "🌸", "🌿", "✨", "✈", "🏡", "🐾", "🎂"];
-const uid = () => (crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random()));
+const uid = () =>
+  typeof crypto !== "undefined" && crypto.randomUUID
+    ? crypto.randomUUID()
+    : String(Date.now() + Math.random());
 
 function photoBox(x, y, w, h, rotate = 0) {
   return { id: uid(), type: "photo", src: "", x, y, w, h, rotate };
@@ -193,4 +196,17 @@ function Flipbook({ book, pageIndex, setPageIndex, setScreen, deleteBook }) { co
 function Premium({ profile }) { return <main className="page"><h1>Premium</h1><p>Your plan: {profile.subscription || "Free"}</p><table><tbody><tr><th>Feature</th><th>Free</th><th>Premium</th></tr><tr><td>My First Scrapbook</td><td>✓</td><td>✓</td></tr><tr><td>Baby templates</td><td>99¢ each</td><td>✓</td></tr><tr><td>Photo uploads</td><td>15</td><td>Unlimited</td></tr><tr><td>Advanced text effects</td><td>—</td><td>✓</td></tr></tbody></table><button className="primary">Upgrade $4.99/mo</button><p className="hint">Payments need Stripe before real charging works.</p></main> }
 function Profile({ user, profile }) { const [name,setName]=useState(profile.name||""), [email,setEmail]=useState(user.email||""), [pass,setPass]=useState(""); async function pic(e){const f=e.target.files?.[0]; if(!f)return; const r=ref(storage,`users/${user.uid}/profile-${Date.now()}-${f.name}`); await uploadBytes(r,f); const url=await getDownloadURL(r); await updateProfile(user,{photoURL:url}); await updateDoc(doc(db,"users",user.uid),{photoURL:url});} return <main className="page profile"><h1>Profile</h1><label className="avatar"><img src={profile.photoURL||user.photoURL||"https://images.unsplash.com/photo-1526047932273-341f2a7631f9?w=200"}/><input type="file" hidden accept="image/*" onChange={pic}/></label><input value={name} onChange={(e)=>setName(e.target.value)} placeholder="Name"/><button onClick={async()=>{await updateProfile(user,{displayName:name}); await updateDoc(doc(db,"users",user.uid),{name});}}>Save Name</button><h2>Settings</h2><label className="toggle">Dark theme <input type="checkbox" checked={!!profile.dark} onChange={(e)=>updateDoc(doc(db,"users",user.uid),{dark:e.target.checked})}/></label><input value={email} onChange={(e)=>setEmail(e.target.value)} /><button onClick={()=>updateEmail(user,email)}>Update Email</button><input type="password" value={pass} onChange={(e)=>setPass(e.target.value)} placeholder="New password"/><button onClick={()=>pass&&updatePassword(user,pass)}>Update Password</button><p>Subscription: {profile.subscription || "Free"}</p><button>Change/Cancel Subscription</button><button className="danger" onClick={()=>signOut(auth)}>Logout</button></main> }
 
-createRoot(document.getElementById("root")).render(<App />);
+function ErrorBox({ error }) {
+  return (
+    <div style={{ padding: 20, color: "red", background: "white" }}>
+      <h1>App Error</h1>
+      <pre>{String(error?.message || error)}</pre>
+    </div>
+  );
+}
+
+try {
+  createRoot(document.getElementById("root")).render(<App />);
+} catch (error) {
+  createRoot(document.getElementById("root")).render(<ErrorBox error={error} />);
+}
