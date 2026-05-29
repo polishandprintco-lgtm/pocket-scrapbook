@@ -53,10 +53,12 @@ h1,h2,h3,p{
 button{
   border:none;
   border-radius:999px;
-  padding:12px 18px;
+  padding:14px 18px;
   cursor:pointer;
-  background:#f3bfd5;
-  font-weight:600;
+  background:#f7bfd4;
+  color:#4b3440;
+  font-weight:700;
+  transition:.2s;
 }
 
 .lightBtn{
@@ -82,6 +84,7 @@ select{
   border-radius:18px;
   margin-bottom:12px;
   box-shadow:0 5px 15px rgba(0,0,0,.05);
+  border:2px solid #ffe5ef;
 }
 
 .bookThumb{
@@ -252,6 +255,12 @@ nav button{
 
 .loginCard{
   margin-top:80px;
+  background:white;
+  border-radius:32px;
+  padding:28px;
+  box-shadow:0 15px 40px rgba(0,0,0,.08);
+  position:relative;
+  overflow:hidden;
 }
 
 .bg-cream{
@@ -263,9 +272,9 @@ nav button{
   repeating-linear-gradient(
     45deg,
     #ffdbe8,
-    #ffdbe8 18px,
-    #fff2f7 18px,
-    #fff2f7 36px
+    #ffdbe8 20px,
+    #fff4f8 20px,
+    #fff4f8 40px
   );
 }
 
@@ -273,10 +282,10 @@ nav button{
   background:
   repeating-linear-gradient(
     45deg,
-    #dcefff,
-    #dcefff 18px,
-    #f4faff 18px,
-    #f4faff 36px
+    #dceeff,
+    #dceeff 20px,
+    #f6fbff 20px,
+    #f6fbff 40px
   );
 }
 
