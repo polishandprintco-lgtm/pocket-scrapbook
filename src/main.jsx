@@ -346,7 +346,11 @@ function App() {
       {screen === "home" && (
         <>
           <div className="card hero">
-            <h1>pocket<br />scrapbook</h1>
+           <h1 className="logo">
+  pocket
+  <br />
+  scrapbook ♡
+</h1>
             <p>cherish every moment ♡</p>
             <button onClick={() => setShowCreate(true)}>Create Scrapbook</button>
           </div>
