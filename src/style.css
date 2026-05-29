@@ -35,3 +35,151 @@
 .creatorBadge{background:#fff4cc;border:1px solid #e3c66b;border-radius:999px;padding:10px 12px;text-align:center;font-weight:800;color:#7b5b15;margin:0 auto 14px;}
 .editorEl textarea{overflow:hidden;}
 .editorEl.locked textarea{pointer-events:none;}
+/* 1. Replace striped login scrapbook picture with a real scrapbook cover look */
+.authScrapbookCover{
+  background:
+    linear-gradient(rgba(255,255,255,.20), rgba(255,255,255,.20)),
+    repeating-linear-gradient(
+      0deg,
+      #f5c8d8 0 18px,
+      #ffeef4 18px 36px
+    ) !important;
+  border: 10px solid #fff !important;
+  border-radius: 10px !important;
+  box-shadow: 0 16px 35px rgba(62,45,34,.18) !important;
+  overflow: visible !important;
+}
+
+.authScrapbookCover::before{
+  content:"memories";
+  position:absolute;
+  inset:34px 16px 42px;
+  display:grid;
+  place-items:center;
+  background:#fffaf3;
+  border:1px solid #e6d8cd;
+  border-radius:8px;
+  font-family:"Brush Script MT", cursive;
+  font-size:22px;
+  color:#332722;
+  box-shadow:0 4px 12px rgba(0,0,0,.08);
+}
+
+.authScrapbookCover::after{
+  content:"";
+  position:absolute;
+  top:-12px;
+  left:34px;
+  width:70px;
+  height:24px;
+  border-radius:5px;
+  background:repeating-linear-gradient(
+    90deg,
+    #f6c7d9 0 14px,
+    #e7a8c4 14px 28px
+  );
+  opacity:.9;
+}
+
+/* 2. Designed template cover cards */
+.templatePreview{
+  height:160px !important;
+  border-radius:18px !important;
+  overflow:hidden;
+  background:#fff8ef !important;
+  box-shadow:0 12px 24px rgba(62,45,34,.14);
+  position:relative;
+}
+
+.templatePreview::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(rgba(255,255,255,.22),rgba(255,255,255,.22)),
+    var(--cover-img, none);
+  background-size:cover;
+  background-position:center;
+}
+
+.templatePreview::after{
+  content:"";
+  position:absolute;
+  left:10px;
+  top:0;
+  width:16px;
+  height:100%;
+  background:repeating-linear-gradient(
+    0deg,
+    #d7b98f 0 7px,
+    #fff2da 7px 13px
+  );
+  opacity:.75;
+}
+
+.templateCard b,
+.templateCard small{
+  position:relative;
+  z-index:2;
+}
+
+/* fallback covers if you don't have cover images yet */
+.templateCard:nth-child(1) .templatePreview{ --cover-img:linear-gradient(135deg,#dff0ff,#fff); }
+.templateCard:nth-child(2) .templatePreview{ --cover-img:linear-gradient(135deg,#ffe2ec,#fff); }
+.templateCard:nth-child(3) .templatePreview{ --cover-img:linear-gradient(135deg,#fff2df,#f8d8dc); }
+.templateCard:nth-child(4) .templatePreview{ --cover-img:linear-gradient(135deg,#d7f0ea,#fff4df); }
+.templateCard:nth-child(5) .templatePreview{ --cover-img:linear-gradient(135deg,#f7ead7,#fff); }
+.templateCard:nth-child(6) .templatePreview{ --cover-img:linear-gradient(135deg,#e7e0ff,#fff); }
+
+/* 3. Buy 20 more photo uploads card */
+.photoBuyCard{
+  margin:22px 0;
+  padding:18px;
+  border:1px solid var(--line);
+  border-radius:24px;
+  background:#fff8f4;
+  box-shadow:var(--shadow);
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+
+.photoBuyIcon{
+  width:64px;
+  height:64px;
+  border-radius:18px;
+  background:#ffd6e4;
+  display:grid;
+  place-items:center;
+  font-size:30px;
+}
+
+.photoBuyInfo{
+  flex:1;
+}
+
+.photoBuyInfo h3{
+  margin:0;
+  font-family:"Playfair Display",serif;
+  color:#c96d99;
+}
+
+.photoBuyInfo p{
+  margin:4px 0 0;
+  color:var(--muted);
+  font-size:13px;
+}
+
+.photoBuyPrice{
+  font-weight:800;
+  color:#c96d99;
+}
+
+.photoBuyCard button{
+  border:0;
+  border-radius:999px;
+  background:#d66f9c;
+  color:white;
+  padding:11px 14px;
+  font-weight:800;
+}
