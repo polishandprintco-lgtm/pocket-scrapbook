@@ -563,7 +563,7 @@ function Editor({ book, pageIndex, setPageIndex, saveBook, setScreen, showToast 
       </div>
       <div className="pageNav"><button disabled={pageIndex === 0} onClick={() => setPageIndex(pageIndex - 1)}>Prev</button><span>Page {pageIndex + 1} of {book.pages.length}</span><button disabled={pageIndex >= book.pages.length - 1} onClick={() => setPageIndex(pageIndex + 1)}>Next</button></div>
       <nav className="editorTools">
-        <button onClick={() => changeBook((p) => p.elements.push(textEl("New text", 25, 25, 42, 10, 22))}>Text</button>
+        <button onClick={() => changeBook((p) => p.elements.push(textEl("New text", 25, 25, 42, 10, 22)))}>Text</button>
         <button onClick={() => changeBook((p) => p.elements.push(photoEl(20, 22, 52, 42)))}>Photo</button>
         <button onClick={() => setSheet(sheet === "stickers" ? null : "stickers")}>Stickers</button>
         <button onClick={() => setSheet(sheet === "backgrounds" ? null : "backgrounds")}>Backgrounds</button>
