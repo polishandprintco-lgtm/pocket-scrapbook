@@ -304,7 +304,7 @@ function Home({ scrapbooks, createBook, openBook, deleteBook }) {
     Baby Girl
   </button>
 </section>
-}
+
 
 function Editor({ book, pageIndex, setPageIndex, saveBook, setScreen, profile }) {
   const [selected, setSelected] = useState(null);
