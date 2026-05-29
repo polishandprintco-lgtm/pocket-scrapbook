@@ -268,7 +268,7 @@ function Home({ scrapbooks, createBook, openBook, deleteBook }) {
         <button className="templateCard" onClick={() => createBook("Baby Boy First Year", "babyBlue", babyTemplate("boy"))}><div className="mini babyBlue">baby boy<br />first year</div><b>Baby Boy Template</b><span>Paid preview · .99</span></button>
         <button className="templateCard" onClick={() => createBook("Baby Girl First Year", "babyPink", babyTemplate("girl"))}><div className="mini babyPink">baby girl<br />first year</div><b>Baby Girl Template</b><span>Paid preview · .99</span></button>
       </section>
-        ))}
+        )}
       </section>
     </main>
   );
