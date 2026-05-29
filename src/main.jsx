@@ -263,14 +263,47 @@ function Home({ scrapbooks, createBook, openBook, deleteBook }) {
         </section>
       
       <h2>Templates</h2>
-      <section className="templateGrid">
-        <button className="templateCard" onClick={() => createBook("My First Scrapbook", bg, myLifeTemplate(bg))}><div className="mini cream">my life<br />scrapbook</div><b>My First Scrapbook</b><span>Free</span></button>
-        <button className="templateCard" onClick={() => createBook("Baby Boy First Year", "babyBlue", babyTemplate("boy"))}><div className="mini babyBlue">baby boy<br />first year</div><b>Baby Boy Template</b><span>Paid preview · .99</span></button>
-        <button className="templateCard" onClick={() => createBook("Baby Girl First Year", "babyPink", babyTemplate("girl"))}><div className="mini babyPink">baby girl<br />first year</div><b>Baby Girl Template</b><span>Paid preview · .99</span></button>
-      </section>
-      
-    </main>
-  );
+
+<section className="templateGrid">
+  <button
+    className="templateCard"
+    onClick={() =>
+      createBook(
+        "My First Scrapbook",
+        bg,
+        myLifeTemplate(bg)
+      )
+    }
+  >
+    My Life
+  </button>
+
+  <button
+    className="templateCard"
+    onClick={() =>
+      createBook(
+        "Baby Boy First Year",
+        "babyBlue",
+        babyTemplate("boy")
+      )
+    }
+  >
+    Baby Boy
+  </button>
+
+  <button
+    className="templateCard"
+    onClick={() =>
+      createBook(
+        "Baby Girl First Year",
+        "babyPink",
+        babyTemplate("girl")
+      )
+    }
+  >
+    Baby Girl
+  </button>
+</section>
 }
 
 function Editor({ book, pageIndex, setPageIndex, saveBook, setScreen, profile }) {
