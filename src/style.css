@@ -314,3 +314,7 @@ nav button{
   color: #3a2b31;
   margin-bottom: 10px;
 }
+h1{
+  color: hotpink !important;
+  font-size: 80px !important;
+}
