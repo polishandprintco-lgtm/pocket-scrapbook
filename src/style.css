@@ -127,3 +127,34 @@ html, body {
   background: #fffaf0;
   box-shadow: 0 12px 35px rgba(0,0,0,.12);
 }
+body {
+  margin: 0;
+  background: #eaded5 !important;
+}
+
+#root {
+  width: 430px !important;
+  max-width: 430px !important;
+  margin: 0 auto !important;
+}
+
+.app,
+.authPage {
+  width: 430px !important;
+  max-width: 430px !important;
+  margin: 0 auto !important;
+  overflow-x: hidden !important;
+}
+
+.authPage {
+  min-height: 100vh;
+  background:
+    url("https://images.unsplash.com/photo-1526047932273-341f2a7631f9?w=500") left 110px / 125px 165px no-repeat,
+    url("https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=500") right 250px / 125px 165px no-repeat,
+    linear-gradient(180deg, #fff8f3, #f9eee9) !important;
+}
+
+.leftPhoto,
+.rightPhoto {
+  display: none !important;
+}
