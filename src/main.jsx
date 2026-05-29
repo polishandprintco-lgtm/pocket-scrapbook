@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./style.css";
 import { auth, db, storage } from "./firebase";
+
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -13,6 +14,7 @@ import {
   deleteUser,
   signOut,
 } from "firebase/auth";
+
 import {
   addDoc,
   collection,
@@ -25,155 +27,178 @@ import {
   setDoc,
   updateDoc,
 } from "firebase/firestore";
+
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
-const uid = () =>
+const CREATOR_EMAILS = [
+  "dubosemo2@gmail.com",
+  "haileemccowen@icloud.com",
+  "sweetkybug09@gmail.com",
+];
+
+const makeId = () =>
   typeof crypto !== "undefined" && crypto.randomUUID
     ? crypto.randomUUID()
     : `${Date.now()}-${Math.random()}`;
 
-const BG_OPTIONS = [
+const bgOptions = [
   { id: "cream", name: "Cream" },
-  { id: "blank", name: "Blank" },
-  { id: "paper", name: "Paper" },
   { id: "grid", name: "Grid" },
   { id: "dots", name: "Dots" },
-  { id: "babyBlue", name: "Baby Blue" },
-  { id: "babyPink", name: "Baby Pink" },
+  { id: "paper", name: "Paper" },
+  { id: "pink", name: "Baby Pink" },
+  { id: "blue", name: "Baby Blue" },
   { id: "lavender", name: "Light Lavender" },
-  { id: "wedding", name: "Wedding Cream" },
-  { id: "christmas", name: "Christmas Cream" },
+  { id: "ginghamPink", name: "Pink Gingham" },
+  { id: "ginghamBlue", name: "Blue Gingham" },
 ];
 
-const FONT_OPTIONS = ["Playfair Display", "Georgia", "Poppins", "Courier New", "Brush Script MT", "Arial"];
-const COLORS = ["#2f2825", "#a95379", "#7a8fa6", "#81916e", "#c38f65", "#111111", "#ffffff"];
-
-const STICKERS = [
-  { name: "Doodle 1", src: "/doodles_01.png", category: "Doodles", premium: false },
-  { name: "Doodle 2", src: "/doodles_02.png", category: "Doodles", premium: false },
-  { name: "Doodle 3", src: "/doodles_03.png", category: "Doodles", premium: false },
-  { name: "Doodle 4", src: "/doodles_04.png", category: "Doodles", premium: false },
-  { name: "Doodle 5", src: "/doodles_05.png", category: "Doodles", premium: false },
-  { name: "Doodle 6", src: "/doodles_06.png", category: "Doodles", premium: false },
-  { name: "Celebration 1", src: "/celebration_01.png", category: "Celebration", premium: false },
-  { name: "Celebration 2", src: "/celebration_02.png", category: "Celebration", premium: true },
-  { name: "Animal 1", src: "/animals_01.png", category: "Animals", premium: true },
-  { name: "Animal 2", src: "/animals_02.png", category: "Animals", premium: true },
-  { name: "Dream Plan 1", src: "/dream_plan_01.png", category: "Dream & Plan", premium: true },
-  { name: "Dream Plan 2", src: "/dream_plan_02.png", category: "Dream & Plan", premium: true },
-  { name: "Dream Plan 3", src: "/dream_plan_03.png", category: "Dream & Plan", premium: true },
-  { name: "Frame Label 1", src: "/frames_labels_01.png", category: "Frames & Labels", premium: false },
-  { name: "Frame Label 2", src: "/frames_labels_02.png", category: "Frames & Labels", premium: true },
+const fonts = [
+  "Georgia",
+  "serif",
+  "cursive",
+  "Arial",
+  "Trebuchet MS",
+  "Times New Roman",
 ];
 
-const emojiStickers = ["♡", "☆", "✿", "🌸", "🌿", "🎀", "🧸", "📷", "✈️", "🎂", "🏡", "💍", "🎓", "🎄"];
+const stickerLibrary = [
+  { name: "Pink Heart", tag: "love heart", category: "Free", value: "♡", premium: false },
+  { name: "Star", tag: "star sparkle", category: "Free", value: "☆", premium: false },
+  { name: "Flower", tag: "flower nature", category: "Free", value: "✿", premium: false },
+  { name: "Sparkle", tag: "sparkle aesthetic", category: "Free", value: "✨", premium: false },
+  { name: "Bow", tag: "bow baby girl", category: "Baby", value: "🎀", premium: true },
+  { name: "Teddy", tag: "bear baby", category: "Baby", value: "🧸", premium: true },
+  { name: "Camera", tag: "camera travel", category: "Travel", value: "📷", premium: true },
+  { name: "Plane", tag: "plane travel", category: "Travel", value: "✈️", premium: true },
+  { name: "Ring", tag: "wedding ring", category: "Wedding", value: "💍", premium: true },
+  { name: "Tree", tag: "christmas tree", category: "Holiday", value: "🎄", premium: true },
+  { name: "Graduate", tag: "graduation school", category: "School", value: "🎓", premium: true },
+  { name: "Cake", tag: "birthday celebration", category: "Celebration", value: "🎂", premium: true },
+  { name: "Leaf", tag: "leaf nature", category: "Nature", value: "🌿", premium: false },
+  { name: "Home", tag: "home cozy", category: "Cozy", value: "🏡", premium: true },
+  { name: "Pet", tag: "animal pet", category: "Animals", value: "🐾", premium: true },
+  // If you uploaded files directly inside public, these will work too:
+  { name: "Animals 01", tag: "animal premium", category: "Animals", src: "/animals_01.png", premium: true },
+  { name: "Celebration 01", tag: "celebration party", category: "Celebration", src: "/celebration_01.png", premium: false },
+  { name: "Frames Labels", tag: "frame label note", category: "Frames", src: "/frames_labels_01.png", premium: false },
+  { name: "Love 01", tag: "love heart", category: "Love", src: "/love_01.png", premium: false },
+  { name: "Travel 01", tag: "travel vacation", category: "Travel", src: "/travel_01.png", premium: true },
+];
 
-function element(type, props = {}) {
+function baseElement(type, extra) {
   return {
-    id: uid(),
+    id: makeId(),
     type,
     x: 20,
     y: 20,
-    w: 28,
-    h: 18,
+    w: 35,
+    h: 15,
     rotate: 0,
-    locked: !!props.locked,
-    ...props,
+    locked: false,
+    z: 1,
+    ...extra,
   };
 }
-function textEl(text, x, y, w, h, opts = {}) {
-  return element("text", { text, x, y, w, h, size: opts.size || 18, color: opts.color || "#2f2825", font: opts.font || "Poppins", premiumCurve: false, ...opts });
+
+function textEl(text, x, y, w, h, size = 18, locked = false, extra = {}) {
+  return baseElement("text", { text, x, y, w, h, size, color: "#5b433b", font: "cursive", locked, ...extra });
 }
-function photoEl(x, y, w, h, opts = {}) {
-  return element("photo", { src: "", x, y, w, h, ...opts });
+
+function photoEl(x, y, w, h, rotate = 0, locked = false) {
+  return baseElement("photo", { x, y, w, h, rotate, src: "", locked });
 }
-function stickerEl(value, x, y, w, h, opts = {}) {
-  return element("sticker", { value, x, y, w, h, ...opts });
+
+function stickerEl(value, x, y, w = 10, h = 10, locked = false, extra = {}) {
+  return baseElement("sticker", { value, x, y, w, h, locked, ...extra });
 }
+
 function page(bg = "cream", elements = []) {
-  return { id: uid(), bg, elements };
+  return { id: makeId(), bg, elements };
 }
 
-function babyPages(kind = "girl") {
+function simpleTemplate(name, bg = "cream") {
+  return [
+    page(bg, [
+      textEl(name, 12, 9, 76, 11, 25, true),
+      photoEl(17, 28, 66, 43, -2),
+      textEl("favorite memory ♡", 20, 77, 60, 8, 18, false),
+      stickerEl("♡", 78, 12, 9, 9, true),
+    ]),
+    page(bg, [photoEl(12, 14, 76, 55, 2), textEl("write the story here...", 15, 75, 70, 11, 16, false)]),
+  ];
+}
+
+function babyTemplate(kind = "girl") {
   const girl = kind === "girl";
-  const bg = girl ? "babyPink" : "babyBlue";
-  const accent = girl ? "#d889a7" : "#7595b6";
-  const babyWord = girl ? "baby girl" : "baby boy";
-  const deco = girl ? "🎀" : "🧸";
+  const bg = girl ? "ginghamPink" : "ginghamBlue";
+  const accent = girl ? "#d56d95" : "#5e88b7";
+  const sticker = girl ? "🎀" : "🧸";
+  const title = girl ? "Baby Girl First Year" : "Baby Boy First Year";
   const pages = [];
-  pages.push(page(bg, [
-    textEl("baby's\nfirst year", 8, 8, 40, 22, { font: "Brush Script MT", size: 30, color: "#1e1b1a", locked: true }),
-    photoEl(10, 42, 30, 34),
-    photoEl(52, 36, 28, 28, { rotate: 5 }),
-    textEl(babyWord + " ♡", 51, 68, 36, 8, { size: 16, color: accent }),
-    stickerEl(deco, 72, 12, 12, 12, { locked: true }),
-    stickerEl("♡", 12, 78, 10, 10, { color: accent, locked: true }),
-  ]));
-  pages.push(page(bg, [
-    textEl("hello\nworld\n♡", 8, 12, 26, 22, { size: 24, locked: true }),
-    photoEl(45, 17, 38, 45, { rotate: 4 }),
-    textEl("date:\ntime:\nweight:\nlength:", 9, 45, 30, 22, { font: "Courier New", size: 12 }),
-    stickerEl(girl ? "🌸" : "☆", 78, 70, 10, 10, { locked: true }),
-  ]));
-  pages.push(page(bg, [textEl("tiny\nhands\nbig\nlove\n♡", 9, 14, 30, 35, { size: 22, locked: true }), photoEl(45, 15, 38, 48, { rotate: 4 }), stickerEl("♡", 74, 65, 12, 12, { locked: true })]));
+  pages.push(
+    page(bg, [
+      textEl("baby's", 12, 10, 36, 9, 25, true, { color: accent }),
+      textEl("first year", 12, 19, 48, 10, 27, true, { color: accent }),
+      photoEl(12, 39, 32, 35, -5),
+      photoEl(53, 34, 29, 30, 4),
+      stickerEl(sticker, 72, 14, 12, 12, true),
+      stickerEl("♡", 46, 76, 9, 9, true, { color: accent }),
+      textEl(girl ? "our little girl ♡" : "our little boy ♡", 50, 69, 36, 8, 16, false, { color: accent }),
+    ])
+  );
+  pages.push(
+    page(bg, [
+      textEl("birth details", 10, 9, 50, 9, 24, true, { color: accent }),
+      photoEl(12, 25, 38, 42, -2),
+      textEl("date:\ntime:\nweight:\nlength:", 57, 27, 32, 30, 15, false),
+      stickerEl("☆", 77, 66, 9, 9, true),
+    ])
+  );
   for (let i = 1; i <= 12; i++) {
-    pages.push(page(bg, [
-      textEl(i === 12 ? "one year\nof you" : `${i}\nmonth${i === 1 ? "" : "s"}`, 8, 9, 26, 18, { font: "Courier New", size: 20, locked: true }),
-      photoEl(i % 3 === 0 ? 18 : 34, i % 2 === 0 ? 25 : 18, i % 3 === 0 ? 55 : 45, i % 2 === 0 ? 36 : 42),
-      i % 2 === 0 ? photoEl(62, 55, 24, 26, { rotate: 4 }) : textEl("learning\n& growing ♡", 55, 66, 35, 10, { size: 14, color: accent }),
-      stickerEl(girl ? "🌸" : "☆", 10, 69, 11, 11, { locked: true }),
-      stickerEl("♡", 78, 74, 10, 10, { locked: true }),
-    ]));
+    pages.push(
+      page(bg, [
+        textEl(`${i}`, 10, 9, 16, 15, 34, true, { color: accent }),
+        textEl(`month${i > 1 ? "s" : ""}`, 22, 13, 31, 8, 18, true, { color: accent }),
+        photoEl(31, 22, 43, 42, 2),
+        textEl("learning & growing ♡", 21, 70, 58, 8, 15, true, { color: accent }),
+        textEl("notes...", 17, 80, 66, 8, 14, false),
+        stickerEl(i % 2 ? sticker : "♡", 76, 13, 10, 10, true),
+      ])
+    );
   }
-  pages.push(page(bg, [textEl("first birthday", 22, 10, 60, 12, { font: "Brush Script MT", size: 30, locked: true }), photoEl(10, 28, 35, 45), photoEl(52, 28, 35, 45, { rotate: 3 }), textEl("favorite moments", 20, 78, 55, 10, { size: 15 })]));
-  pages.push(page(bg, [textEl("one year reflection", 12, 10, 76, 10, { size: 24, locked: true }), textEl("what I never want to forget...\n\n\n\n", 12, 28, 76, 35, { font: "Courier New", size: 15 }), stickerEl("♡", 45, 70, 14, 14, { locked: true })]));
-  return pages;
+  pages.push(
+    page(bg, [
+      textEl("one year of you", 10, 10, 70, 10, 26, true, { color: accent }),
+      photoEl(14, 27, 72, 45, -1),
+      textEl("favorite moments...", 17, 78, 66, 9, 15, false),
+      stickerEl("✨", 77, 15, 8, 8, true),
+    ])
+  );
+  return { name: title, price: "$0.99", pages };
 }
 
-function simpleTemplate(title, bg = "cream", pages = 6) {
-  const list = [page(bg, [textEl(title, 14, 17, 72, 20, { font: "Brush Script MT", size: 32, locked: true }), stickerEl("♡", 45, 45, 10, 10, { locked: true })])];
-  for (let i = 1; i < pages; i++) list.push(page(bg, [textEl(["About this", "Memories", "Favorite Moments", "Details", "Photos", "Looking Ahead"][i - 1] || "Memories", 12, 8, 76, 10, { size: 22, locked: true }), photoEl(10, 24, 36, 40), textEl("notes:\n\n\n\n", 52, 26, 38, 30, { font: "Courier New", size: 14 }), stickerEl("🌿", 76, 68, 12, 12, { locked: true })]));
-  return list;
-}
-
-const TEMPLATES = [
-  { id: "blank", name: "Blank Book", label: "Free", premium: false, price: "Free", maker: () => [page("cream", [])] },
-  { id: "memory", name: "Memory Book", label: "Free", premium: false, price: "Free", maker: () => simpleTemplate("memory book", "paper", 8) },
-  { id: "adventure", name: "Adventure Book", label: "$0.99", premium: true, price: "$0.99", maker: () => simpleTemplate("my adventure book", "paper", 12) },
-  { id: "babyBoy", name: "Baby Boy First Year", label: "$0.99", premium: true, price: "$0.99", maker: () => babyPages("boy") },
-  { id: "babyGirl", name: "Baby Girl First Year", label: "$0.99", premium: true, price: "$0.99", maker: () => babyPages("girl") },
-  { id: "wedding", name: "Wedding Book", label: "$0.99", premium: true, price: "$0.99", maker: () => simpleTemplate("our wedding book", "wedding", 16) },
-  { id: "pregnancy", name: "Pregnancy Journey", label: "$0.99", premium: true, price: "$0.99", maker: () => simpleTemplate("our pregnancy journey", "paper", 8) },
-  { id: "vacation", name: "Vacation Memories", label: "$0.99", premium: true, price: "$0.99", maker: () => simpleTemplate("our vacation memories", "paper", 8) },
-  { id: "graduation", name: "Graduation Memories", label: "$0.99", premium: true, price: "$0.99", maker: () => simpleTemplate("my graduation memories", "paper", 8) },
-  { id: "christmas", name: "Christmas Memories", label: "$0.99", premium: true, price: "$0.99", maker: () => simpleTemplate("our christmas memories", "christmas", 8) },
-  { id: "thanksgiving", name: "Thanksgiving Memories", label: "$0.99", premium: true, price: "$0.99", maker: () => simpleTemplate("thanksgiving memories", "paper", 8) },
-  { id: "family", name: "Family Reunion", label: "$0.99", premium: true, price: "$0.99", maker: () => simpleTemplate("family reunion memories", "paper", 8) },
+const templateList = [
+  { id: "blank", title: "Blank Scrapbook", price: "Free", premium: false, cover: "blankCover", build: () => [page("cream", [])] },
+  { id: "memory", title: "Memory Book", price: "Free", premium: false, cover: "memoryCover", build: () => simpleTemplate("Memory Book", "paper") },
+  { id: "boy", title: "Baby Boy First Year", price: "$0.99", premium: true, cover: "boyCover", build: () => babyTemplate("boy").pages },
+  { id: "girl", title: "Baby Girl First Year", price: "$0.99", premium: true, cover: "girlCover", build: () => babyTemplate("girl").pages },
+  { id: "wedding", title: "Wedding Book", price: "$0.99", premium: true, cover: "weddingCover", build: () => simpleTemplate("Wedding Book", "paper") },
+  { id: "pregnancy", title: "Pregnancy Journey", price: "$0.99", premium: true, cover: "pregnancyCover", build: () => simpleTemplate("Pregnancy Journey", "pink") },
+  { id: "vacation", title: "Vacation Memories", price: "$0.99", premium: true, cover: "vacationCover", build: () => simpleTemplate("Vacation Memories", "blue") },
+  { id: "graduation", title: "Graduation Memories", price: "$0.99", premium: true, cover: "graduationCover", build: () => simpleTemplate("Graduation Memories", "cream") },
+  { id: "christmas", title: "Christmas Memories", price: "$0.99", premium: true, cover: "christmasCover", build: () => simpleTemplate("Christmas Memories", "paper") },
+  { id: "thanksgiving", title: "Thanksgiving Memories", price: "$0.99", premium: true, cover: "thanksgivingCover", build: () => simpleTemplate("Thanksgiving Memories", "cream") },
+  { id: "family", title: "Family Reunion", price: "$0.99", premium: true, cover: "familyCover", build: () => simpleTemplate("Family Reunion", "lavender") },
 ];
 
-function useToast() {
-  const [toast, setToast] = useState(null);
-  function showToast(message) {
-    setToast(message);
-    setTimeout(() => setToast(null), 2500);
-  }
-  return { toast, showToast };
+function isCreator(user) {
+  const email = user?.email?.toLowerCase();
+  return !!email && CREATOR_EMAILS.includes(email);
 }
 
-function PaperModal({ title, message, confirmText = "Okay", cancelText = "Cancel", danger, onCancel, onConfirm }) {
-  return (
-    <div className="modalOverlay">
-      <div className="paperModal">
-        <div className="washiTape" />
-        <h3>{title}</h3>
-        <p>{message}</p>
-        <div className="modalButtons">
-          {onCancel && <button className="softBtn" onClick={onCancel}>{cancelText}</button>}
-          <button className={danger ? "dangerBtn" : "primaryBtn"} onClick={onConfirm}>{confirmText}</button>
-        </div>
-      </div>
-    </div>
-  );
+function isUnlocked(user, profile) {
+  return isCreator(user) || profile?.subscription === "Premium" || profile?.premium === true;
 }
 
 function App() {
@@ -181,85 +206,147 @@ function App() {
   const [profile, setProfile] = useState({});
   const [books, setBooks] = useState([]);
   const [screen, setScreen] = useState("loading");
-  const [active, setActive] = useState(null);
+  const [activeBook, setActiveBook] = useState(null);
   const [pageIndex, setPageIndex] = useState(0);
   const [modal, setModal] = useState(null);
-  const { toast, showToast } = useToast();
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, async (u) => {
+    return onAuthStateChanged(auth, async (u) => {
       setUser(u);
-      if (!u) { setScreen("auth"); return; }
-      const pref = doc(db, "users", u.uid);
-      await setDoc(pref, {
-        name: u.displayName || "",
-        email: u.email || "",
-        photoURL: u.photoURL || "",
-        subscription: "Free",
-        notifications: true,
-        dark: false,
-      }, { merge: true });
-      const unsubProfile = onSnapshot(pref, (snap) => setProfile(snap.data() || {}));
+      if (!u) {
+        setScreen("auth");
+        return;
+      }
+      const userRef = doc(db, "users", u.uid);
+      await setDoc(
+        userRef,
+        {
+          name: u.displayName || "",
+          email: u.email || "",
+          photoURL: u.photoURL || "",
+          subscription: isCreator(u) ? "Creator" : "Free",
+          notifications: true,
+          updatedAt: serverTimestamp(),
+        },
+        { merge: true }
+      );
+      const unsubProfile = onSnapshot(userRef, (snap) => setProfile(snap.data() || {}));
       const q = query(collection(db, "users", u.uid, "scrapbooks"), orderBy("updatedAt", "desc"));
       const unsubBooks = onSnapshot(q, (snap) => setBooks(snap.docs.map((d) => ({ id: d.id, ...d.data() }))));
       setScreen("home");
-      return () => { unsubProfile(); unsubBooks(); };
+      return () => {
+        unsubProfile();
+        unsubBooks();
+      };
     });
-    return () => unsub();
   }, []);
 
   useEffect(() => {
-    document.body.classList.toggle("dark", !!profile?.dark);
-  }, [profile?.dark]);
+    document.body.classList.toggle("dark", !!profile.dark);
+  }, [profile.dark]);
+
+  async function createBook(template, name) {
+    if (!user) return;
+    const locked = template.premium && !isUnlocked(user, profile);
+    if (locked) {
+      setModal({ type: "premium", title: template.title });
+      return;
+    }
+    const data = {
+      name: name || template.title,
+      templateId: template.id,
+      pages: template.build(),
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      deleted: false,
+    };
+    const r = await addDoc(collection(db, "users", user.uid, "scrapbooks"), data);
+    setActiveBook({ ...data, id: r.id });
+    setPageIndex(0);
+    setScreen("editor");
+  }
 
   async function saveBook(book) {
-    setActive(book);
     if (!user || !book?.id) return;
-    await updateDoc(doc(db, "users", user.uid, "scrapbooks", book.id), { ...book, updatedAt: serverTimestamp() });
-  }
-
-  async function createBook(name, pages) {
-    if (!user) return;
-    const data = { name: name || "Untitled Scrapbook", pages, createdAt: serverTimestamp(), updatedAt: serverTimestamp() };
-    const r = await addDoc(collection(db, "users", user.uid, "scrapbooks"), data);
-    const book = { ...data, id: r.id };
-    setActive(book); setPageIndex(0); setScreen("editor"); showToast("Scrapbook created ♡");
-  }
-
-  function askDeleteBook(book) {
-    setModal({
-      title: "Delete Scrapbook?",
-      message: `Are you sure you want to delete “${book.name}”? This cannot be undone.`,
-      danger: true,
-      confirmText: "Delete",
-      onConfirm: async () => {
-        await deleteDoc(doc(db, "users", user.uid, "scrapbooks", book.id));
-        setModal(null); setScreen("home"); showToast("Scrapbook deleted");
-      },
-      onCancel: () => setModal(null),
+    setActiveBook(book);
+    await updateDoc(doc(db, "users", user.uid, "scrapbooks", book.id), {
+      ...book,
+      updatedAt: serverTimestamp(),
     });
   }
 
-  function openBook(book, flip = false) { setActive(book); setPageIndex(0); setScreen(flip ? "flipbook" : "editor"); }
-  function home() { setScreen("home"); }
+  function requestDeleteBook(book) {
+    setModal({ type: "deleteBook", book });
+  }
 
-  if (screen === "loading") return <div className="phoneFrame"><div className="loading">Loading...</div></div>;
+  async function reallyDeleteBook(book) {
+    if (!user || !book?.id) return;
+    await deleteDoc(doc(db, "users", user.uid, "scrapbooks", book.id));
+    setModal(null);
+    if (activeBook?.id === book.id) setScreen("home");
+  }
+
+  function openBook(book, flip = false) {
+    setActiveBook(book);
+    setPageIndex(0);
+    setScreen(flip ? "flipbook" : "editor");
+  }
+
+  if (screen === "loading") return <PhoneFrame><div className="loading">Loading Pocket Scrapbook...</div></PhoneFrame>;
   if (!user) return <Auth />;
 
+  const unlocked = isUnlocked(user, profile);
+
   return (
-    <div className="phoneFrame">
+    <PhoneFrame>
+      <AppHeader screen={screen} setScreen={setScreen} />
       {screen === "home" && <Home books={books} openBook={openBook} setScreen={setScreen} />}
-      {screen === "scrapbooks" && <Scrapbooks books={books} openBook={openBook} deleteBook={askDeleteBook} />}
-      {screen === "templates" && <Templates createBook={createBook} profile={profile} setModal={setModal} />}
-      {screen === "create" && <Create createBook={createBook} setScreen={setScreen} setModal={setModal} />}
-      {screen === "premium" && <Premium profile={profile} />}
-      {screen === "profile" && <Profile user={user} profile={profile} setModal={setModal} showToast={showToast} />}
-      {screen === "editor" && active && <Editor book={active} pageIndex={pageIndex} setPageIndex={setPageIndex} saveBook={saveBook} setScreen={setScreen} home={home} profile={profile} showToast={showToast} setModal={setModal} />}
-      {screen === "flipbook" && active && <Flipbook book={active} pageIndex={pageIndex} setPageIndex={setPageIndex} setScreen={setScreen} deleteBook={askDeleteBook} />}
+      {screen === "scrapbooks" && <Scrapbooks books={books} openBook={openBook} requestDeleteBook={requestDeleteBook} />}
+      {screen === "create" && <Create templates={templateList} createBook={createBook} unlocked={unlocked} />}
+      {screen === "templates" && <Templates templates={templateList} createBook={createBook} unlocked={unlocked} />}
+      {screen === "premium" && <Premium profile={profile} creator={isCreator(user)} />}
+      {screen === "profile" && <Profile user={user} profile={profile} setModal={setModal} creator={isCreator(user)} />}
+      {screen === "editor" && activeBook && <Editor book={activeBook} pageIndex={pageIndex} setPageIndex={setPageIndex} saveBook={saveBook} setScreen={setScreen} user={user} profile={profile} setModal={setModal} />}
+      {screen === "flipbook" && activeBook && <Flipbook book={activeBook} pageIndex={pageIndex} setPageIndex={setPageIndex} setScreen={setScreen} requestDeleteBook={requestDeleteBook} />}
       {!["editor", "flipbook"].includes(screen) && <BottomNav screen={screen} setScreen={setScreen} />}
-      {modal && <PaperModal {...modal} />}
-      {toast && <div className="toast"><div className="washiTape" />{toast}</div>}
-    </div>
+      <PaperModal modal={modal} setModal={setModal} onDeleteBook={reallyDeleteBook} user={user} />
+    </PhoneFrame>
+  );
+}
+
+function PhoneFrame({ children }) {
+  return <div className="phoneFrame">{children}</div>;
+}
+
+function AppHeader({ screen, setScreen }) {
+  return (
+    <header className="appHeader">
+      <button className="homeIcon" onClick={() => setScreen("home")}>⌂</button>
+      <div>
+        <strong>Pocket Scrapbook</strong>
+        <span>{screen}</span>
+      </div>
+    </header>
+  );
+}
+
+function BottomNav({ screen, setScreen }) {
+  const tabs = [
+    ["home", "Home", "⌂"],
+    ["templates", "Templates", "▧"],
+    ["create", "Create", "+"],
+    ["premium", "Premium", "♡"],
+    ["profile", "Profile", "☻"],
+  ];
+  return (
+    <nav className="bottomNav">
+      {tabs.map(([id, label, icon]) => (
+        <button key={id} className={screen === id ? "active" : ""} onClick={() => setScreen(id)}>
+          <b>{icon}</b>
+          <span>{label}</span>
+        </button>
+      ))}
+    </nav>
   );
 }
 
@@ -268,224 +355,312 @@ function Auth() {
   const [email, setEmail] = useState("");
   const [pass, setPass] = useState("");
   const [show, setShow] = useState(false);
-  const [error, setError] = useState("");
+  const [err, setErr] = useState("");
 
   async function submit(e) {
-    e.preventDefault(); setError("");
+    e.preventDefault();
+    setErr("");
     try {
       if (mode === "signup") await createUserWithEmailAndPassword(auth, email, pass);
       else await signInWithEmailAndPassword(auth, email, pass);
-    } catch (err) { setError(err.message); }
+    } catch (error) {
+      setErr(error.message);
+    }
   }
 
   return (
-    <div className="phoneFrame authScreen">
-      <div className="authScrapbookCover">memories</div>
-      <header className="authBrand">
-        <div className="brandBadge">♡</div>
-        <div className="brandScript">pocket</div>
-        <h1>SCRAPBOOK</h1>
-        <p>Capture your story. Cherish every moment.</p>
-      </header>
-      <form className="authCard" onSubmit={submit}>
-        <div className="washiTape" />
-        <h2>{mode === "signup" ? "Create account ♡" : "Welcome back ♡"}</h2>
-        <label>Email address</label>
-        <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" required />
-        <label>Password</label>
-        <div className="passwordWrap">
-          <input value={pass} onChange={(e) => setPass(e.target.value)} type={show ? "text" : "password"} required />
-          <button type="button" onClick={() => setShow(!show)}>{show ? "Hide" : "Show"}</button>
-        </div>
-        {mode === "login" && <button type="button" className="linkBtn" onClick={() => email && sendPasswordResetEmail(auth, email)}>Forgot password?</button>}
-        {error && <p className="error">{error}</p>}
-        <button className="gradientBtn">{mode === "signup" ? "Create Account" : "Log In"}</button>
-        <p className="switcher">{mode === "signup" ? "Already have an account?" : "New here?"} <button type="button" onClick={() => setMode(mode === "signup" ? "login" : "signup")}>{mode === "signup" ? "Log in" : "Create an account ♡"}</button></p>
-      </form>
-    </div>
+    <PhoneFrame>
+      <main className="authPage">
+        <div className="scrapCoverDeco">memories</div>
+        <section className="authBrand">
+          <div className="badge">♡</div>
+          <h1>Pocket Scrapbook</h1>
+          <p>Capture your story. Cherish every moment.</p>
+        </section>
+        <form className="authCard" onSubmit={submit}>
+          <h2>{mode === "signup" ? "Create account ♡" : "Welcome back ♡"}</h2>
+          <label>Email address</label>
+          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          <label>Password</label>
+          <div className="passwordField">
+            <input type={show ? "text" : "password"} value={pass} onChange={(e) => setPass(e.target.value)} required />
+            <button type="button" onClick={() => setShow(!show)}>{show ? "Hide" : "Show"}</button>
+          </div>
+          {mode === "login" && <button type="button" className="linkBtn" onClick={() => email && sendPasswordResetEmail(auth, email)}>Forgot password?</button>}
+          {err && <p className="error">{err}</p>}
+          <button className="primary">{mode === "signup" ? "Create Account" : "Log In"}</button>
+          <p className="swap">{mode === "signup" ? "Already have an account?" : "New here?"} <button type="button" onClick={() => setMode(mode === "signup" ? "login" : "signup")}>{mode === "signup" ? "Log in" : "Create account"}</button></p>
+        </form>
+      </main>
+    </PhoneFrame>
   );
 }
 
-function BottomNav({ screen, setScreen }) {
-  const items = [
-    ["home", "⌂", "Home"],
-    ["templates", "▧", "Templates"],
-    ["create", "+", ""],
-    ["premium", "♡", "Premium"],
-    ["profile", "♙", "Profile"],
-  ];
-  return <nav className="bottomNav">{items.map(([id, icon, label]) => <button key={id} className={`${screen === id ? "active" : ""} ${id === "create" ? "createNav" : ""}`} onClick={() => setScreen(id)}><span>{icon}</span>{label && <small>{label}</small>}</button>)}</nav>;
-}
-
-function AppHeader({ setScreen }) {
-  return <div className="appHeader"><button onClick={() => setScreen("home")}>⌂</button><div><span>pocket</span><b>SCRAPBOOK</b></div><button onClick={() => setScreen("premium")}>♡</button></div>;
-}
-
 function Home({ books, openBook, setScreen }) {
-  const recent = books.slice(0, 4);
   return (
     <main className="page homePage">
-      <AppHeader setScreen={setScreen} />
-      <section className="welcomeHero">
-        <div><h1>Welcome<br />back ♡</h1><p>Every story matters.<br />What will you capture today?</p></div>
-        <div className="heroPolaroid" />
+      <section className="heroCard">
+        <div>
+          <p className="eyebrow">Welcome back</p>
+          <h1>Your memories, beautifully kept.</h1>
+          <button onClick={() => setScreen("create")}>Create a Scrapbook</button>
+        </div>
+        <div className="miniCover">pocket scrapbook</div>
       </section>
-      <section className="quickGrid">
-        <button onClick={() => setScreen("create")}><span>＋</span><b>New Scrapbook</b><small>Start a new chapter</small></button>
-        <button onClick={() => setScreen("scrapbooks")}><span>📖</span><b>My Scrapbooks</b><small>View and manage</small></button>
-        <button onClick={() => setScreen("templates")}><span>▧</span><b>Templates</b><small>Browse beautiful pages</small></button>
-        <button onClick={() => setScreen("premium")}><span>♡</span><b>Premium</b><small>Unlock more</small></button>
-      </section>
-      <div className="sectionTitle"><h2>My Scrapbooks</h2><button onClick={() => setScreen("scrapbooks")}>View all ›</button></div>
-      <div className="coverRow">{recent.length ? recent.map((b) => <BookCover key={b.id} book={b} onClick={() => openBook(b)} />) : <p className="empty">No scrapbooks yet. Tap + to create one.</p>}</div>
+      <section className="sectionHead"><h2>Recent Scrapbooks</h2><button onClick={() => setScreen("scrapbooks")}>View all</button></section>
+      <div className="bookRow">
+        {books.slice(0, 5).map((book) => <BookCover key={book.id} book={book} onClick={() => openBook(book)} />)}
+        {books.length === 0 && <div className="emptyCard">No scrapbooks yet. Tap Create to start one.</div>}
+      </div>
     </main>
   );
 }
 
-function BookCover({ book, onClick, menu }) {
-  const bg = book.pages?.[0]?.bg || "cream";
-  return <button className={`bookCover ${bg}`} onClick={onClick}><div className="coverTape" /><div className="coverLeaf">🌿</div><span>{book.name}</span><small>{book.pages?.length || 1} pages</small>{menu}</button>;
-}
-
-function Scrapbooks({ books, openBook, deleteBook }) {
+function Scrapbooks({ books, openBook, requestDeleteBook }) {
   const [menu, setMenu] = useState(null);
-  return <main className="page"><h1>My Scrapbooks</h1><div className="scrapbookGrid">{books.map((book) => <div key={book.id} className="bookWrap"><BookCover book={book} onClick={() => openBook(book)} /><button className="dots" onClick={() => setMenu(menu === book.id ? null : book.id)}>⋯</button>{menu === book.id && <div className="paperMenu"><div className="washiTape" /><button onClick={() => openBook(book)}>Edit</button><button onClick={() => openBook(book, true)}>Flipbook</button><button onClick={() => alert("Export coming soon")}>Export</button><button onClick={() => deleteBook(book)}>Delete</button></div>}</div>)}</div></main>;
+  return (
+    <main className="page">
+      <h1>My Scrapbooks</h1>
+      <div className="coverGrid">
+        {books.map((book) => (
+          <div className="coverWrap" key={book.id}>
+            <BookCover book={book} onClick={() => openBook(book)} />
+            <button className="dots" onClick={() => setMenu(menu === book.id ? null : book.id)}>⋯</button>
+            {menu === book.id && <div className="cardMenu"><button onClick={() => openBook(book)}>Edit</button><button onClick={() => openBook(book, true)}>Flipbook</button><button onClick={() => requestDeleteBook(book)}>Delete</button></div>}
+          </div>
+        ))}
+      </div>
+    </main>
+  );
 }
 
-function Templates({ createBook, profile, setModal }) {
-  function choose(t) {
-    if (t.premium && profile?.subscription !== "Premium") {
-      setModal({ title: "Premium Template", message: `${t.name} is ${t.price} or included with Premium. Payments are demo only until Stripe is connected.`, confirmText: "Preview Anyway", onCancel: () => setModal(null), onConfirm: () => { setModal(null); createBook(t.name, t.maker()); } });
-      return;
-    }
-    createBook(t.name, t.maker());
-  }
-  return <main className="page"><h1>Templates</h1><div className="templateGrid">{TEMPLATES.filter(t => t.id !== "pocket").map((t) => <button key={t.id} className={`templateCard ${t.premium ? "locked" : ""}`} onClick={() => choose(t)}><div className={`templatePreview ${t.id}`}><span>{t.name.split(" ").slice(0, 2).join(" ")}</span></div><b>{t.name}</b><small>{t.label}</small></button>)}</div></main>;
+function BookCover({ book, onClick }) {
+  const bg = book?.pages?.[0]?.bg || "cream";
+  return (
+    <button className={`bookCover ${bg}`} onClick={onClick}>
+      <div className="coverTape"></div>
+      <div className="coverTitle">{book.name}</div>
+      <div className="coverPhoto"></div>
+      <small>{book.pages?.length || 1} pages</small>
+    </button>
+  );
 }
 
-function Create({ createBook, setScreen, setModal }) {
+function Create({ templates, createBook, unlocked }) {
+  const [selected, setSelected] = useState(templates[0]);
   const [name, setName] = useState("");
-  const [templateId, setTemplateId] = useState("blank");
-  const selected = TEMPLATES.find((t) => t.id === templateId) || TEMPLATES[0];
-  return <main className="page"><button className="backBtn" onClick={() => setScreen("home")}>⌂ Home</button><section className="createPaper"><div className="washiTape" /><h1>Create Scrapbook</h1><input placeholder="Name your scrapbook" value={name} onChange={(e) => setName(e.target.value)} /><select value={templateId} onChange={(e) => setTemplateId(e.target.value)}>{TEMPLATES.map(t => <option key={t.id} value={t.id}>{t.name} — {t.label}</option>)}</select><button className="gradientBtn" onClick={() => createBook(name || selected.name, selected.maker())}>Create Scrapbook</button></section></main>;
+  return (
+    <main className="page">
+      <h1>Create</h1>
+      <div className="templatePickerSmall">
+        {templates.map((t) => <button key={t.id} className={selected.id === t.id ? "chosen" : ""} onClick={() => setSelected(t)}>{t.title}</button>)}
+      </div>
+      <div className={`templateBigPreview ${selected.cover}`}><span>{selected.title}</span><em>{selected.price}</em></div>
+      <input className="prettyInput" placeholder="Name your scrapbook" value={name} onChange={(e) => setName(e.target.value)} />
+      <button className="primary" onClick={() => createBook(selected, name)}>{selected.premium && !unlocked ? `Unlock ${selected.price}` : "Create Scrapbook"}</button>
+    </main>
+  );
 }
 
-function Premium({ profile }) {
-  return <main className="page"><h1>Premium</h1><section className="createPaper"><div className="washiTape" /><h2>Your plan: {profile?.subscription || "Free"}</h2><table><tbody><tr><th>Feature</th><th>Free</th><th>Premium</th></tr><tr><td>Photo uploads</td><td>15</td><td>Unlimited</td></tr><tr><td>Premium templates</td><td>$0.99 each</td><td>Included</td></tr><tr><td>Advanced stickers</td><td>Basic</td><td>All</td></tr><tr><td>Curved text</td><td>—</td><td>✓</td></tr></tbody></table><button className="gradientBtn">Upgrade $4.99/mo</button><p className="hint">Stripe needed before real payments work.</p></section></main>;
+function Templates({ templates, createBook, unlocked }) {
+  return (
+    <main className="page">
+      <h1>Templates</h1>
+      <div className="templateGrid">
+        {templates.map((t) => (
+          <button key={t.id} className="templateCard" onClick={() => createBook(t)}>
+            <div className={`templateCover ${t.cover}`}><span>{t.title}</span></div>
+            <b>{t.title}</b>
+            <small>{t.premium && !unlocked ? `🔒 ${t.price}` : t.price}</small>
+          </button>
+        ))}
+      </div>
+    </main>
+  );
 }
 
-function Profile({ user, profile, setModal, showToast }) {
-  const [name, setName] = useState(profile?.name || user?.displayName || "");
-  const [email, setEmail] = useState(user?.email || "");
-  const [pass, setPass] = useState("");
-  useEffect(() => setName(profile?.name || user?.displayName || ""), [profile?.name, user?.displayName]);
-
-  async function uploadProfile(e) {
-    const file = e.target.files?.[0]; if (!file) return;
-    try {
-      const path = ref(storage, `users/${user.uid}/profile/${Date.now()}-${file.name}`);
-      await uploadBytes(path, file);
-      const url = await getDownloadURL(path);
-      await updateProfile(user, { photoURL: url });
-      await updateDoc(doc(db, "users", user.uid), { photoURL: url });
-      showToast("Profile picture saved ♡");
-    } catch (err) {
-      setModal({ title: "Upload Failed", message: "Check Firebase Storage rules. Signed-in users need upload permission.", confirmText: "Okay", onConfirm: () => setModal(null) });
-    }
-  }
-  function deleteAccount() {
-    setModal({ title: "Delete Account?", message: "Are you sure? This permanently deletes your account. You may need to log in again first.", danger: true, confirmText: "Delete", onCancel: () => setModal(null), onConfirm: async () => { try { await deleteUser(user); setModal(null); } catch { setModal({ title: "Log in again", message: "For security, log out and log back in before deleting your account.", confirmText: "Okay", onConfirm: () => setModal(null) }); } } });
-  }
-  return <main className="page profilePage"><h1>Profile</h1><section className="profileCard"><div className="washiTape" /><label className="avatarFrame"><img src={profile?.photoURL || user?.photoURL || "https://images.unsplash.com/photo-1526047932273-341f2a7631f9?w=300"} alt="profile" /><input type="file" hidden accept="image/*" onChange={uploadProfile} /></label><input value={name} onChange={(e) => setName(e.target.value)} placeholder="Name" /><button onClick={async () => { await updateProfile(user, { displayName: name }); await updateDoc(doc(db, "users", user.uid), { name }); showToast("Name saved ♡"); }}>Save Name</button><h2>Settings</h2><label className="toggle">Email notifications about new updates <input type="checkbox" checked={!!profile?.notifications} onChange={(e) => updateDoc(doc(db, "users", user.uid), { notifications: e.target.checked })} /></label><label className="toggle">Dark theme <input type="checkbox" checked={!!profile?.dark} onChange={(e) => updateDoc(doc(db, "users", user.uid), { dark: e.target.checked })} /></label><input value={email} onChange={(e) => setEmail(e.target.value)} /><button onClick={() => updateEmail(user, email)}>Update Email</button><input type="password" value={pass} onChange={(e) => setPass(e.target.value)} placeholder="New password" /><button onClick={() => pass && updatePassword(user, pass)}>Update Password</button><p>Subscription: {profile?.subscription || "Free"}</p><button onClick={() => signOut(auth)}>Logout</button><button className="dangerBtn full" onClick={deleteAccount}>Delete Account</button></section></main>;
-}
-
-function Editor({ book, pageIndex, setPageIndex, saveBook, setScreen, home, profile, showToast, setModal }) {
+function Editor({ book, pageIndex, setPageIndex, saveBook, setScreen, user, profile, setModal }) {
   const [selected, setSelected] = useState(null);
   const [sheet, setSheet] = useState(null);
-  const [search, setSearch] = useState("");
+  const [stickerSearch, setStickerSearch] = useState("");
+  const [history, setHistory] = useState([]);
   const pageRef = useRef(null);
-  const cur = book.pages?.[pageIndex] || page("cream", []);
-  const selectedEl = cur.elements.find((e) => e.id === selected);
+  const currentPage = book.pages[pageIndex] || book.pages[0];
+  const unlocked = isUnlocked(user, profile);
 
-  function changePage(fn) {
-    const next = { ...book, pages: (book.pages || []).map((p, i) => i === pageIndex ? { ...p, elements: [...(p.elements || [])] } : p) };
+  useEffect(() => {
+    const timer = setInterval(() => saveBook(book), 5000);
+    return () => clearInterval(timer);
+  }, [book]);
+
+  function changeBook(fn, pushHistory = true) {
+    if (pushHistory) setHistory((h) => [...h.slice(-10), JSON.stringify(book)]);
+    const next = { ...book, pages: book.pages.map((p) => ({ ...p, elements: [...(p.elements || [])] })) };
     fn(next.pages[pageIndex], next);
     saveBook(next);
   }
-  function updateElement(id, patch) { changePage((p) => { p.elements = p.elements.map((e) => e.id === id ? { ...e, ...patch } : e); }); }
-  function addElement(el) { changePage((p) => { p.elements.push(el); }); }
-  function removeElement(id) { const el = cur.elements.find(e => e.id === id); if (el?.locked) return; changePage((p) => { p.elements = p.elements.filter((e) => e.id !== id); }); setSelected(null); }
-  function duplicateElement(el) { if (el.locked) return; addElement({ ...el, id: uid(), x: el.x + 4, y: el.y + 4 }); }
 
-  async function uploadPhoto(e, id) {
-    const file = e.target.files?.[0]; if (!file) return;
+  function updateElement(id, patch) {
+    changeBook((p) => { p.elements = p.elements.map((el) => el.id === id ? { ...el, ...patch } : el); });
+  }
+
+  function addElement(el) {
+    changeBook((p) => { p.elements.push({ ...el, z: p.elements.length + 1 }); });
+  }
+
+  function removeElement(id) {
+    changeBook((p) => { p.elements = p.elements.filter((el) => el.id !== id); });
+    setSelected(null);
+  }
+
+  function duplicateElement(el) {
+    addElement({ ...el, id: makeId(), x: Math.min(85, el.x + 4), y: Math.min(85, el.y + 4), locked: false });
+  }
+
+  function undo() {
+    const last = history[history.length - 1];
+    if (!last) return;
+    const restored = JSON.parse(last);
+    setHistory((h) => h.slice(0, -1));
+    saveBook(restored);
+  }
+
+  async function uploadPhoto(file, id = null) {
+    if (!file || !user) return;
     try {
-      const url = URL.createObjectURL(file);
-      updateElement(id, { src: url, pendingFileName: file.name });
-      const path = ref(storage, `users/${auth.currentUser.uid}/scrapbook-photos/${Date.now()}-${file.name}`);
-      await uploadBytes(path, file);
-      const downloadURL = await getDownloadURL(path);
-      updateElement(id, { src: downloadURL, pendingFileName: null });
-      showToast("Photo uploaded ♡");
-    } catch {
-      setModal({ title: "Upload Failed", message: "The image preview was added, but Firebase Storage blocked saving. Check your Storage rules.", confirmText: "Okay", onConfirm: () => setModal(null) });
+      const storageRef = ref(storage, `users/${user.uid}/photos/${Date.now()}-${file.name}`);
+      await uploadBytes(storageRef, file);
+      const url = await getDownloadURL(storageRef);
+      if (id) updateElement(id, { src: url });
+      else addElement(photoEl(15, 18, 70, 45, 0, false));
+    } catch (err) {
+      setModal({ type: "notice", title: "Upload failed", text: "Check Firebase Storage rules and try again." });
     }
   }
 
-  function pointerDown(ev, el) {
+  function startDrag(e, el) {
     if (el.locked) return;
-    ev.stopPropagation(); setSelected(el.id);
+    const startX = e.clientX || e.touches?.[0]?.clientX;
+    const startY = e.clientY || e.touches?.[0]?.clientY;
     const rect = pageRef.current.getBoundingClientRect();
-    const startX = ev.clientX; const startY = ev.clientY; const sx = el.x; const sy = el.y;
-    function move(e) { updateElement(el.id, { x: Math.max(0, Math.min(92, sx + ((e.clientX - startX) / rect.width) * 100)), y: Math.max(0, Math.min(92, sy + ((e.clientY - startY) / rect.height) * 100)) }); }
-    function up() { window.removeEventListener("mousemove", move); window.removeEventListener("mouseup", up); }
-    window.addEventListener("mousemove", move); window.addEventListener("mouseup", up);
+    const sx = el.x;
+    const sy = el.y;
+    function move(ev) {
+      const cx = ev.clientX || ev.touches?.[0]?.clientX;
+      const cy = ev.clientY || ev.touches?.[0]?.clientY;
+      updateElement(el.id, { x: Math.max(0, Math.min(92, sx + ((cx - startX) / rect.width) * 100)), y: Math.max(0, Math.min(92, sy + ((cy - startY) / rect.height) * 100)) });
+    }
+    function up() {
+      window.removeEventListener("mousemove", move);
+      window.removeEventListener("mouseup", up);
+      window.removeEventListener("touchmove", move);
+      window.removeEventListener("touchend", up);
+    }
+    window.addEventListener("mousemove", move);
+    window.addEventListener("mouseup", up);
+    window.addEventListener("touchmove", move);
+    window.addEventListener("touchend", up);
   }
 
-  function resizeDown(ev, el) {
-    if (el.locked) return;
-    ev.stopPropagation();
-    const rect = pageRef.current.getBoundingClientRect();
-    const startX = ev.clientX; const startY = ev.clientY; const sw = el.w; const sh = el.h;
-    function move(e) { updateElement(el.id, { w: Math.max(6, Math.min(95, sw + ((e.clientX - startX) / rect.width) * 100)), h: Math.max(5, Math.min(95, sh + ((e.clientY - startY) / rect.height) * 100)) }); }
-    function up() { window.removeEventListener("mousemove", move); window.removeEventListener("mouseup", up); }
-    window.addEventListener("mousemove", move); window.addEventListener("mouseup", up);
-  }
+  const filteredStickers = stickerLibrary.filter((s) => `${s.name} ${s.tag} ${s.category}`.toLowerCase().includes(stickerSearch.toLowerCase()));
 
-  function onDrop(e) {
-    e.preventDefault();
-    const file = e.dataTransfer.files?.[0];
-    if (!file || !file.type.startsWith("image/")) return;
-    const rect = pageRef.current.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
-    const url = URL.createObjectURL(file);
-    const newEl = photoEl(Math.max(0, x - 20), Math.max(0, y - 15), 40, 30, { src: url });
-    addElement(newEl);
-  }
-
-  const filtered = STICKERS.filter(s => `${s.name} ${s.category}`.toLowerCase().includes(search.toLowerCase()));
-
-  return <main className="editorPage"><header className="editorHeader"><button onClick={home}>⌂ Home</button><strong>{book.name}</strong><button onClick={() => setScreen("flipbook")}>Flipbook</button></header><div className="editorScroll"><div ref={pageRef} className={`scrapPage ${cur.bg}`} onClick={() => setSelected(null)} onDragOver={(e) => e.preventDefault()} onDrop={onDrop}>{cur.elements.map((el) => <div key={el.id} className={`editorEl ${selected === el.id ? "selected" : ""} ${el.locked ? "locked" : ""}`} style={{ left: `${el.x}%`, top: `${el.y}%`, width: `${el.w}%`, height: `${el.h}%`, transform: `rotate(${el.rotate || 0}deg)` }} onMouseDown={(e) => pointerDown(e, el)} onClick={(e) => { e.stopPropagation(); setSelected(el.id); }}>{el.type === "photo" && (el.src ? <img src={el.src} alt="" /> : <label className="uploadBox">Upload Photo<input type="file" accept="image/*" hidden onChange={(e) => uploadPhoto(e, el.id)} /></label>)}{el.type === "text" && <textarea disabled={el.locked} value={el.text} style={{ fontSize: el.size, color: el.color, fontFamily: el.font }} onChange={(e) => updateElement(el.id, { text: e.target.value })} />}{el.type === "sticker" && (el.src ? <img src={el.src} alt={el.value || "sticker"} /> : <div className="stickerEmoji">{el.value}</div>)}{selected === el.id && <><div className="miniTools"><button onClick={() => updateElement(el.id, { locked: !el.locked })}>{el.locked ? "🔒" : "🔓"}</button><button disabled={el.locked} onClick={() => updateElement(el.id, { rotate: (el.rotate || 0) + 10 })}>↻</button><button disabled={el.locked} onClick={() => duplicateElement(el)}>⧉</button><button disabled={el.locked} onClick={() => removeElement(el.id)}>🗑</button></div>{!el.locked && <span className="resizeHandle" onMouseDown={(e) => resizeDown(e, el)} />}</>}</div>)}</div><div className="pageNav"><button disabled={pageIndex === 0} onClick={() => setPageIndex(pageIndex - 1)}>Prev</button><span>Page {pageIndex + 1} of {book.pages.length}</span><button disabled={pageIndex === book.pages.length - 1} onClick={() => setPageIndex(pageIndex + 1)}>Next</button></div>{selectedEl?.type === "text" && !selectedEl.locked && <div className="textPanel"><select value={selectedEl.font} onChange={(e) => updateElement(selectedEl.id, { font: e.target.value })}>{FONT_OPTIONS.map(f => <option key={f} value={f}>{f}</option>)}</select><input type="range" min="10" max="54" value={selectedEl.size} onChange={(e) => updateElement(selectedEl.id, { size: Number(e.target.value) })} /><div className="colorRow">{COLORS.map(c => <button key={c} style={{ background: c }} onClick={() => updateElement(selectedEl.id, { color: c })} />)}</div><button onClick={() => setModal({ title: "Premium Effect", message: "Curved text is part of Premium.", confirmText: "Okay", onConfirm: () => setModal(null) })}>Curve Text ✨</button></div>}</div><nav className="editorTools"><button onClick={() => addElement(textEl("New text", 25, 25, 42, 10, { size: 22 }))}>Text</button><button onClick={() => addElement(photoEl(20, 22, 52, 42))}>Photo</button><button onClick={() => setSheet(sheet === "stickers" ? null : "stickers")}>Stickers</button><button onClick={() => setSheet(sheet === "backgrounds" ? null : "backgrounds")}>Backgrounds</button><button onClick={() => changePage((p, next) => next.pages.push(page("cream", [])))}>Page</button></nav>{sheet && <div className="stickerSheet"><div className="washiTape" />{sheet === "stickers" ? <><input placeholder="Search stickers..." value={search} onChange={(e) => setSearch(e.target.value)} /><div className="stickerGrid">{emojiStickers.map((s) => <button key={s} onClick={() => { addElement(stickerEl(s, 30, 30, 12, 12)); setSheet(null); }}>{s}</button>)}{filtered.map((s) => <button key={s.src} className={s.premium ? "premiumSticker" : ""} onClick={() => { if (s.premium && profile?.subscription !== "Premium") { setModal({ title: "Premium Sticker", message: `${s.name} is part of Premium stickers.`, confirmText: "Okay", onConfirm: () => setModal(null) }); return; } addElement(stickerEl(s.name, 30, 30, 18, 18, { src: s.src })); setSheet(null); }}><img src={s.src} alt={s.name} />{s.premium && <span>🔒</span>}</button>)}</div></> : <div className="backgroundGrid">{BG_OPTIONS.map((b) => <button key={b.id} onClick={() => { changePage((p) => { p.bg = b.id; }); setSheet(null); }}>{b.name}</button>)}</div>}</div>}</main>;
+  return (
+    <main className="editorPage">
+      <header className="editorHeader"><button onClick={() => setScreen("home")}>⌂ Home</button><strong>{book.name}</strong><span>{pageIndex + 1}/{book.pages.length}</span></header>
+      <div
+        ref={pageRef}
+        className={`scrapPage ${currentPage.bg}`}
+        onClick={() => setSelected(null)}
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={(e) => { e.preventDefault(); uploadPhoto(e.dataTransfer.files?.[0]); }}
+      >
+        {(currentPage.elements || []).map((el) => (
+          <div
+            key={el.id}
+            className={`pageEl ${selected === el.id ? "selected" : ""} ${el.locked ? "locked" : ""}`}
+            style={{ left: `${el.x}%`, top: `${el.y}%`, width: `${el.w}%`, height: `${el.h}%`, transform: `rotate(${el.rotate || 0}deg)`, zIndex: el.z || 1 }}
+            onMouseDown={(e) => { e.stopPropagation(); setSelected(el.id); startDrag(e, el); }}
+            onTouchStart={(e) => { e.stopPropagation(); setSelected(el.id); startDrag(e, el); }}
+            onClick={(e) => { e.stopPropagation(); setSelected(el.id); }}
+          >
+            {el.type === "photo" && (el.src ? <img src={el.src} alt="" /> : <label className="photoSlot">Upload Photo<input hidden type="file" accept="image/*" onChange={(e) => uploadPhoto(e.target.files?.[0], el.id)} /></label>)}
+            {el.type === "text" && <textarea disabled={el.locked} value={el.text} onChange={(e) => updateElement(el.id, { text: e.target.value })} style={{ fontSize: el.size, color: el.color, fontFamily: el.font }} />}
+            {el.type === "sticker" && (el.src ? <img src={el.src} alt={el.name || "sticker"} /> : <div className="emojiSticker">{el.value}</div>)}
+            {selected === el.id && <div className="miniTools">
+              <button onClick={() => updateElement(el.id, { locked: !el.locked })}>{el.locked ? "🔓" : "🔒"}</button>
+              {!el.locked && <><button onClick={() => updateElement(el.id, { rotate: (el.rotate || 0) + 10 })}>↻</button><button onClick={() => updateElement(el.id, { w: el.w + 3, h: el.h + 3 })}>＋</button><button onClick={() => updateElement(el.id, { w: Math.max(5, el.w - 3), h: Math.max(5, el.h - 3) })}>−</button><button onClick={() => duplicateElement(el)}>⧉</button><button onClick={() => updateElement(el.id, { z: (el.z || 1) + 1 })}>↑</button><button onClick={() => removeElement(el.id)}>🗑</button></>}
+            </div>}
+          </div>
+        ))}
+      </div>
+      {selected && <TextPanel el={(currentPage.elements || []).find((e) => e.id === selected)} updateElement={updateElement} unlocked={unlocked} setModal={setModal} />}
+      <div className="pageControls"><button disabled={pageIndex === 0} onClick={() => setPageIndex(pageIndex - 1)}>Prev</button><button onClick={undo}>Undo</button><button disabled={pageIndex === book.pages.length - 1} onClick={() => setPageIndex(pageIndex + 1)}>Next</button></div>
+      <nav className="editorBar"><button onClick={() => addElement(textEl("New text", 25, 25, 42, 10, 22))}>Text</button><button onClick={() => addElement(photoEl(14, 20, 70, 45))}>Photo</button><button onClick={() => setSheet(sheet === "stickers" ? null : "stickers")}>Stickers</button><button onClick={() => setSheet(sheet === "bg" ? null : "bg")}>Background</button><button onClick={() => changeBook((p, next) => next.pages.push(page("cream", [])))}>Page</button><button onClick={() => setScreen("flipbook")}>Flipbook</button></nav>
+      {sheet && <div className="bottomSheet scrapbookPopup"><div className="washi"></div>{sheet === "stickers" ? <><input placeholder="Search stickers..." value={stickerSearch} onChange={(e) => setStickerSearch(e.target.value)} /> <div className="stickerGrid">{filteredStickers.map((s) => <button key={s.name} onClick={() => { if (s.premium && !unlocked) return setModal({ type: "premium", title: s.name }); addElement(stickerEl(s.value, 35, 35, 12, 12, false, { src: s.src, name: s.name })); setSheet(null); }}>{s.src ? <img src={s.src} alt={s.name} /> : s.value}<small>{s.premium && !unlocked ? "🔒" : ""}</small></button>)}</div></> : <div className="bgGrid">{bgOptions.map((b) => <button key={b.id} onClick={() => { changeBook((p) => { p.bg = b.id; }); setSheet(null); }}>{b.name}</button>)}</div>}</div>}
+    </main>
+  );
 }
 
-function Flipbook({ book, pageIndex, setPageIndex, setScreen, deleteBook }) {
+function TextPanel({ el, updateElement, unlocked, setModal }) {
+  if (!el || el.type !== "text" || el.locked) return null;
+  return <div className="textPanel"><select value={el.font || "cursive"} onChange={(e) => updateElement(el.id, { font: e.target.value })}>{fonts.map((f) => <option key={f} value={f}>{f}</option>)}</select><input type="number" value={el.size || 18} onChange={(e) => updateElement(el.id, { size: Number(e.target.value) })} /><input type="color" value={el.color || "#5b433b"} onChange={(e) => updateElement(el.id, { color: e.target.value })} /><button onClick={() => unlocked ? updateElement(el.id, { curved: !el.curved }) : setModal({ type: "premium", title: "Curved Text" })}>Curve 🔒</button></div>;
+}
+
+function Flipbook({ book, pageIndex, setPageIndex, setScreen, requestDeleteBook }) {
   const [menu, setMenu] = useState(false);
-  const p = book.pages?.[pageIndex] || page();
-  function exportPage() { window.print(); }
-  return <main className="page flipPageScreen"><header className="flipHeader"><button className="backBtn" onClick={() => setScreen("editor")}>← Back</button><strong>{book.name}</strong><button className="dots" onClick={() => setMenu(!menu)}>⋯</button></header>{menu && <div className="paperMenu flip"><div className="washiTape" /><button onClick={exportPage}>Export / Print</button><button onClick={() => setScreen("editor")}>Edit</button><button onClick={() => deleteBook(book)}>Delete</button></div>}<div className={`scrapPage ${p.bg}`}>{p.elements.map(el => <div key={el.id} className="previewEl" style={{ left: `${el.x}%`, top: `${el.y}%`, width: `${el.w}%`, height: `${el.h}%`, transform: `rotate(${el.rotate || 0}deg)`, color: el.color, fontFamily: el.font, fontSize: el.size }}>{el.type === "text" ? el.text : el.type === "photo" && el.src ? <img src={el.src} /> : el.type === "sticker" && el.src ? <img src={el.src} /> : el.value}</div>)}</div><div className="pageNav"><button disabled={pageIndex === 0} onClick={() => setPageIndex(pageIndex - 1)}>Prev</button><span>{pageIndex + 1}/{book.pages.length}</span><button disabled={pageIndex === book.pages.length - 1} onClick={() => setPageIndex(pageIndex + 1)}>Next</button></div></main>;
+  const p = book.pages[pageIndex];
+  function exportPage() {
+    window.print();
+  }
+  return <main className="page flipPageWrap"><button className="cuteBack" onClick={() => setScreen("home")}>← Back</button><button className="dots flipDots" onClick={() => setMenu(!menu)}>⋯</button>{menu && <div className="flipMenu scrapbookPopup"><div className="washi"></div><button onClick={() => setScreen("editor")}>Edit</button><button onClick={exportPage}>Export</button><button onClick={() => requestDeleteBook(book)}>Delete</button></div>}<div className={`scrapPage ${p.bg}`}>{(p.elements || []).map((el) => <div key={el.id} className="pageEl previewOnly" style={{ left: `${el.x}%`, top: `${el.y}%`, width: `${el.w}%`, height: `${el.h}%`, transform: `rotate(${el.rotate || 0}deg)` }}>{el.type === "photo" ? (el.src ? <img src={el.src} /> : <div className="photoSlot">Photo</div>) : el.type === "text" ? <div style={{ fontSize: el.size, color: el.color, fontFamily: el.font }}>{el.text}</div> : el.src ? <img src={el.src} /> : <div className="emojiSticker">{el.value}</div>}</div>)}</div><div className="pageControls"><button disabled={pageIndex === 0} onClick={() => setPageIndex(pageIndex - 1)}>Prev</button><span>{pageIndex + 1}/{book.pages.length}</span><button disabled={pageIndex === book.pages.length - 1} onClick={() => setPageIndex(pageIndex + 1)}>Next</button></div></main>;
 }
 
-function ErrorBoundaryApp() {
-  const [err, setErr] = useState(null);
-  useEffect(() => {
-    const handler = (e) => setErr(e.error || e.message);
-    window.addEventListener("error", handler);
-    window.addEventListener("unhandledrejection", (e) => setErr(e.reason));
-    return () => window.removeEventListener("error", handler);
-  }, []);
-  if (err) return <div className="phoneFrame"><div className="errorBox"><h1>App Error</h1><p>{String(err?.message || err)}</p></div></div>;
-  return <App />;
+function Premium({ profile, creator }) {
+  return <main className="page"><h1>Premium</h1>{creator && <div className="creatorBadge">Creator account: everything unlocked</div>}<div className="premiumCard"><h2>$4.99/month</h2><p>Unlimited uploads, premium stickers, curved text, print-ready export, and all premium tools.</p><button className="primary">Upgrade Soon</button></div><table><tbody><tr><th>Feature</th><th>Free</th><th>Premium</th></tr><tr><td>Scrapbooks</td><td>3</td><td>Unlimited</td></tr><tr><td>Uploads</td><td>15</td><td>Unlimited</td></tr><tr><td>Premium templates</td><td>$0.99 each</td><td>Included</td></tr><tr><td>Curved text</td><td>—</td><td>✓</td></tr></tbody></table></main>;
 }
 
-createRoot(document.getElementById("root")).render(<ErrorBoundaryApp />);
+function Profile({ user, profile, setModal, creator }) {
+  const [name, setName] = useState(profile?.name || user?.displayName || "");
+  const [email, setEmail] = useState(user?.email || "");
+  const [pass, setPass] = useState("");
+
+  async function uploadProfilePic(file) {
+    if (!file || !user) return;
+    try {
+      const storageRef = ref(storage, `users/${user.uid}/profile/${Date.now()}-${file.name}`);
+      await uploadBytes(storageRef, file);
+      const url = await getDownloadURL(storageRef);
+      await updateProfile(user, { photoURL: url });
+      await updateDoc(doc(db, "users", user.uid), { photoURL: url, updatedAt: serverTimestamp() });
+      setModal({ type: "notice", title: "Profile updated", text: "Your profile picture was saved." });
+    } catch (err) {
+      setModal({ type: "notice", title: "Upload failed", text: "Check Firebase Storage rules." });
+    }
+  }
+
+  return <main className="page profilePage"><h1>Profile</h1><label className="profilePolaroid"><img src={profile?.photoURL || user?.photoURL || "https://images.unsplash.com/photo-1526047932273-341f2a7631f9?w=300"} alt="profile" /><input hidden type="file" accept="image/*" onChange={(e) => uploadProfilePic(e.target.files?.[0])} /><span>Change photo</span></label>{creator && <div className="creatorBadge">Creator access unlocked</div>}<input className="prettyInput" value={name} onChange={(e) => setName(e.target.value)} placeholder="Name" /><button onClick={async () => { await updateProfile(user, { displayName: name }); await updateDoc(doc(db, "users", user.uid), { name }); }}>Save Name</button><section className="settingsCard"><h2>Settings</h2><label className="toggleRow">Email notifications <input type="checkbox" checked={profile?.notifications !== false} onChange={(e) => updateDoc(doc(db, "users", user.uid), { notifications: e.target.checked })} /></label><label className="toggleRow">Dark theme <input type="checkbox" checked={!!profile?.dark} onChange={(e) => updateDoc(doc(db, "users", user.uid), { dark: e.target.checked })} /></label><input className="prettyInput" value={email} onChange={(e) => setEmail(e.target.value)} /><button onClick={() => updateEmail(user, email)}>Update Email</button><input className="prettyInput" type="password" placeholder="New password" value={pass} onChange={(e) => setPass(e.target.value)} /><button onClick={() => pass && updatePassword(user, pass)}>Update Password</button></section><p>Subscription: {profile?.subscription || "Free"}</p><button onClick={() => signOut(auth)}>Logout</button><button className="danger" onClick={() => setModal({ type: "deleteAccount" })}>Delete Account</button><p className="version">Pocket Scrapbook v1.0.0</p></main>;
+}
+
+function PaperModal({ modal, setModal, onDeleteBook, user }) {
+  if (!modal) return null;
+  async function deleteAccount() {
+    try { await deleteUser(user); }
+    catch { alert("For security, log out and log back in before deleting your account."); }
+  }
+  let title = modal.title || "Are you sure?";
+  let text = modal.text || "";
+  if (modal.type === "deleteBook") { title = "Delete Scrapbook?"; text = `Are you sure you want to delete “${modal.book?.name}”?`; }
+  if (modal.type === "deleteAccount") { title = "Delete Account?"; text = "This will permanently delete your account. This cannot be undone."; }
+  if (modal.type === "premium") { title = "Premium Feature"; text = `${modal.title} is part of Premium or a $0.99 template.`; }
+  return <div className="modalBg"><div className="scrapbookPopup modalCard"><div className="washi"></div><h2>{title}</h2><p>{text}</p><div className="modalBtns"><button onClick={() => setModal(null)}>Cancel</button>{modal.type === "deleteBook" && <button className="danger" onClick={() => onDeleteBook(modal.book)}>Delete</button>}{modal.type === "deleteAccount" && <button className="danger" onClick={deleteAccount}>Yes, Delete</button>}{modal.type === "premium" && <button className="primary" onClick={() => setModal(null)}>Okay</button>}{modal.type === "notice" && <button className="primary" onClick={() => setModal(null)}>Okay</button>}</div></div></div>;
+}
+
+function ErrorFallback({ error }) {
+  return <div style={{ padding: 20, color: "#8b1e3f", background: "#fff" }}><h1>Pocket Scrapbook Error</h1><pre>{String(error?.message || error)}</pre></div>;
+}
+
+try {
+  createRoot(document.getElementById("root")).render(<App />);
+} catch (error) {
+  createRoot(document.getElementById("root")).render(<ErrorFallback error={error} />);
+}
