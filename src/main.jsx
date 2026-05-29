@@ -404,6 +404,20 @@ function Create({ createBook, setScreen, setModal }) {
 
 function Premium({ profile, user }) {
   return <main className="page"><h1>Premium</h1><section className="createPaper"><div className="washiTape" /><h2>Your plan: {hasPremium(profile, user) ? (isCreatorEmail(profile?.email || user?.email) ? "Creator — unlocked" : "Premium") : "Free"}</h2><table><tbody><tr><th>Feature</th><th>Free</th><th>Premium</th></tr><tr><td>Photo uploads</td><td>15</td><td>Unlimited</td></tr><tr><td>Premium templates</td><td>$0.99 each</td><td>Included</td></tr><tr><td>Advanced stickers</td><td>Basic</td><td>All</td></tr><tr><td>Curved text</td><td>—</td><td>✓</td></tr></tbody></table><button className="gradientBtn">Upgrade $4.99/mo</button><p className="hint">Stripe needed before real payments work.</p></section></main>;
+<div className="photoBuyCard">
+  <div className="photoBuyIcon">📷</div>
+
+  <div className="photoBuyInfo">
+    <h3>Need more photo space?</h3>
+    <p>Add 20 more photo uploads to your account.</p>
+  </div>
+
+  <div className="photoBuyPrice">$0.99</div>
+
+  <button onClick={() => alert("Stripe checkout coming soon ♡")}>
+    Buy 20
+  </button>
+</div>
 }
 
 function Profile({ user, profile, setModal, showToast }) {
