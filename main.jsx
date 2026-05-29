@@ -1,0 +1,339 @@
+// Paste this file into src/main.jsx
+// Keep src/firebase.js exactly as-is.
+// Add your sticker sheet PNG at public/stickers/sticker-sheet.png
+
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { createRoot } from "react-dom/client";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+} from "firebase/auth";
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  orderBy,
+  query,
+  serverTimestamp,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { auth, db, storage } from "./firebase";
+import "./style.css";
+
+const BACKGROUNDS = [
+  { id: "cream", name: "Cream" },
+  { id: "pinkPlaid", name: "Pink Plaid" },
+  { id: "bluePlaid", name: "Blue Plaid" },
+  { id: "lavender", name: "Lavender" },
+  { id: "grid", name: "Grid" },
+  { id: "dots", name: "Dots" },
+];
+
+const FREE_FONTS = ["Georgia", "Poppins", "Montserrat", "Caveat", "Dancing Script", "Playfair Display"];
+const PREMIUM_FONTS = ["Pacifico", "Great Vibes", "Amatic SC", "Arial", "Courier New", "Trebuchet MS"];
+
+const EMOJI_STICKERS = [
+  { name: "heart", value: "♡", cat: "love" },
+  { name: "pink heart", value: "♥", cat: "love" },
+  { name: "bow", value: "🎀", cat: "love" },
+  { name: "flower", value: "✿", cat: "nature" },
+  { name: "daisy", value: "🌼", cat: "nature" },
+  { name: "leaf", value: "🌿", cat: "nature" },
+  { name: "butterfly", value: "🦋", cat: "nature" },
+  { name: "bear", value: "🧸", cat: "animals" },
+  { name: "bunny", value: "🐰", cat: "animals" },
+  { name: "dog", value: "🐶", cat: "animals" },
+  { name: "cat", value: "🐱", cat: "animals" },
+  { name: "fox", value: "🦊", cat: "animals" },
+  { name: "paw", value: "🐾", cat: "animals" },
+  { name: "camera", value: "📷", cat: "memories" },
+  { name: "film", value: "🎞️", cat: "memories" },
+  { name: "note", value: "📝", cat: "school" },
+  { name: "books", value: "📚", cat: "school" },
+  { name: "plane", value: "✈️", cat: "travel" },
+  { name: "world", value: "🌎", cat: "travel" },
+  { name: "pin", value: "📍", cat: "travel" },
+  { name: "coffee", value: "☕", cat: "cozy" },
+  { name: "house", value: "🏠", cat: "cozy" },
+  { name: "gift", value: "🎁", cat: "celebrate" },
+  { name: "balloons", value: "🎈", cat: "celebrate" },
+  { name: "cake", value: "🎂", cat: "celebrate" },
+  { name: "star", value: "★", cat: "doodles" },
+  { name: "sparkle", value: "✦", cat: "doodles" },
+  { name: "moon", value: "☾", cat: "doodles" },
+  { name: "cloud", value: "☁", cat: "doodles" },
+];
+
+const PNG_STICKERS = [
+  { name: "Watercolor Sticker Sheet", src: "/stickers/sticker-sheet.png", cat: "all" },
+];
+
+function makeId() {
+  return crypto?.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
+}
+
+function photoEl(x, y, w = 160, h = 160) {
+  return { id: makeId(), type: "photo", x, y, w, h, r: 0, src: "", cropX: 50, cropY: 50 };
+}
+
+function textEl(value, x, y, options = {}) {
+  return {
+    id: makeId(), type: "text", value, x, y,
+    w: options.w || 210, h: options.h || 80, r: 0,
+    size: options.size || 22, color: options.color || "#2f2528", font: options.font || "Georgia",
+    bold: false, italic: false, underline: false, align: "center",
+  };
+}
+
+function stickerEl(value, x, y) {
+  return { id: makeId(), type: "sticker", value, x, y, w: 70, h: 70, r: 0 };
+}
+
+function imageStickerEl(src, x, y) {
+  return { id: makeId(), type: "imageSticker", src, x, y, w: 190, h: 130, r: 0 };
+}
+
+function makeBook(title, bg = "cream") {
+  return {
+    id: makeId(), title, bg,
+    pages: [{ id: makeId(), bg, elements: [textEl(title, 88, 42, { size: 28, w: 240 }), photoEl(95, 155, 210, 210), stickerEl("♡", 285, 390)] }],
+  };
+}
+
+function myFirstTemplate() {
+  return {
+    id: makeId(), title: "My First Scrapbook", bg: "cream",
+    pages: [
+      { id: makeId(), bg: "cream", elements: [textEl("About Me ♡", 105, 28, { size: 30, w: 230 }), photoEl(45, 115, 155, 155), textEl("Some of my favorite\nthings:\nColor:\nFood:\nBook:\nSong:", 230, 120, { size: 13, w: 150, h: 140 }), textEl("My name:\nBirthday:\nFavorite color:", 80, 335, { size: 20, w: 250 }), stickerEl("✿", 300, 320), stickerEl("♡", 318, 405)] },
+      { id: makeId(), bg: "cream", elements: [textEl("My Family ♡", 112, 28, { size: 30, w: 230 }), photoEl(45, 110, 165, 140), textEl("About my family:", 230, 110, { size: 15, w: 145 }), textEl("The people I love most:", 92, 275, { size: 16, w: 240 }), photoEl(55, 330, 85, 90), photoEl(165, 330, 85, 90), photoEl(275, 330, 85, 90), stickerEl("🌿", 320, 285)] },
+      { id: makeId(), bg: "cream", elements: [textEl("Places I’ve Been ♡", 72, 28, { size: 28, w: 280 }), stickerEl("🌎", 155, 130), textEl("Favorite place\nand why:", 55, 320, { size: 15, w: 160 }), photoEl(265, 315, 95, 110)] },
+      { id: makeId(), bg: "cream", elements: [textEl("Goals & Dreams ♡", 72, 28, { size: 28, w: 280 }), textEl("Things I want to do:\n○\n○\n○", 45, 130, { size: 15, w: 150 }), textEl("My dreams:", 215, 130, { size: 15, w: 150 }), textEl("Notes to my future self:", 65, 350, { size: 14, w: 260 }), stickerEl("★", 330, 100)] },
+    ],
+  };
+}
+
+function babyTemplate(girl = true) {
+  const bg = girl ? "pinkPlaid" : "bluePlaid";
+  const title = girl ? "Baby Girl First Year" : "Baby Boy First Year";
+  return {
+    id: makeId(), title, bg, premium: true,
+    pages: Array.from({ length: 12 }, (_, i) => ({
+      id: makeId(), bg,
+      elements: [
+        textEl(`${i + 1}\nmonth${i === 0 ? "" : "s"}`, 35, 35, { size: 24, w: 100, h: 85 }),
+        photoEl(150, 95, 190, 185),
+        textEl(girl ? "sweet girl ♡" : "sweet boy ♡", 155, 320, { size: 16, w: 175, h: 45 }),
+        stickerEl(girl ? "🎀" : "★", 45, 315),
+        stickerEl(girl ? "🌸" : "🧸", 300, 290),
+        stickerEl("♡", 320, 365),
+        stickerEl("🌿", 55, 220),
+      ],
+    })),
+  };
+}
+
+function App() {
+  const [user, setUser] = useState(null);
+  const [screen, setScreen] = useState("home");
+  const [books, setBooks] = useState([]);
+  const [selectedBook, setSelectedBook] = useState(null);
+  const [selectedPage, setSelectedPage] = useState(0);
+  const [selectedElement, setSelectedElement] = useState(null);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [newBookName, setNewBookName] = useState("");
+  const [newBookBg, setNewBookBg] = useState("cream");
+  const [profileImage, setProfileImage] = useState("");
+  const [darkMode, setDarkMode] = useState(false);
+  const [notificationsOn, setNotificationsOn] = useState(true);
+  const [subscription, setSubscription] = useState("Free Plan");
+  const [modal, setModal] = useState(null);
+  const [actionBook, setActionBook] = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState(null);
+  const [showCreate, setShowCreate] = useState(false);
+  const [showStickers, setShowStickers] = useState(false);
+  const [stickerSearch, setStickerSearch] = useState("");
+  const [showBgPicker, setShowBgPicker] = useState(false);
+  const [flipBook, setFlipBook] = useState(null);
+  const [flipPage, setFlipPage] = useState(0);
+  const dragRef = useRef(null);
+  const isPremium = subscription === "Premium Monthly";
+
+  const filteredEmoji = useMemo(() => {
+    const q = stickerSearch.trim().toLowerCase();
+    if (!q) return EMOJI_STICKERS;
+    return EMOJI_STICKERS.filter((s) => s.name.includes(q) || s.cat.includes(q) || s.value.includes(q));
+  }, [stickerSearch]);
+
+  const filteredPng = useMemo(() => {
+    const q = stickerSearch.trim().toLowerCase();
+    if (!q) return PNG_STICKERS;
+    return PNG_STICKERS.filter((s) => s.name.toLowerCase().includes(q) || s.cat.includes(q));
+  }, [stickerSearch]);
+
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, async (u) => {
+      setUser(u);
+      if (!u) { setBooks([]); setProfileImage(""); return; }
+      const snap = await getDocs(query(collection(db, "scrapbooks"), orderBy("createdAt", "desc")));
+      const loaded = [];
+      snap.forEach((d) => { const data = d.data(); if (data.uid === u.uid) loaded.push({ ...data, id: data.id || d.id, firebaseId: d.id }); });
+      setBooks(loaded);
+      const profileSnap = await getDoc(doc(db, "profiles", u.uid));
+      if (profileSnap.exists()) {
+        const data = profileSnap.data();
+        setProfileImage(data.photoURL || "");
+        setDarkMode(data.darkMode || false);
+        setNotificationsOn(data.notificationsOn ?? true);
+        setSubscription(data.subscription || "Free Plan");
+      }
+    });
+    return () => unsub();
+  }, []);
+
+  async function signup() { if (email && password) await createUserWithEmailAndPassword(auth, email, password); }
+  async function login() { if (email && password) await signInWithEmailAndPassword(auth, email, password); }
+  async function logoutUser() { await signOut(auth); setScreen("home"); }
+  async function saveProfile(data) { if (user) await setDoc(doc(db, "profiles", user.uid), data, { merge: true }); }
+  async function toggleDarkMode() { const next = !darkMode; setDarkMode(next); await saveProfile({ darkMode: next }); }
+  async function toggleNotifications() { const next = !notificationsOn; setNotificationsOn(next); await saveProfile({ notificationsOn: next }); }
+
+  async function uploadProfilePicture(e) {
+    const file = e.target.files?.[0]; if (!file || !user) return;
+    try {
+      const fileRef = ref(storage, `profiles/${user.uid}/profile-${Date.now()}-${file.name}`);
+      await uploadBytes(fileRef, file);
+      const url = await getDownloadURL(fileRef);
+      setProfileImage(url);
+      await saveProfile({ photoURL: url });
+    } catch { setModal({ icon: "⚠️", title: "Upload failed", text: "Firebase Storage rules are blocking profile photo uploads.", button: "Okay" }); }
+  }
+
+  async function saveBooks(updated) {
+    if (!user) return;
+    setBooks(updated);
+    for (const book of updated) {
+      const clean = { ...book, id: book.id || makeId(), uid: user.uid };
+      delete clean.firebaseId;
+      if (book.firebaseId) await updateDoc(doc(db, "scrapbooks", book.firebaseId), clean);
+      else { const added = await addDoc(collection(db, "scrapbooks"), { ...clean, createdAt: serverTimestamp() }); book.firebaseId = added.id; }
+    }
+  }
+
+  function openBook(book) { setSelectedBook(book); setSelectedPage(0); setSelectedElement(null); setScreen("editor"); }
+  async function createBook() { if (!newBookName.trim()) return; const book = makeBook(newBookName.trim(), newBookBg); const updated = [book, ...books]; await saveBooks(updated); openBook(updated[0]); setNewBookName(""); setShowCreate(false); }
+  async function createFromTemplate(templateFn) { const book = templateFn(); const updated = [book, ...books]; await saveBooks(updated); openBook(updated[0]); }
+
+  async function renameBook(book) {
+    const name = prompt("Rename scrapbook:", book.title); if (!name?.trim()) return;
+    const key = book.firebaseId || book.id;
+    const updated = books.map((b) => ((b.firebaseId || b.id) === key ? { ...b, title: name.trim() } : b));
+    await saveBooks(updated);
+    if (selectedBook && (selectedBook.firebaseId || selectedBook.id) === key) setSelectedBook({ ...selectedBook, title: name.trim() });
+  }
+
+  async function deleteBook(book) {
+    const key = book.firebaseId || book.id;
+    if (book.firebaseId) await deleteDoc(doc(db, "scrapbooks", book.firebaseId));
+    setBooks(books.filter((b) => (b.firebaseId || b.id) !== key));
+    setConfirmDelete(null); setActionBook(null);
+    if (selectedBook && (selectedBook.firebaseId || selectedBook.id) === key) { setSelectedBook(null); setScreen("home"); }
+  }
+
+  function page() { return selectedBook?.pages?.[selectedPage]; }
+  function updateBook(book) { const updated = books.map((b) => ((b.firebaseId || b.id) === (book.firebaseId || book.id) ? book : b)); setBooks(updated); setSelectedBook(book); saveBooks(updated); }
+  function updateElement(el) { const pages = selectedBook.pages.map((p, i) => i === selectedPage ? { ...p, elements: p.elements.map((x) => (x.id === el.id ? el : x)) } : p); updateBook({ ...selectedBook, pages }); setSelectedElement(el); }
+  function addElement(el) { const pages = selectedBook.pages.map((p, i) => i === selectedPage ? { ...p, elements: [...p.elements, el] } : p); updateBook({ ...selectedBook, pages }); setSelectedElement(el); }
+  function deleteElement() { if (!selectedElement) return; const pages = selectedBook.pages.map((p, i) => i === selectedPage ? { ...p, elements: p.elements.filter((x) => x.id !== selectedElement.id) } : p); updateBook({ ...selectedBook, pages }); setSelectedElement(null); }
+  function duplicateElement() { if (!selectedElement) return; addElement({ ...selectedElement, id: makeId(), x: selectedElement.x + 20, y: selectedElement.y + 20 }); }
+  function addPage() { const book = { ...selectedBook, pages: [...selectedBook.pages, { id: makeId(), bg: selectedBook.bg || "cream", elements: [] }] }; updateBook(book); setSelectedPage(book.pages.length - 1); }
+  function changeBg(bg) { const pages = selectedBook.pages.map((p, i) => (i === selectedPage ? { ...p, bg } : p)); updateBook({ ...selectedBook, pages }); setShowBgPicker(false); }
+
+  async function uploadPhoto(el, file) {
+    if (!file || !user) return;
+    try {
+      const fileRef = ref(storage, `scrapbooks/${user.uid}/${Date.now()}-${file.name}`);
+      await uploadBytes(fileRef, file);
+      const url = await getDownloadURL(fileRef);
+      updateElement({ ...el, src: url, cropX: 50, cropY: 50 });
+    } catch { setModal({ icon: "⚠️", title: "Photo failed", text: "Firebase Storage blocked this photo upload.", button: "Okay" }); }
+  }
+
+  function openFlipbook(book) { setFlipBook(book); setFlipPage(0); setActionBook(null); }
+  function exportBook(book) { setFlipBook(book); setFlipPage(0); setActionBook(null); setTimeout(() => window.print(), 500); }
+  function point(e) { return e.touches?.[0] ? { x: e.touches[0].clientX, y: e.touches[0].clientY } : { x: e.clientX, y: e.clientY }; }
+  function startDrag(e, el, mode) { e.stopPropagation(); setSelectedElement(el); const p = point(e); dragRef.current = { mode, x: p.x, y: p.y, original: { ...el } }; }
+
+  function moveDrag(e) {
+    if (!dragRef.current) return;
+    const p = point(e); const dx = p.x - dragRef.current.x; const dy = p.y - dragRef.current.y; const o = dragRef.current.original;
+    if (dragRef.current.mode === "move") updateElement({ ...o, x: o.x + dx, y: o.y + dy });
+    if (dragRef.current.mode === "resize") updateElement({ ...o, w: Math.max(40, o.w + dx), h: Math.max(40, o.h + dy) });
+    if (dragRef.current.mode === "rotate") updateElement({ ...o, r: o.r + dx });
+  }
+
+  function stopDrag() { dragRef.current = null; }
+  useEffect(() => {
+    window.addEventListener("mousemove", moveDrag); window.addEventListener("mouseup", stopDrag); window.addEventListener("touchmove", moveDrag); window.addEventListener("touchend", stopDrag);
+    return () => { window.removeEventListener("mousemove", moveDrag); window.removeEventListener("mouseup", stopDrag); window.removeEventListener("touchmove", moveDrag); window.removeEventListener("touchend", stopDrag); };
+  });
+
+  function nudgeCrop(dir) {
+    if (!selectedElement || selectedElement.type !== "photo") return;
+    const el = { ...selectedElement };
+    if (dir === "left") el.cropX = Math.max(0, el.cropX - 5);
+    if (dir === "right") el.cropX = Math.min(100, el.cropX + 5);
+    if (dir === "up") el.cropY = Math.max(0, el.cropY - 5);
+    if (dir === "down") el.cropY = Math.min(100, el.cropY + 5);
+    updateElement(el);
+  }
+
+  function renderElement(el) {
+    const selected = selectedElement?.id === el.id;
+    return (
+      <div key={el.id} className={`scrapElement ${selected ? "selected" : ""}`} style={{ left: el.x, top: el.y, width: el.w, height: el.h, transform: `rotate(${el.r || 0}deg)` }} onMouseDown={(e) => startDrag(e, el, "move")} onTouchStart={(e) => startDrag(e, el, "move")} onClick={(e) => { e.stopPropagation(); setSelectedElement(el); }}>
+        {el.type === "photo" && <div className="photoFrame">{el.src ? <img src={el.src} alt="" style={{ objectPosition: `${el.cropX}% ${el.cropY}%` }} /> : <label className="emptyPhoto">+ Photo<input hidden type="file" accept="image/*" onChange={(e) => uploadPhoto(el, e.target.files[0])} /></label>}</div>}
+        {el.type === "text" && <textarea value={el.value} onMouseDown={(e) => e.stopPropagation()} onTouchStart={(e) => e.stopPropagation()} onClick={(e) => { e.stopPropagation(); setSelectedElement(el); }} onChange={(e) => updateElement({ ...el, value: e.target.value })} style={{ fontSize: el.size, color: el.color, fontFamily: el.font, fontWeight: el.bold ? "800" : "400", fontStyle: el.italic ? "italic" : "normal", textDecoration: el.underline ? "underline" : "none", textAlign: el.align }} />}
+        {el.type === "sticker" && <div className="stickerElement" style={{ fontSize: Math.max(el.w, el.h) * 0.65 }}>{el.value}</div>}
+        {el.type === "imageSticker" && <img className="imageSticker" src={el.src} alt="" />}
+        {selected && <><button className="handle rotateHandle" onMouseDown={(e) => startDrag(e, el, "rotate")}>↻</button><button className="handle resizeHandle" onMouseDown={(e) => startDrag(e, el, "resize")}>↘</button><div className="elementBubble"><button onClick={duplicateElement}>Duplicate</button><button onClick={deleteElement}>Delete</button></div></>}
+      </div>
+    );
+  }
+
+  function TextToolbar() {
+    if (!selectedElement || selectedElement.type !== "text") return null;
+    const fonts = isPremium ? [...FREE_FONTS, ...PREMIUM_FONTS] : FREE_FONTS;
+    return <div className="textToolbar"><div className="textToolbarGrid"><input type="color" value={selectedElement.color} onChange={(e) => updateElement({ ...selectedElement, color: e.target.value })} /><input type="range" min="10" max="72" value={selectedElement.size} onChange={(e) => updateElement({ ...selectedElement, size: Number(e.target.value) })} /></div><select value={selectedElement.font} onChange={(e) => updateElement({ ...selectedElement, font: e.target.value })}>{fonts.map((font) => <option key={font} value={font}>{font}{PREMIUM_FONTS.includes(font) ? " 👑" : ""}</option>)}</select>{!isPremium && <p className="smallNote">Premium unlocks more fonts.</p>}<div className="textButtons"><button onClick={() => updateElement({ ...selectedElement, bold: !selectedElement.bold })}>B</button><button onClick={() => updateElement({ ...selectedElement, italic: !selectedElement.italic })}>I</button><button onClick={() => updateElement({ ...selectedElement, underline: !selectedElement.underline })}>U</button><button onClick={() => updateElement({ ...selectedElement, align: selectedElement.align === "left" ? "center" : selectedElement.align === "center" ? "right" : "left" })}>Align</button></div></div>;
+  }
+
+  return (
+    <div className={`appBg ${darkMode ? "dark" : ""}`}>
+      <div className="phoneShell">
+        {!user && <div className="authScreen"><div className="heroCard"><div className="logoTape"></div><h1>pocket<br />scrapbook</h1><p>cherish every moment ♡</p><input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} /><div className="passwordWrap"><input type={showPassword ? "text" : "password"} placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} /><button onClick={() => setShowPassword(!showPassword)}>{showPassword ? "Hide" : "Show"}</button></div><button className="mainBtn" onClick={login}>Login</button><button className="secondaryBtn" onClick={signup}>Create Account</button></div></div>}
+        {user && screen === "home" && <div className="homeScreen"><div className="heroCard"><div className="logoTape"></div><h1>pocket<br />scrapbook</h1><p>cherish every moment ♡</p><button className="mainBtn" onClick={() => setShowCreate(true)}>Create Scrapbook</button></div><div className="sectionTitle">My Scrapbooks</div><div className="booksList">{books.map((book) => <div key={book.firebaseId || book.id} className="bookCard"><div className={`bookPreview bg-${book.bg}`} onClick={() => openBook(book)}></div><div className="bookInfo" onClick={() => openBook(book)}><h3>{book.title}</h3><p>{book.pages?.length || 0} pages</p></div><button className="dotsBtn" onClick={() => setActionBook(book)}>⋮</button></div>)}</div><div className="bottomNav"><button onClick={() => setScreen("home")}>Home</button><button onClick={() => setScreen("templates")}>Templates</button><button onClick={() => setScreen("premium")}>Premium</button><button onClick={() => setScreen("profile")}>Profile</button></div></div>}
+        {user && screen === "templates" && <div className="screen"><button className="backBtn" onClick={() => setScreen("home")}>← Back</button><h2>Templates</h2><button className="templateCard" onClick={() => createFromTemplate(myFirstTemplate)}>My First Scrapbook — Free</button><button className="templateCard" onClick={() => createFromTemplate(() => babyTemplate(true))}>Baby Girl First Year — $1.99</button><button className="templateCard" onClick={() => createFromTemplate(() => babyTemplate(false))}>Baby Boy First Year — $1.99</button></div>}
+        {user && screen === "premium" && <div className="screen"><button className="backBtn" onClick={() => setScreen("home")}>← Back</button><h2>Premium</h2><div className="premiumBox"><h3>Your Subscription</h3><p>{subscription}</p><button className="mainBtn" onClick={() => { setSubscription("Premium Monthly"); saveProfile({ subscription: "Premium Monthly" }); }}>Upgrade $4.99/month</button><button className="secondaryBtn" onClick={() => { setSubscription("Free Plan"); saveProfile({ subscription: "Free Plan" }); }}>Cancel / Free Plan</button></div></div>}
+        {user && screen === "profile" && <div className="screen"><button className="backBtn" onClick={() => setScreen("home")}>← Back</button><div className="profileCard"><label className="profileImageWrap">{profileImage ? <img src={profileImage} alt="" className="profileImage" /> : <div className="profilePlaceholder">♡</div>}<input hidden type="file" accept="image/*" onChange={uploadProfilePicture} /></label><h2>Pocket Scrapbook</h2><div className="settingsRow"><div><strong>Notifications</strong><p>{notificationsOn ? "On" : "Off"}</p></div><button className={`toggle ${notificationsOn ? "on" : ""}`} onClick={toggleNotifications}><span></span></button></div><button className="settingsBtn" onClick={() => setModal({ icon: "🔒", title: "Privacy", text: "Pocket Scrapbook does not sell your personal information.", button: "Okay" })}>Privacy</button><button className="settingsBtn" onClick={() => setScreen("premium")}>Subscription: {subscription}</button><div className="settingsRow"><div><strong>Dark Theme</strong><p>Easier on your eyes at night</p></div><button className={`toggle ${darkMode ? "on" : ""}`} onClick={toggleDarkMode}><span></span></button></div><button className="logoutBtn" onClick={logoutUser}>Logout</button></div></div>}
+        {user && screen === "editor" && selectedBook && <div className="editorScreen"><div className="editorHeader"><button onClick={() => setScreen("home")}>←</button><h2>{selectedBook.title}</h2><button onClick={() => setActionBook(selectedBook)}>⋮</button></div><div className="pageNav"><button disabled={selectedPage === 0} onClick={() => setSelectedPage(selectedPage - 1)}>‹</button><span>Page {selectedPage + 1}/{selectedBook.pages.length}</span><button disabled={selectedPage === selectedBook.pages.length - 1} onClick={() => setSelectedPage(selectedPage + 1)}>›</button></div><div className={`scrapPage bg-${page()?.bg}`} onClick={() => setSelectedElement(null)}>{page()?.elements.map(renderElement)}</div><div className="toolBar"><button onClick={() => addElement(photoEl(100, 130))}>Photo</button><button onClick={() => addElement(textEl("tap to edit", 80, 80))}>Text</button><button onClick={() => setShowStickers(true)}>Stickers</button><button onClick={addPage}>Add Page</button><button onClick={() => setShowBgPicker(true)}>Background</button></div><TextToolbar />{selectedElement?.type === "photo" && <div className="cropControls"><button onClick={() => nudgeCrop("left")}>←</button><button onClick={() => nudgeCrop("up")}>↑</button><button onClick={() => nudgeCrop("down")}>↓</button><button onClick={() => nudgeCrop("right")}>→</button></div>}</div>}
+        {actionBook && <div className="bottomSheet"><h3>{actionBook.title}</h3><button onClick={() => { openBook(actionBook); setActionBook(null); }}>Edit</button><button onClick={() => openFlipbook(actionBook)}>View Flipbook</button><button onClick={() => exportBook(actionBook)}>Export / Print</button><button onClick={() => { renameBook(actionBook); setActionBook(null); }}>Rename</button><button className="danger" onClick={() => { setConfirmDelete(actionBook); setActionBook(null); }}>Delete</button><button onClick={() => setActionBook(null)}>Cancel</button></div>}
+        {flipBook && <div className="flipbookScreen"><button className="backBtn" onClick={() => setFlipBook(null)}>← Back</button><h2>{flipBook.title}</h2><div className="bookFlipWrap"><button disabled={flipPage === 0} onClick={() => setFlipPage(flipPage - 1)}>‹</button><div className={`flipPage bg-${flipBook.pages[flipPage]?.bg}`}>{flipBook.pages[flipPage]?.elements.map((el) => <div key={el.id} className="flipElement" style={{ left: el.x * 0.75, top: el.y * 0.75, width: el.w * 0.75, height: el.h * 0.75, transform: `rotate(${el.r || 0}deg)` }}>{el.type === "photo" && el.src && <img src={el.src} alt="" />}{el.type === "text" && <span style={{ fontSize: el.size * 0.75, color: el.color, fontFamily: el.font, fontWeight: el.bold ? "800" : "400", fontStyle: el.italic ? "italic" : "normal", textDecoration: el.underline ? "underline" : "none" }}>{el.value}</span>}{el.type === "sticker" && <span style={{ fontSize: Math.max(el.w, el.h) * 0.48 }}>{el.value}</span>}{el.type === "imageSticker" && <img src={el.src} alt="" />}</div>)}</div><button disabled={flipPage === flipBook.pages.length - 1} onClick={() => setFlipPage(flipPage + 1)}>›</button></div><p className="flipCount">Page {flipPage + 1} / {flipBook.pages.length}</p></div>}
+        {showCreate && <div className="bottomSheet"><h3>Create Scrapbook</h3><input placeholder="Scrapbook name" value={newBookName} onChange={(e) => setNewBookName(e.target.value)} /><div className="bgPicker">{BACKGROUNDS.map((bg) => <button key={bg.id} className={`bgChoice bg-${bg.id}`} onClick={() => setNewBookBg(bg.id)}><span>{bg.name}</span></button>)}</div><button className="mainBtn" onClick={createBook}>Create</button><button onClick={() => setShowCreate(false)}>Cancel</button></div>}
+        {showBgPicker && <div className="bottomSheet"><h3>Change Background</h3><div className="bgPicker">{BACKGROUNDS.map((bg) => <button key={bg.id} className={`bgChoice bg-${bg.id}`} onClick={() => changeBg(bg.id)}><span>{bg.name}</span></button>)}</div><button onClick={() => setShowBgPicker(false)}>Cancel</button></div>}
+        {showStickers && <div className="bottomSheet stickerSheet"><h3>Choose Sticker</h3><input placeholder="Search stickers..." value={stickerSearch} onChange={(e) => setStickerSearch(e.target.value)} /><div className="stickerGrid">{filteredPng.map((s) => <button key={s.name} onClick={() => { addElement(imageStickerEl(s.src, 80, 120)); setShowStickers(false); }}><img src={s.src} alt={s.name} /><small>{s.name}</small></button>)}{filteredEmoji.map((s) => <button key={s.name} onClick={() => { addElement(stickerEl(s.value, 150, 180)); setShowStickers(false); }}><span>{s.value}</span><small>{s.name}</small></button>)}</div><button onClick={() => setShowStickers(false)}>Cancel</button></div>}
+        {confirmDelete && <div className="cuteOverlay"><div className="cuteModal"><div className="modalTape"></div><div className="modalIcon">🗑️</div><h2>Delete scrapbook?</h2><p>Delete <strong>{confirmDelete.title}</strong>? This cannot be undone.</p><button className="modalBtn dangerBtn" onClick={() => deleteBook(confirmDelete)}>Yes, delete</button><button className="modalBtn lightBtn" onClick={() => setConfirmDelete(null)}>Keep it</button></div></div>}
+        {modal && <div className="cuteOverlay"><div className="cuteModal"><div className="modalTape"></div><button className="modalX" onClick={() => setModal(null)}>×</button><div className="modalIcon">{modal.icon}</div><h2>{modal.title}</h2><p>{modal.text}</p><button className="modalBtn" onClick={() => setModal(null)}>{modal.button}</button></div></div>}
+      </div>
+    </div>
+  );
+}
+
+createRoot(document.getElementById("root")).render(<App />);
