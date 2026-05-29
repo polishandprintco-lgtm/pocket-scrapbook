@@ -23,9 +23,11 @@ import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { auth, db, storage } from "./firebase";
 
 const css = `
+@import url('https://fonts.googleapis.com/css2?family=Amatic+SC:wght@700&family=Archivo+Black&family=Caveat:wght@500;700&family=Dancing+Script:wght@600&family=Georgia&family=Great+Vibes&family=Montserrat:wght@500;700&family=Pacifico&family=Playfair+Display:wght@600;700&family=Poppins:wght@400;600;800&display=swap');
+
 *{box-sizing:border-box}
-body{margin:0;background:#f3edf0;font-family:Arial,sans-serif}
-button,input,textarea{font-family:inherit}
+body{margin:0;background:#f3edf0;font-family:Poppins,Arial,sans-serif}
+button,input,textarea,select{font-family:inherit}
 button{border:0;cursor:pointer}
 .appBg{min-height:100vh;display:flex;justify-content:center;background:#f3edf0}
 .phoneShell{width:100%;max-width:430px;min-height:100vh;position:relative;overflow-x:hidden;background:linear-gradient(#ffffffaa,#ffffffaa),repeating-linear-gradient(45deg,#ffdce9 0 18px,#fff1f6 18px 36px);box-shadow:0 0 40px #0002}
@@ -35,8 +37,8 @@ button{border:0;cursor:pointer}
 h1{font-family:Georgia,serif;font-size:44px;line-height:.9;margin:18px 0;color:#34262b}
 h2{font-family:Georgia,serif;font-size:30px;margin:12px 0}
 p{color:#7c6870}
-input,textarea{outline:0}
-input{width:100%;padding:14px;border:1px solid #ecd7df;border-radius:18px;margin:7px 0;background:white}
+input,textarea,select{outline:0}
+input,select{width:100%;padding:14px;border:1px solid #ecd7df;border-radius:18px;margin:7px 0;background:white}
 .passwordWrap{position:relative}
 .passwordWrap button{position:absolute;right:8px;top:13px;background:#fff0f6;color:#d96f94;border-radius:12px;padding:8px 10px;font-weight:800}
 .mainBtn,.secondaryBtn,.backBtn,.settingsBtn,.logoutBtn,.bottomSheet button,.toolBar button,.bottomNav button{border-radius:18px;padding:12px 14px;font-weight:800}
@@ -52,15 +54,7 @@ input{width:100%;padding:14px;border:1px solid #ecd7df;border-radius:18px;margin
 .dotsBtn{width:40px;height:40px;border-radius:14px;background:#fff0f6;font-size:22px}
 .bottomNav,.toolBar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:#ffffffe8;backdrop-filter:blur(10px);display:flex;gap:8px;padding:12px;z-index:100;box-shadow:0 -8px 25px #0001}
 .bottomNav button,.toolBar button{flex:1;background:#fff0f6;color:#4a333b;font-size:12px}
-.templateCard{width:100%;background:white;border-radius:26px;padding:14px;margin:12px 0;display:grid;grid-template-columns:95px 1fr;gap:14px;text-align:left;align-items:center;box-shadow:0 10px 26px #0001}
-.templatePreview{height:95px;border-radius:18px;position:relative;overflow:hidden;box-shadow:inset 0 0 0 5px white}
-.tinyTitle{position:absolute;top:10px;left:16px;font-family:Georgia,serif;font-weight:900;font-size:14px}
-.tinyPhoto{position:absolute;left:13px;top:34px;width:40px;height:44px;background:#f5f1eb;border:5px solid white;box-shadow:0 4px 8px #0002}
-.tinyPaper{position:absolute;right:12px;top:32px;width:36px;height:44px;background:#f3eadf;border-radius:6px}
-.tinyMonth{position:absolute;top:10px;left:12px;font-family:Georgia,serif;text-align:center;line-height:1.05}
-.tinyLabel{position:absolute;left:38px;bottom:9px;background:#f7c4d5;padding:4px 7px;border-radius:5px;font-size:10px}
-.tinyLabel.blue{background:#cde5ff}
-.tinySticker{position:absolute;left:12px;bottom:9px;font-size:17px}
+.templateCard{width:100%;background:white;border-radius:26px;padding:16px;margin:12px 0;text-align:left;box-shadow:0 10px 26px #0001;font-weight:900;color:#3b2c32}
 .profileImageWrap{display:block;width:98px;height:98px;border-radius:50%;overflow:hidden;background:#ffd6e6;margin:0 auto 14px;cursor:pointer}
 .profileImage{width:100%;height:100%;object-fit:cover}
 .profilePlaceholder{width:100%;height:100%;display:grid;place-items:center;font-size:44px;color:#d96f94}
@@ -72,7 +66,7 @@ input{width:100%;padding:14px;border:1px solid #ecd7df;border-radius:18px;margin
 .toggle span{display:block;width:24px;height:24px;background:white;border-radius:50%;transition:.2s}
 .toggle.on{background:#e66fa1}
 .toggle.on span{transform:translateX(26px)}
-.editorScreen{min-height:100vh;padding-bottom:105px}
+.editorScreen{min-height:100vh;padding-bottom:160px}
 .editorHeader{background:white;padding:14px;display:grid;grid-template-columns:44px 1fr 44px;align-items:center;gap:8px;box-shadow:0 4px 14px #0001}
 .editorHeader button{height:40px;border-radius:14px;background:#fff0f6;font-weight:900}
 .editorHeader h2{font-size:16px;text-align:center;margin:0}
@@ -93,6 +87,13 @@ input{width:100%;padding:14px;border:1px solid #ecd7df;border-radius:18px;margin
 .elementBubble button{background:#fff0f6;border-radius:12px;padding:8px 10px;font-weight:800}
 .cropControls{position:fixed;bottom:74px;left:50%;transform:translateX(-50%);background:white;padding:8px;border-radius:22px;display:flex;gap:8px;z-index:110;box-shadow:0 8px 22px #0002}
 .cropControls button{width:42px;height:38px;border-radius:14px;background:#fff0f6;font-weight:900}
+.textToolbar{position:fixed;left:50%;bottom:72px;transform:translateX(-50%);width:100%;max-width:430px;background:white;border-radius:24px 24px 0 0;padding:12px;z-index:130;box-shadow:0 -10px 25px #0002}
+.textToolbarGrid{display:grid;grid-template-columns:48px 1fr;gap:8px;align-items:center}
+.textToolbar input[type=color]{height:44px;padding:2px}
+.textToolbar input[type=range]{width:100%}
+.textToolbar select{margin:0}
+.textButtons{display:flex;gap:6px;margin-top:8px}
+.textButtons button{flex:1;background:#fff0f6;border-radius:14px;padding:9px;font-weight:900}
 .bottomSheet{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:100%;max-width:430px;max-height:82vh;overflow:auto;background:white;border-radius:30px 30px 0 0;padding:20px;box-shadow:0 -12px 35px #0003;z-index:500}
 .bottomSheet button{width:100%;margin:7px 0;background:#fff0f6}
 .danger{background:#ffe4e9!important;color:#c73558}
@@ -110,13 +111,6 @@ input{width:100%;padding:14px;border:1px solid #ecd7df;border-radius:18px;margin
 .modalBtn{margin-top:12px;background:linear-gradient(135deg,#ff9cc2,#df5d91);color:white;border-radius:18px;padding:14px 28px;font-weight:900}
 .lightBtn{background:#fff0f6;color:#4a333b}
 .dangerBtn{background:#ff6f8f}
-.flipbookScreen{position:fixed;inset:0;background:#f4edf0;z-index:800;padding:18px;text-align:center}
-.bookFlipWrap{display:grid;grid-template-columns:42px 1fr 42px;gap:8px;align-items:center;max-width:430px;margin:18px auto}
-.bookFlipWrap button{height:58px;border-radius:18px;background:white;font-size:28px}
-.flipPage{height:500px;border-radius:12px 28px 28px 12px;box-shadow:inset -14px 0 22px #0001,0 18px 35px #0003;position:relative;overflow:hidden;animation:pageFlip .28s ease}
-@keyframes pageFlip{from{transform:perspective(700px) rotateY(-18deg)}to{transform:perspective(700px) rotateY(0)}}
-.flipElement{position:absolute;overflow:hidden}
-.flipElement img{width:100%;height:100%;object-fit:cover}
 .bg-pinkPlaid{background:linear-gradient(#ffffff66,#ffffff66),repeating-linear-gradient(45deg,#ffd5e6 0 18px,#fff0f6 18px 36px)}
 .bg-bluePlaid{background:linear-gradient(#ffffff66,#ffffff66),repeating-linear-gradient(45deg,#cfe6ff 0 18px,#f2f8ff 18px 36px)}
 .bg-cream{background:#fff8ee}
@@ -125,7 +119,7 @@ input{width:100%;padding:14px;border:1px solid #ecd7df;border-radius:18px;margin
 .bg-dots{background-color:white;background-image:radial-gradient(#ddd 1px,transparent 1px);background-size:18px 18px}
 .appBg.dark{background:#111}
 .appBg.dark .phoneShell{background:#151518;color:white}
-.appBg.dark .heroCard,.appBg.dark .bookCard,.appBg.dark .templateCard,.appBg.dark .premiumBox,.appBg.dark .profileCard,.appBg.dark .bottomSheet,.appBg.dark .editorHeader,.appBg.dark .bottomNav,.appBg.dark .toolBar,.appBg.dark .cropControls{background:#1f2024;color:white}
+.appBg.dark .heroCard,.appBg.dark .bookCard,.appBg.dark .templateCard,.appBg.dark .premiumBox,.appBg.dark .profileCard,.appBg.dark .bottomSheet,.appBg.dark .editorHeader,.appBg.dark .bottomNav,.appBg.dark .toolBar,.appBg.dark .cropControls,.appBg.dark .textToolbar{background:#1f2024;color:white}
 .appBg.dark button,.appBg.dark .settingsRow{background:#2b2c31;color:white}
 `;
 
@@ -140,9 +134,12 @@ const BACKGROUNDS = [
 
 const STICKERS = ["♡","♥","🎀","✿","🌸","🌼","🌿","🦋","🧸","🐰","🐶","🐱","🦊","🐾","📷","🎞️","📝","📚","✈️","🌎","📍","☕","🏠","🎁","🎈","🎂","★","✦","☾","☁"];
 
+const FREE_FONTS = ["Poppins", "Montserrat", "Caveat", "Dancing Script", "Georgia", "Playfair Display"];
+const PREMIUM_FONTS = ["Great Vibes", "Pacifico", "Amatic SC", "Archivo Black"];
+
 function makeId(){return crypto?.randomUUID?crypto.randomUUID():`${Date.now()}-${Math.random()}`}
 function photoEl(x,y,w=160,h=160){return{id:makeId(),type:"photo",x,y,w,h,r:0,src:"",cropX:50,cropY:50}}
-function textEl(value,x,y,size=22){return{id:makeId(),type:"text",value,x,y,w:210,h:80,r:0,size,color:"#2f2528",font:"Georgia"}}
+function textEl(value,x,y,size=22){return{id:makeId(),type:"text",value,x,y,w:210,h:80,r:0,size,color:"#2f2528",font:"Georgia",bold:false,italic:false,underline:false,align:"center"}}
 function stickerEl(value,x,y){return{id:makeId(),type:"sticker",value,x,y,w:60,h:60,r:0,size:36}}
 
 function makeBook(title,bg="cream"){
@@ -197,6 +194,8 @@ function App(){
   const [flipBook,setFlipBook]=useState(null);
   const [flipPage,setFlipPage]=useState(0);
   const dragRef=useRef(null);
+
+  const isPremium = subscription === "Premium Monthly";
 
   const filteredStickers=useMemo(()=>{
     const s=stickerSearch.trim().toLowerCase();
@@ -273,9 +272,30 @@ function App(){
     const selected=selectedElement?.id===el.id;
     return <div key={el.id} className={`scrapElement ${selected?"selected":""}`} style={{left:el.x,top:el.y,width:el.w,height:el.h,transform:`rotate(${el.r||0}deg)`}} onMouseDown={e=>startDrag(e,el,"move")} onTouchStart={e=>startDrag(e,el,"move")} onClick={e=>{e.stopPropagation();setSelectedElement(el)}}>
       {el.type==="photo"&&<div className="photoFrame">{el.src?<img src={el.src} alt="" style={{objectPosition:`${el.cropX}% ${el.cropY}%`}}/>:<label className="emptyPhoto">+ Photo<input hidden type="file" accept="image/*" onChange={e=>uploadPhoto(el,e.target.files[0])}/></label>}</div>}
-      {el.type==="text"&&<textarea value={el.value} onChange={e=>updateElement({...el,value:e.target.value})} style={{fontSize:el.size,color:el.color,fontFamily:el.font}}/>}
+      {el.type==="text"&&<textarea value={el.value} onMouseDown={e=>e.stopPropagation()} onTouchStart={e=>e.stopPropagation()} onClick={e=>{e.stopPropagation();setSelectedElement(el)}} onChange={e=>updateElement({...el,value:e.target.value})} style={{fontSize:el.size,color:el.color,fontFamily:el.font,fontWeight:el.bold?"800":"400",fontStyle:el.italic?"italic":"normal",textDecoration:el.underline?"underline":"none",textAlign:el.align}}/>}
       {el.type==="sticker"&&<div className="stickerElement" style={{fontSize:el.size}}>{el.value}</div>}
       {selected&&<><button className="handle rotateHandle" onMouseDown={e=>startDrag(e,el,"rotate")}>↻</button><button className="handle resizeHandle" onMouseDown={e=>startDrag(e,el,"resize")}>↘</button><div className="elementBubble"><button onClick={duplicateElement}>Duplicate</button><button onClick={deleteElement}>Delete</button></div></>}
+    </div>
+  }
+
+  function TextToolbar(){
+    if(!selectedElement || selectedElement.type !== "text") return null;
+    const fonts = isPremium ? [...FREE_FONTS, ...PREMIUM_FONTS] : FREE_FONTS;
+    return <div className="textToolbar">
+      <div className="textToolbarGrid">
+        <input type="color" value={selectedElement.color} onChange={e=>updateElement({...selectedElement,color:e.target.value})}/>
+        <input type="range" min="10" max="72" value={selectedElement.size} onChange={e=>updateElement({...selectedElement,size:Number(e.target.value)})}/>
+      </div>
+      <select value={selectedElement.font} onChange={e=>updateElement({...selectedElement,font:e.target.value})}>
+        {fonts.map(font=><option key={font} value={font}>{font}{PREMIUM_FONTS.includes(font) ? " 👑" : ""}</option>)}
+      </select>
+      {!isPremium && <p style={{fontSize:12,margin:"4px 0"}}>Premium unlocks more fonts.</p>}
+      <div className="textButtons">
+        <button onClick={()=>updateElement({...selectedElement,bold:!selectedElement.bold})}>B</button>
+        <button onClick={()=>updateElement({...selectedElement,italic:!selectedElement.italic})}>I</button>
+        <button onClick={()=>updateElement({...selectedElement,underline:!selectedElement.underline})}>U</button>
+        <button onClick={()=>updateElement({...selectedElement,align:selectedElement.align==="left"?"center":selectedElement.align==="center"?"right":"left"})}>Align</button>
+      </div>
     </div>
   }
 
@@ -290,11 +310,9 @@ function App(){
 
     {user&&screen==="profile"&&<div className="screen"><button className="backBtn" onClick={()=>setScreen("home")}>← Back</button><div className="profileCard"><label className="profileImageWrap">{profileImage?<img src={profileImage} alt="" className="profileImage"/>:<div className="profilePlaceholder">♡</div>}<input hidden type="file" accept="image/*" onChange={uploadProfilePicture}/></label><h2>Pocket Scrapbook</h2><button className="settingsBtn" onClick={()=>setModal({icon:"🔔",title:"Notifications",text:"Choose email updates, new templates, promotions, or none.",button:"Got it"})}>Notifications</button><button className="settingsBtn" onClick={()=>setModal({icon:"🔒",title:"Privacy",text:"Pocket Scrapbook does not sell your personal information.",button:"Okay"})}>Privacy</button><button className="settingsBtn" onClick={()=>setScreen("premium")}>Subscription: {subscription}</button><div className="settingsRow"><div><strong>Dark Theme</strong><p>Easier on your eyes at night</p></div><button className={`toggle ${darkMode?"on":""}`} onClick={toggleDarkMode}><span></span></button></div><button className="logoutBtn" onClick={logoutUser}>Logout</button></div></div>}
 
-    {user&&screen==="editor"&&selectedBook&&<div className="editorScreen"><div className="editorHeader"><button onClick={()=>setScreen("home")}>←</button><h2>{selectedBook.title}</h2><button onClick={()=>setActionBook(selectedBook)}>⋮</button></div><div className="pageNav"><button disabled={selectedPage===0} onClick={()=>setSelectedPage(selectedPage-1)}>‹</button><span>Page {selectedPage+1}/{selectedBook.pages.length}</span><button disabled={selectedPage===selectedBook.pages.length-1} onClick={()=>setSelectedPage(selectedPage+1)}>›</button></div><div className={`scrapPage bg-${page()?.bg}`} onClick={()=>setSelectedElement(null)}>{page()?.elements.map(renderElement)}</div><div className="toolBar"><button onClick={()=>addElement(photoEl(100,130))}>Photo</button><button onClick={()=>addElement(textEl("tap to edit",80,80))}>Text</button><button onClick={()=>setShowStickers(true)}>Stickers</button><button onClick={addPage}>Add Page</button><button onClick={()=>setShowBgPicker(true)}>Background</button></div>{selectedElement?.type==="photo"&&<div className="cropControls"><button onClick={()=>nudgeCrop("left")}>←</button><button onClick={()=>nudgeCrop("up")}>↑</button><button onClick={()=>nudgeCrop("down")}>↓</button><button onClick={()=>nudgeCrop("right")}>→</button></div>}</div>}
+    {user&&screen==="editor"&&selectedBook&&<div className="editorScreen"><div className="editorHeader"><button onClick={()=>setScreen("home")}>←</button><h2>{selectedBook.title}</h2><button onClick={()=>setActionBook(selectedBook)}>⋮</button></div><div className="pageNav"><button disabled={selectedPage===0} onClick={()=>setSelectedPage(selectedPage-1)}>‹</button><span>Page {selectedPage+1}/{selectedBook.pages.length}</span><button disabled={selectedPage===selectedBook.pages.length-1} onClick={()=>setSelectedPage(selectedPage+1)}>›</button></div><div className={`scrapPage bg-${page()?.bg}`} onClick={()=>setSelectedElement(null)}>{page()?.elements.map(renderElement)}</div><div className="toolBar"><button onClick={()=>addElement(photoEl(100,130))}>Photo</button><button onClick={()=>addElement(textEl("tap to edit",80,80))}>Text</button><button onClick={()=>setShowStickers(true)}>Stickers</button><button onClick={addPage}>Add Page</button><button onClick={()=>setShowBgPicker(true)}>Background</button></div><TextToolbar />{selectedElement?.type==="photo"&&<div className="cropControls"><button onClick={()=>nudgeCrop("left")}>←</button><button onClick={()=>nudgeCrop("up")}>↑</button><button onClick={()=>nudgeCrop("down")}>↓</button><button onClick={()=>nudgeCrop("right")}>→</button></div>}</div>}
 
     {actionBook&&<div className="bottomSheet"><h3>{actionBook.title}</h3><button onClick={()=>{openBook(actionBook);setActionBook(null)}}>Edit</button><button onClick={()=>{setFlipBook(actionBook);setFlipPage(0);setActionBook(null)}}>View Flipbook</button><button onClick={()=>{window.print();setActionBook(null)}}>Export / Print</button><button onClick={()=>{renameBook(actionBook);setActionBook(null)}}>Rename</button><button className="danger" onClick={()=>{setConfirmDelete(actionBook);setActionBook(null)}}>Delete</button><button onClick={()=>setActionBook(null)}>Cancel</button></div>}
-
-    {flipBook&&<div className="flipbookScreen"><button className="backBtn" onClick={()=>setFlipBook(null)}>← Back</button><h2>{flipBook.title}</h2><div className="bookFlipWrap"><button disabled={flipPage===0} onClick={()=>setFlipPage(flipPage-1)}>‹</button><div className={`flipPage bg-${flipBook.pages[flipPage]?.bg}`}>{flipBook.pages[flipPage]?.elements.map(el=><div key={el.id} className="flipElement" style={{left:el.x*.75,top:el.y*.75,width:el.w*.75,height:el.h*.75}}>{el.type==="photo"&&el.src&&<img src={el.src} alt=""/>}{el.type==="text"&&<span style={{fontSize:el.size*.75}}>{el.value}</span>}{el.type==="sticker"&&<span style={{fontSize:el.size*.75}}>{el.value}</span>}</div>)}</div><button disabled={flipPage===flipBook.pages.length-1} onClick={()=>setFlipPage(flipPage+1)}>›</button></div></div>}
 
     {showCreate&&<div className="bottomSheet"><h3>Create Scrapbook</h3><input placeholder="Scrapbook name" value={newBookName} onChange={e=>setNewBookName(e.target.value)}/><div className="bgPicker">{BACKGROUNDS.map(bg=><button key={bg.id} className={`bgChoice bg-${bg.id}`} onClick={()=>setNewBookBg(bg.id)}><span>{bg.name}</span></button>)}</div><button className="mainBtn" onClick={createBook}>Create</button><button onClick={()=>setShowCreate(false)}>Cancel</button></div>}
 
