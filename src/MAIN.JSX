@@ -1,343 +1,1396 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged,
-} from "firebase/auth";
-import {
-  addDoc,
-  collection,
-  deleteDoc,
-  doc,
-  getDoc,
-  getDocs,
-  orderBy,
-  query,
-  serverTimestamp,
-  setDoc,
-  updateDoc,
-} from "firebase/firestore";
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { auth, db, storage } from "./firebase";
 
-const css = `
-@import url('https://fonts.googleapis.com/css2?family=Amatic+SC:wght@700&family=Archivo+Black&family=Caveat:wght@500;700&family=Dancing+Script:wght@600&family=Georgia&family=Great+Vibes&family=Montserrat:wght@500;700&family=Pacifico&family=Playfair+Display:wght@600;700&family=Poppins:wght@400;600;800&display=swap');
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail,
+  onAuthStateChanged,
+  updateProfile,
+  signOut
+} from "firebase/auth";
 
-*{box-sizing:border-box}
-body{margin:0;background:#f3edf0;font-family:Poppins,Arial,sans-serif}
-button,input,textarea,select{font-family:inherit}
-button{border:0;cursor:pointer}
-.appBg{min-height:100vh;display:flex;justify-content:center;background:#f3edf0}
-.phoneShell{width:100%;max-width:430px;min-height:100vh;position:relative;overflow-x:hidden;background:linear-gradient(#ffffffaa,#ffffffaa),repeating-linear-gradient(45deg,#ffdce9 0 18px,#fff1f6 18px 36px);box-shadow:0 0 40px #0002}
-.authScreen,.homeScreen,.screen{min-height:100vh;padding:18px 18px 110px}
-.heroCard,.profileCard,.premiumBox{background:#fffaf4;border-radius:32px;padding:28px 22px;text-align:center;box-shadow:0 14px 35px #0002;position:relative;margin-bottom:18px}
-.logoTape{position:absolute;top:14px;left:50%;transform:translateX(-50%) rotate(-2deg);width:115px;height:28px;background:#eaa8bdcc;border-radius:4px}
-h1{font-family:Georgia,serif;font-size:44px;line-height:.9;margin:18px 0;color:#34262b}
-h2{font-family:Georgia,serif;font-size:30px;margin:12px 0}
-p{color:#7c6870}
-input,textarea,select{outline:0}
-input,select{width:100%;padding:14px;border:1px solid #ecd7df;border-radius:18px;margin:7px 0;background:white}
-.passwordWrap{position:relative}
-.passwordWrap button{position:absolute;right:8px;top:13px;background:#fff0f6;color:#d96f94;border-radius:12px;padding:8px 10px;font-weight:800}
-.mainBtn,.secondaryBtn,.backBtn,.settingsBtn,.logoutBtn,.bottomSheet button,.toolBar button,.bottomNav button{border-radius:18px;padding:12px 14px;font-weight:800}
-.mainBtn{width:100%;background:linear-gradient(135deg,#ff9cc2,#e96e9f);color:white;box-shadow:0 10px 22px #e96e9f55}
-.secondaryBtn{width:100%;margin-top:10px;background:#fff0f6;color:#d96f94}
-.backBtn{background:white;margin-bottom:14px;box-shadow:0 7px 18px #0001}
-.sectionTitle{font-family:Georgia,serif;font-size:30px;font-weight:900;margin:18px 4px 12px}
-.booksList{display:flex;flex-direction:column;gap:14px}
-.bookCard{background:white;border-radius:26px;padding:14px;display:grid;grid-template-columns:78px 1fr 42px;gap:12px;align-items:center;box-shadow:0 10px 26px #0001}
-.bookPreview{width:78px;height:78px;border-radius:18px;box-shadow:inset 0 0 0 5px white}
-.bookInfo h3{margin:0 0 5px;font-size:17px}
-.bookInfo p{margin:0;font-size:13px}
-.dotsBtn{width:40px;height:40px;border-radius:14px;background:#fff0f6;font-size:22px}
-.bottomNav,.toolBar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:#ffffffe8;backdrop-filter:blur(10px);display:flex;gap:8px;padding:12px;z-index:100;box-shadow:0 -8px 25px #0001}
-.bottomNav button,.toolBar button{flex:1;background:#fff0f6;color:#4a333b;font-size:12px}
-.templateCard{width:100%;background:white;border-radius:26px;padding:16px;margin:12px 0;text-align:left;box-shadow:0 10px 26px #0001;font-weight:900;color:#3b2c32}
-.profileImageWrap{display:block;width:98px;height:98px;border-radius:50%;overflow:hidden;background:#ffd6e6;margin:0 auto 14px;cursor:pointer}
-.profileImage{width:100%;height:100%;object-fit:cover}
-.profilePlaceholder{width:100%;height:100%;display:grid;place-items:center;font-size:44px;color:#d96f94}
-.settingsBtn,.logoutBtn{width:100%;display:block;margin:10px 0;text-align:left;background:#fff0f6}
-.logoutBtn{text-align:center;background:linear-gradient(135deg,#ff9cc2,#e96e9f);color:white}
-.settingsRow{background:#fff0f6;border-radius:22px;padding:14px;margin:10px 0;display:flex;justify-content:space-between;align-items:center;text-align:left}
-.settingsRow p{margin:3px 0 0;font-size:12px}
-.toggle{width:58px;height:32px;border-radius:999px;background:#ead8df;padding:4px}
-.toggle span{display:block;width:24px;height:24px;background:white;border-radius:50%;transition:.2s}
-.toggle.on{background:#e66fa1}
-.toggle.on span{transform:translateX(26px)}
-.editorScreen{min-height:100vh;padding-bottom:160px}
-.editorHeader{background:white;padding:14px;display:grid;grid-template-columns:44px 1fr 44px;align-items:center;gap:8px;box-shadow:0 4px 14px #0001}
-.editorHeader button{height:40px;border-radius:14px;background:#fff0f6;font-weight:900}
-.editorHeader h2{font-size:16px;text-align:center;margin:0}
-.pageNav{display:flex;justify-content:center;align-items:center;gap:14px;padding:12px;font-weight:900}
-.pageNav button{background:white;border-radius:14px;padding:8px 14px}
-.scrapPage{position:relative;width:100%;height:560px;margin:0 auto 16px;border-radius:0 0 34px 34px;overflow:hidden;box-shadow:0 14px 35px #0003}
-.scrapElement{position:absolute;touch-action:none}
-.scrapElement.selected{outline:3px dashed #e96e9f}
-.photoFrame{width:100%;height:100%;background:white;border:8px solid white;border-radius:15px;box-shadow:0 8px 18px #0003;display:grid;place-items:center;overflow:hidden;color:#a85e7a;font-weight:900}
-.photoFrame img{width:100%;height:100%;object-fit:cover}
-.emptyPhoto{width:100%;height:100%;display:grid;place-items:center}
-.scrapElement textarea{width:100%;height:100%;border:0;resize:none;background:transparent;text-align:center}
-.stickerElement{width:100%;height:100%;display:grid;place-items:center;filter:drop-shadow(0 5px 7px #0002)}
-.handle{position:absolute;width:32px;height:32px;border-radius:50%;background:#e96e9f;color:white;z-index:20}
-.rotateHandle{top:-16px;right:-16px}
-.resizeHandle{bottom:-16px;right:-16px}
-.elementBubble{position:absolute;left:50%;bottom:-54px;transform:translateX(-50%);background:white;border-radius:18px;padding:6px;display:flex;gap:6px;box-shadow:0 8px 20px #0003;z-index:25}
-.elementBubble button{background:#fff0f6;border-radius:12px;padding:8px 10px;font-weight:800}
-.cropControls{position:fixed;bottom:74px;left:50%;transform:translateX(-50%);background:white;padding:8px;border-radius:22px;display:flex;gap:8px;z-index:110;box-shadow:0 8px 22px #0002}
-.cropControls button{width:42px;height:38px;border-radius:14px;background:#fff0f6;font-weight:900}
-.textToolbar{position:fixed;left:50%;bottom:72px;transform:translateX(-50%);width:100%;max-width:430px;background:white;border-radius:24px 24px 0 0;padding:12px;z-index:130;box-shadow:0 -10px 25px #0002}
-.textToolbarGrid{display:grid;grid-template-columns:48px 1fr;gap:8px;align-items:center}
-.textToolbar input[type=color]{height:44px;padding:2px}
-.textToolbar input[type=range]{width:100%}
-.textToolbar select{margin:0}
-.textButtons{display:flex;gap:6px;margin-top:8px}
-.textButtons button{flex:1;background:#fff0f6;border-radius:14px;padding:9px;font-weight:900}
-.bottomSheet{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:100%;max-width:430px;max-height:82vh;overflow:auto;background:white;border-radius:30px 30px 0 0;padding:20px;box-shadow:0 -12px 35px #0003;z-index:500}
-.bottomSheet button{width:100%;margin:7px 0;background:#fff0f6}
-.danger{background:#ffe4e9!important;color:#c73558}
-.bgPicker{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:12px 0}
-.bgChoice{height:66px;border-radius:16px;border:3px solid white;box-shadow:0 4px 12px #0002;overflow:hidden}
-.bgChoice span{display:block;background:#ffffffcc;font-size:11px;padding:4px;border-radius:10px}
-.stickerGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-.stickerGrid button{min-height:72px}
-.stickerGrid span{font-size:28px}
-.cuteOverlay{position:fixed;inset:0;background:#1e141c88;backdrop-filter:blur(8px);z-index:999;display:grid;place-items:center;padding:20px}
-.cuteModal{width:100%;max-width:360px;background:#fff8f2;border:4px solid #ffd3e1;border-radius:30px;padding:34px 24px 24px;text-align:center;position:relative;box-shadow:0 20px 45px #0004}
-.modalTape{position:absolute;top:-18px;left:50%;transform:translateX(-50%) rotate(-3deg);width:120px;height:32px;background:repeating-linear-gradient(45deg,#ff9fc2 0 10px,#ffd1df 10px 20px);border-radius:5px}
-.modalX{position:absolute;top:12px;right:12px;width:38px;height:38px;border-radius:50%;background:#ff91b7;font-size:24px}
-.modalIcon{font-size:54px;margin-bottom:10px}
-.modalBtn{margin-top:12px;background:linear-gradient(135deg,#ff9cc2,#df5d91);color:white;border-radius:18px;padding:14px 28px;font-weight:900}
-.lightBtn{background:#fff0f6;color:#4a333b}
-.dangerBtn{background:#ff6f8f}
-.bg-pinkPlaid{background:linear-gradient(#ffffff66,#ffffff66),repeating-linear-gradient(45deg,#ffd5e6 0 18px,#fff0f6 18px 36px)}
-.bg-bluePlaid{background:linear-gradient(#ffffff66,#ffffff66),repeating-linear-gradient(45deg,#cfe6ff 0 18px,#f2f8ff 18px 36px)}
-.bg-cream{background:#fff8ee}
-.bg-lavender{background:#eee4ff}
-.bg-grid{background-color:white;background-image:linear-gradient(#eee 1px,transparent 1px),linear-gradient(90deg,#eee 1px,transparent 1px);background-size:24px 24px}
-.bg-dots{background-color:white;background-image:radial-gradient(#ddd 1px,transparent 1px);background-size:18px 18px}
-.appBg.dark{background:#111}
-.appBg.dark .phoneShell{background:#151518;color:white}
-.appBg.dark .heroCard,.appBg.dark .bookCard,.appBg.dark .templateCard,.appBg.dark .premiumBox,.appBg.dark .profileCard,.appBg.dark .bottomSheet,.appBg.dark .editorHeader,.appBg.dark .bottomNav,.appBg.dark .toolBar,.appBg.dark .cropControls,.appBg.dark .textToolbar{background:#1f2024;color:white}
-.appBg.dark button,.appBg.dark .settingsRow{background:#2b2c31;color:white}
-`;
+import {
+  addDoc,
+  collection,
+  getDocs,
+  orderBy,
+  query,
+  serverTimestamp,
+  deleteDoc,
+  doc,
+  updateDoc
+} from "firebase/firestore";
 
-const BACKGROUNDS = [
-  { id: "cream", name: "Cream" },
-  { id: "pinkPlaid", name: "Pink Plaid" },
-  { id: "bluePlaid", name: "Blue Plaid" },
-  { id: "lavender", name: "Lavender" },
-  { id: "grid", name: "Grid" },
-  { id: "dots", name: "Dots" },
-];
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import "./style.css";
 
-const STICKERS = ["♡","♥","🎀","✿","🌸","🌼","🌿","🦋","🧸","🐰","🐶","🐱","🦊","🐾","📷","🎞️","📝","📚","✈️","🌎","📍","☕","🏠","🎁","🎈","🎂","★","✦","☾","☁"];
-
-const FREE_FONTS = ["Poppins", "Montserrat", "Caveat", "Dancing Script", "Georgia", "Playfair Display"];
-const PREMIUM_FONTS = ["Great Vibes", "Pacifico", "Amatic SC", "Archivo Black"];
-
-function makeId(){return crypto?.randomUUID?crypto.randomUUID():`${Date.now()}-${Math.random()}`}
-function photoEl(x,y,w=160,h=160){return{id:makeId(),type:"photo",x,y,w,h,r:0,src:"",cropX:50,cropY:50}}
-function textEl(value,x,y,size=22){return{id:makeId(),type:"text",value,x,y,w:210,h:80,r:0,size,color:"#2f2528",font:"Georgia",bold:false,italic:false,underline:false,align:"center"}}
-function stickerEl(value,x,y){return{id:makeId(),type:"sticker",value,x,y,w:60,h:60,r:0,size:36}}
-
-function makeBook(title,bg="cream"){
-  return{id:makeId(),title,bg,pages:[{id:makeId(),bg,elements:[textEl(title,90,40,28),photoEl(95,150,210,210),stickerEl("♡",285,390)]}]}
+function id() {
+  return crypto?.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
 }
 
-function myFirstTemplate(){
-  return{id:makeId(),title:"My First Scrapbook",bg:"cream",pages:[
-    {id:makeId(),bg:"cream",elements:[textEl("About Me ♡",105,28,30),photoEl(45,115,155,155),textEl("Some of my favorite\\nthings:\\nColor:\\nFood:\\nBook:\\nSong:",230,120,13),textEl("My name:\\nBirthday:\\nFavorite color:",80,335,20),stickerEl("✿",300,320),stickerEl("♡",318,405)]},
-    {id:makeId(),bg:"cream",elements:[textEl("My Family ♡",112,28,30),photoEl(45,110,165,140),textEl("About my family:",230,110,15),textEl("The people I love most:",92,275,16),photoEl(55,330,85,90),photoEl(165,330,85,90),photoEl(275,330,85,90),stickerEl("🌿",320,285)]},
-    {id:makeId(),bg:"cream",elements:[textEl("My Best Friends ♡",75,28,28),photoEl(55,130,130,155),photoEl(230,130,130,155),textEl("Name:\\nWe met:",60,305,13),textEl("Name:\\nWe met:",235,305,13)]},
-    {id:makeId(),bg:"cream",elements:[textEl("My Personality ♡",78,28,28),textEl("I am...",50,120,17),textEl("Words that describe me:\\n○\\n○\\n○\\n○",220,110,14),textEl("I’m proud of:",90,330,16)]},
-  ]}
+function blankPage(bg = "bgGrid") {
+  return {
+    background: bg,
+    items: []
+  };
 }
 
-function babyTemplate(girl=true){
-  const bg=girl?"pinkPlaid":"bluePlaid";
-  const title=girl?"Baby Girl First Year":"Baby Boy First Year";
-  return{id:makeId(),title,bg,premium:true,pages:Array.from({length:12},(_,i)=>({id:makeId(),bg,elements:[
-    textEl(`${i + 1}
-month${i === 0 ? "" : "s"}`,35,35,24),
-    photoEl(150,95,190,185),
-    textEl(girl?"sweet girl ♡":"sweet boy ♡",155,320,16),
-    stickerEl(girl?"🎀":"★",45,315),
-    stickerEl(girl?"🌸":"🧸",300,290),
-    stickerEl("♡",320,365),
-    stickerEl("🌿",55,220),
-  ]}))}
+function babyPage(title, caption, photoCount = 1, gender = "girl") {
+  const bg = gender === "boy" ? "bgBabyBluePlaid" : "bgBabyPinkPlaid";
+  const accent = gender === "boy" ? "#7ba7d9" : "#e96d9b";
+  const mainSticker = gender === "boy" ? "🧸" : "🎀";
+
+  const items = [
+    {
+      id: id(),
+      type: "text",
+      text: title,
+      x: 22,
+      y: 24,
+      w: 125,
+      h: 78,
+      fontSize: 24,
+      fontFamily: "Georgia",
+      color: "#4d392f"
+    },
+    {
+      id: id(),
+      type: "sticker",
+      text: mainSticker,
+      x: 18,
+      y: 5,
+      w: 45,
+      h: 45,
+      fontSize: 34
+    },
+    {
+      id: id(),
+      type: "sticker",
+      text: "🍼",
+      x: 280,
+      y: 38,
+      w: 44,
+      h: 44,
+      fontSize: 34
+    },
+    {
+      id: id(),
+      type: "sticker",
+      text: "🌙",
+      x: 288,
+      y: 270,
+      w: 48,
+      h: 48,
+      fontSize: 38
+    },
+    {
+      id: id(),
+      type: "sticker",
+      text: "⭐",
+      x: 48,
+      y: 340,
+      w: 45,
+      h: 45,
+      fontSize: 34
+    },
+    {
+      id: id(),
+      type: "text",
+      text: caption,
+      x: 185,
+      y: 340,
+      w: 145,
+      h: 58,
+      fontSize: 16,
+      fontFamily: "Georgia",
+      color: "#6b4f43"
+    }
+  ];
+
+  for (let i = 0; i < photoCount; i++) {
+    items.push({
+      id: id(),
+      type: "placeholder",
+      text: "Add Photo",
+      x: i === 0 ? 120 : 225,
+      y: i === 0 ? 125 : 175,
+      w: 145,
+      h: 155,
+      fontSize: 18,
+      color: accent,
+      rotate: i === 0 ? -3 : 4
+    });
+  }
+
+  return { background: bg, items };
 }
 
-function App(){
-  const [user,setUser]=useState(null);
-  const [screen,setScreen]=useState("home");
-  const [books,setBooks]=useState([]);
-  const [selectedBook,setSelectedBook]=useState(null);
-  const [selectedPage,setSelectedPage]=useState(0);
-  const [selectedElement,setSelectedElement]=useState(null);
-  const [email,setEmail]=useState("");
-  const [password,setPassword]=useState("");
-  const [showPassword,setShowPassword]=useState(false);
-  const [newBookName,setNewBookName]=useState("");
-  const [newBookBg,setNewBookBg]=useState("cream");
-  const [profileImage,setProfileImage]=useState("");
-  const [darkMode,setDarkMode]=useState(false);
-  const [subscription,setSubscription]=useState("Free Plan");
-  const [modal,setModal]=useState(null);
-  const [actionBook,setActionBook]=useState(null);
-  const [confirmDelete,setConfirmDelete]=useState(null);
-  const [showCreate,setShowCreate]=useState(false);
-  const [showStickers,setShowStickers]=useState(false);
-  const [stickerSearch,setStickerSearch]=useState("");
-  const [showBgPicker,setShowBgPicker]=useState(false);
-  const [flipBook,setFlipBook]=useState(null);
-  const [flipPage,setFlipPage]=useState(0);
-  const dragRef=useRef(null);
+function App() {
+  const [page, setPage] = useState("welcome");
+  const [toast, setToast] = useState("");
+  const [user, setUser] = useState(null);
 
-  const isPremium = subscription === "Premium Monthly";
+  function flash(message) {
+    setToast(message);
+    setTimeout(() => setToast(""), 3000);
+  }
 
-  const filteredStickers=useMemo(()=>{
-    const s=stickerSearch.trim().toLowerCase();
-    if(!s)return STICKERS;
-    return STICKERS.filter(x=>x.toLowerCase().includes(s));
-  },[stickerSearch]);
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (u) => {
+      setUser(u || null);
+      setPage(u ? "home" : "welcome");
+    });
 
-  useEffect(()=>{
-    const unsub=onAuthStateChanged(auth,async(u)=>{
-      setUser(u);
-      if(!u){setBooks([]);return}
-      const snap=await getDocs(query(collection(db,"scrapbooks"),orderBy("createdAt","desc")));
-      const loaded=[];
-      snap.forEach(d=>{const data=d.data();if(data.uid===u.uid)loaded.push({...data,id:data.id||d.id,firebaseId:d.id})});
-      setBooks(loaded);
-      const p=await getDoc(doc(db,"profiles",u.uid));
-      if(p.exists()){const data=p.data();setProfileImage(data.photoURL||"");setDarkMode(data.darkMode||false);setSubscription(data.subscription||"Free Plan")}
-    });
-    return()=>unsub();
-  },[]);
+    return () => unsub();
+  }, []);
 
-  async function signup(){if(email&&password)await createUserWithEmailAndPassword(auth,email,password)}
-  async function login(){if(email&&password)await signInWithEmailAndPassword(auth,email,password)}
-  async function logoutUser(){await signOut(auth);setScreen("home")}
-  async function saveProfile(data){if(user)await setDoc(doc(db,"profiles",user.uid),data,{merge:true})}
-  async function toggleDarkMode(){const next=!darkMode;setDarkMode(next);await saveProfile({darkMode:next})}
+  return (
+    <div className="appShell">
+      {toast && <div className="toast">{toast}</div>}
 
-  async function uploadProfilePicture(e){
-    const file=e.target.files?.[0]; if(!file||!user)return;
-    try{const fileRef=ref(storage,`profiles/${user.uid}/profile-${Date.now()}-${file.name}`);await uploadBytes(fileRef,file);const url=await getDownloadURL(fileRef);setProfileImage(url);await saveProfile({photoURL:url})}
-    catch{setModal({icon:"⚠️",title:"Upload failed",text:"Firebase Storage rules are blocking this upload.",button:"Okay"})}
-  }
-
-  async function saveBooks(updated){
-    if(!user)return;
-    setBooks(updated);
-    for(const b of updated){
-      const clean={...b,id:b.id||makeId(),uid:user.uid}; delete clean.firebaseId;
-      if(b.firebaseId) await updateDoc(doc(db,"scrapbooks",b.firebaseId),clean);
-      else{const added=await addDoc(collection(db,"scrapbooks"),{...clean,createdAt:serverTimestamp()});b.firebaseId=added.id}
-    }
-  }
-
-  function openBook(book){setSelectedBook(book);setSelectedPage(0);setSelectedElement(null);setScreen("editor")}
-  async function createBook(){if(!newBookName.trim())return;const book=makeBook(newBookName.trim(),newBookBg);const updated=[book,...books];await saveBooks(updated);openBook(updated[0]);setNewBookName("");setShowCreate(false)}
-  async function createFromTemplate(fn){const book=fn();const updated=[book,...books];await saveBooks(updated);openBook(updated[0])}
-  async function renameBook(book){const name=prompt("Rename scrapbook:",book.title);if(!name?.trim())return;const updated=books.map(b=>(b.firebaseId||b.id)===(book.firebaseId||book.id)?{...b,title:name.trim()}:b);await saveBooks(updated);if(selectedBook&&(selectedBook.firebaseId||selectedBook.id)===(book.firebaseId||book.id))setSelectedBook({...selectedBook,title:name.trim()})}
-  async function deleteBook(book){const key=book.firebaseId||book.id;if(book.firebaseId)await deleteDoc(doc(db,"scrapbooks",book.firebaseId));setBooks(books.filter(b=>(b.firebaseId||b.id)!==key));setConfirmDelete(null);setActionBook(null);if(selectedBook&&(selectedBook.firebaseId||selectedBook.id)===key){setSelectedBook(null);setScreen("home")}}
-  function openFlipbook(book){
-  setFlipBook(book);
-  setFlipPage(0);
+      {page === "welcome" && <Welcome go={setPage} />}
+      {page === "login" && <Login go={setPage} flash={flash} />}
+      {page === "signup" && <Signup go={setPage} flash={flash} />}
+      {page === "forgot" && <Forgot go={setPage} flash={flash} />}
+      {page === "home" && <Home user={user} flash={flash} />}
+    </div>
+  );
 }
 
-function exportBook(book){
-  setFlipBook(book);
-  setFlipPage(0);
+function Welcome({ go }) {
+  return (
+    <div className="phone">
+      <div className="screen paper auth-page">
+        <div className="auth-logo">Pocket Scrapbook</div>
+        <h1>Turn your memories into beautiful stories 💗</h1>
+        <div className="hero">🌼 🖼️ 🦋</div>
 
-  setTimeout(()=>{
-    window.print();
-  },500);
+        <div className="auth-card">
+          <button onClick={() => go("signup")}>✨ Start Scrapbooking</button>
+          <button className="secondary" onClick={() => go("login")}>
+            Login
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }
-  function page(){return selectedBook?.pages?.[selectedPage]}
 
-  function updateBook(book){const updated=books.map(b=>(b.firebaseId||b.id)===(book.firebaseId||book.id)?book:b);setBooks(updated);setSelectedBook(book);saveBooks(updated)}
-  function updateElement(el){const pages=selectedBook.pages.map((p,i)=>i===selectedPage?{...p,elements:p.elements.map(x=>x.id===el.id?el:x)}:p);updateBook({...selectedBook,pages});setSelectedElement(el)}
-  function addElement(el){const pages=selectedBook.pages.map((p,i)=>i===selectedPage?{...p,elements:[...p.elements,el]}:p);updateBook({...selectedBook,pages});setSelectedElement(el)}
-  function deleteElement(){const pages=selectedBook.pages.map((p,i)=>i===selectedPage?{...p,elements:p.elements.filter(x=>x.id!==selectedElement.id)}:p);updateBook({...selectedBook,pages});setSelectedElement(null)}
-  function duplicateElement(){addElement({...selectedElement,id:makeId(),x:selectedElement.x+20,y:selectedElement.y+20})}
-  function addPage(){const book={...selectedBook,pages:[...selectedBook.pages,{id:makeId(),bg:selectedBook.bg,elements:[]}]};updateBook(book);setSelectedPage(book.pages.length-1)}
-  function changeBg(bg){const pages=selectedBook.pages.map((p,i)=>i===selectedPage?{...p,bg}:p);updateBook({...selectedBook,pages});setShowBgPicker(false)}
+function Login({ go, flash }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPass, setShowPass] = useState(false);
 
-  async function uploadPhoto(el,file){
-    if(!file||!user)return;
-    try{const fileRef=ref(storage,`scrapbooks/${user.uid}/${Date.now()}-${file.name}`);await uploadBytes(fileRef,file);const url=await getDownloadURL(fileRef);updateElement({...el,src:url})}
-    catch{setModal({icon:"⚠️",title:"Photo failed",text:"Firebase Storage blocked this photo upload.",button:"Okay"})}
-  }
+  async function submit() {
+    try {
+      await signInWithEmailAndPassword(auth, email.trim(), password);
+      flash("Logged in 💖");
+      go("home");
+    } catch (e) {
+      flash("Login error: " + e.message);
+    }
+  }
 
-  function point(e){return e.touches?.[0]?{x:e.touches[0].clientX,y:e.touches[0].clientY}:{x:e.clientX,y:e.clientY}}
-  function startDrag(e,el,mode){e.stopPropagation();setSelectedElement(el);const p=point(e);dragRef.current={mode,x:p.x,y:p.y,original:{...el}}}
-  function moveDrag(e){if(!dragRef.current)return;const p=point(e);const dx=p.x-dragRef.current.x;const dy=p.y-dragRef.current.y;const o=dragRef.current.original;if(dragRef.current.mode==="move")updateElement({...o,x:o.x+dx,y:o.y+dy});if(dragRef.current.mode==="resize")updateElement({...o,w:Math.max(40,o.w+dx),h:Math.max(40,o.h+dy)});if(dragRef.current.mode==="rotate")updateElement({...o,r:o.r+dx})}
-  function stopDrag(){dragRef.current=null}
-  useEffect(()=>{window.addEventListener("mousemove",moveDrag);window.addEventListener("mouseup",stopDrag);window.addEventListener("touchmove",moveDrag);window.addEventListener("touchend",stopDrag);return()=>{window.removeEventListener("mousemove",moveDrag);window.removeEventListener("mouseup",stopDrag);window.removeEventListener("touchmove",moveDrag);window.removeEventListener("touchend",stopDrag)}});
+  return (
+    <div className="phone">
+      <div className="screen paper auth-page">
+        <div className="auth-logo">Pocket Scrapbook</div>
+        <h1>Welcome Back ✨</h1>
 
-  function nudgeCrop(dir){if(!selectedElement||selectedElement.type!=="photo")return;const el={...selectedElement};if(dir==="left")el.cropX=Math.max(0,el.cropX-5);if(dir==="right")el.cropX=Math.min(100,el.cropX+5);if(dir==="up")el.cropY=Math.max(0,el.cropY-5);if(dir==="down")el.cropY=Math.min(100,el.cropY+5);updateElement(el)}
+        <div className="auth-card">
+          <input
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
 
-  function renderElement(el){
-    const selected=selectedElement?.id===el.id;
-    return <div key={el.id} className={`scrapElement ${selected?"selected":""}`} style={{left:el.x,top:el.y,width:el.w,height:el.h,transform:`rotate(${el.r||0}deg)`}} onMouseDown={e=>startDrag(e,el,"move")} onTouchStart={e=>startDrag(e,el,"move")} onClick={e=>{e.stopPropagation();setSelectedElement(el)}}>
-      {el.type==="photo"&&<div className="photoFrame">{el.src?<img src={el.src} alt="" style={{objectPosition:`${el.cropX}% ${el.cropY}%`}}/>:<label className="emptyPhoto">+ Photo<input hidden type="file" accept="image/*" onChange={e=>uploadPhoto(el,e.target.files[0])}/></label>}</div>}
-      {el.type==="text"&&<textarea value={el.value} onMouseDown={e=>e.stopPropagation()} onTouchStart={e=>e.stopPropagation()} onClick={e=>{e.stopPropagation();setSelectedElement(el)}} onChange={e=>updateElement({...el,value:e.target.value})} style={{fontSize:el.size,color:el.color,fontFamily:el.font,fontWeight:el.bold?"800":"400",fontStyle:el.italic?"italic":"normal",textDecoration:el.underline?"underline":"none",textAlign:el.align}}/>}
-      {el.type==="sticker"&&<div className="stickerElement" style={{fontSize:el.size}}>{el.value}</div>}
-      {selected&&<><button className="handle rotateHandle" onMouseDown={e=>startDrag(e,el,"rotate")}>↻</button><button className="handle resizeHandle" onMouseDown={e=>startDrag(e,el,"resize")}>↘</button><div className="elementBubble"><button onClick={duplicateElement}>Duplicate</button><button onClick={deleteElement}>Delete</button></div></>}
-    </div>
-  }
+          <div className="passwordWrap">
+            <input
+              placeholder="Password"
+              type={showPass ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") submit();
+              }}
+            />
 
-  function TextToolbar(){
-    if(!selectedElement || selectedElement.type !== "text") return null;
-    const fonts = isPremium ? [...FREE_FONTS, ...PREMIUM_FONTS] : FREE_FONTS;
-    return <div className="textToolbar">
-      <div className="textToolbarGrid">
-        <input type="color" value={selectedElement.color} onChange={e=>updateElement({...selectedElement,color:e.target.value})}/>
-        <input type="range" min="10" max="72" value={selectedElement.size} onChange={e=>updateElement({...selectedElement,size:Number(e.target.value)})}/>
-      </div>
-      <select value={selectedElement.font} onChange={e=>updateElement({...selectedElement,font:e.target.value})}>
-        {fonts.map(font=><option key={font} value={font}>{font}{PREMIUM_FONTS.includes(font) ? " 👑" : ""}</option>)}
-      </select>
-      {!isPremium && <p style={{fontSize:12,margin:"4px 0"}}>Premium unlocks more fonts.</p>}
-      <div className="textButtons">
-        <button onClick={()=>updateElement({...selectedElement,bold:!selectedElement.bold})}>B</button>
-        <button onClick={()=>updateElement({...selectedElement,italic:!selectedElement.italic})}>I</button>
-        <button onClick={()=>updateElement({...selectedElement,underline:!selectedElement.underline})}>U</button>
-        <button onClick={()=>updateElement({...selectedElement,align:selectedElement.align==="left"?"center":selectedElement.align==="center"?"right":"left"})}>Align</button>
-      </div>
-    </div>
-  }
+            <button className="showBtn" onClick={() => setShowPass(!showPass)}>
+              {showPass ? "🙈" : "👁️"}
+            </button>
+          </div>
 
-  return <div className={`appBg ${darkMode?"dark":""}`}><style>{css}</style><div className="phoneShell">
-    {!user&&<div className="authScreen"><div className="heroCard"><div className="logoTape"></div><h1>pocket<br/>scrapbook</h1><p>cherish every moment ♡</p><input placeholder="Email" value={email} onChange={e=>setEmail(e.target.value)}/><div className="passwordWrap"><input type={showPassword?"text":"password"} placeholder="Password" value={password} onChange={e=>setPassword(e.target.value)}/><button onClick={()=>setShowPassword(!showPassword)}>{showPassword?"Hide":"Show"}</button></div><button className="mainBtn" onClick={login}>Login</button><button className="secondaryBtn" onClick={signup}>Create Account</button></div></div>}
+          <button onClick={submit}>Login ✨</button>
+        </div>
 
-    {user&&screen==="home"&&<div className="homeScreen"><div className="heroCard"><div className="logoTape"></div><h1>pocket<br/>scrapbook</h1><p>cherish every moment ♡</p><button className="mainBtn" onClick={()=>setShowCreate(true)}>Create Scrapbook</button></div><div className="sectionTitle">My Scrapbooks</div><div className="booksList">{books.map(book=><div key={book.firebaseId||book.id} className="bookCard"><div className={`bookPreview bg-${book.bg}`} onClick={()=>openBook(book)}></div><div className="bookInfo" onClick={()=>openBook(book)}><h3>{book.title}</h3><p>{book.pages?.length||0} pages</p></div><button className="dotsBtn" onClick={()=>setActionBook(book)}>⋮</button></div>)}</div><div className="bottomNav"><button onClick={()=>setScreen("home")}>Home</button><button onClick={()=>setScreen("templates")}>Templates</button><button onClick={()=>setScreen("premium")}>Premium</button><button onClick={()=>setScreen("profile")}>Profile</button></div></div>}
+        <button className="text-btn" onClick={() => go("forgot")}>
+          Forgot Password?
+        </button>
 
-    {user&&screen==="templates"&&<div className="screen"><button className="backBtn" onClick={()=>setScreen("home")}>← Back</button><h2>Templates</h2><button className="templateCard" onClick={()=>createFromTemplate(myFirstTemplate)}>My First Scrapbook — Free</button><button className="templateCard" onClick={()=>createFromTemplate(()=>babyTemplate(true))}>Baby Girl First Year — $1.99</button><button className="templateCard" onClick={()=>createFromTemplate(()=>babyTemplate(false))}>Baby Boy First Year — $1.99</button></div>}
+        <button className="text-btn" onClick={() => go("signup")}>
+          Need an account?
+        </button>
+      </div>
+    </div>
+  );
+}
 
-    {user&&screen==="premium"&&<div className="screen"><button className="backBtn" onClick={()=>setScreen("home")}>← Back</button><h2>Premium</h2><div className="premiumBox"><h3>Your Subscription</h3><p>{subscription}</p><button className="mainBtn" onClick={()=>{setSubscription("Premium Monthly");saveProfile({subscription:"Premium Monthly"})}}>Upgrade $4.99/month</button><button className="secondaryBtn" onClick={()=>{setSubscription("Free Plan");saveProfile({subscription:"Free Plan"})}}>Cancel / Free Plan</button></div></div>}
+function Signup({ go, flash }) {
+  const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPass, setShowPass] = useState(false);
 
-    {user&&screen==="profile"&&<div className="screen"><button className="backBtn" onClick={()=>setScreen("home")}>← Back</button><div className="profileCard"><label className="profileImageWrap">{profileImage?<img src={profileImage} alt="" className="profileImage"/>:<div className="profilePlaceholder">♡</div>}<input hidden type="file" accept="image/*" onChange={uploadProfilePicture}/></label><h2>Pocket Scrapbook</h2><button className="settingsBtn" onClick={()=>setModal({icon:"🔔",title:"Notifications",text:"Choose email updates, new templates, promotions, or none.",button:"Got it"})}>Notifications</button><button className="settingsBtn" onClick={()=>setModal({icon:"🔒",title:"Privacy",text:"Pocket Scrapbook does not sell your personal information.",button:"Okay"})}>Privacy</button><button className="settingsBtn" onClick={()=>setScreen("premium")}>Subscription: {subscription}</button><div className="settingsRow"><div><strong>Dark Theme</strong><p>Easier on your eyes at night</p></div><button className={`toggle ${darkMode?"on":""}`} onClick={toggleDarkMode}><span></span></button></div><button className="logoutBtn" onClick={logoutUser}>Logout</button></div></div>}
+  async function submit() {
+    try {
+      if (!name || !username || !email || !password) {
+        throw new Error("Fill in every field.");
+      }
 
-    {user&&screen==="editor"&&selectedBook&&<div className="editorScreen"><div className="editorHeader"><button onClick={()=>setScreen("home")}>←</button><h2>{selectedBook.title}</h2><button onClick={()=>setActionBook(selectedBook)}>⋮</button></div><div className="pageNav"><button disabled={selectedPage===0} onClick={()=>setSelectedPage(selectedPage-1)}>‹</button><span>Page {selectedPage+1}/{selectedBook.pages.length}</span><button disabled={selectedPage===selectedBook.pages.length-1} onClick={()=>setSelectedPage(selectedPage+1)}>›</button></div><div className={`scrapPage bg-${page()?.bg}`} onClick={()=>setSelectedElement(null)}>{page()?.elements.map(renderElement)}</div><div className="toolBar"><button onClick={()=>addElement(photoEl(100,130))}>Photo</button><button onClick={()=>addElement(textEl("tap to edit",80,80))}>Text</button><button onClick={()=>setShowStickers(true)}>Stickers</button><button onClick={addPage}>Add Page</button><button onClick={()=>setShowBgPicker(true)}>Background</button></div><TextToolbar />{selectedElement?.type==="photo"&&<div className="cropControls"><button onClick={()=>nudgeCrop("left")}>←</button><button onClick={()=>nudgeCrop("up")}>↑</button><button onClick={()=>nudgeCrop("down")}>↓</button><button onClick={()=>nudgeCrop("right")}>→</button></div>}</div>}
+      if (password.length < 6) {
+        throw new Error("Password must be at least 6 characters.");
+      }
 
-    {actionBook&&<div className="bottomSheet"><h3>{actionBook.title}</h3><button onClick={()=>{openBook(actionBook);setActionBook(null)}}>Edit</button><button onClick={()=>{setFlipBook(actionBook);setFlipPage(0);setActionBook(null)}}>View Flipbook</button><button onClick={()=>{window.print();setActionBook(null)}}>Export / Print</button><button onClick={()=>{renameBook(actionBook);setActionBook(null)}}>Rename</button><button className="danger" onClick={()=>{setConfirmDelete(actionBook);setActionBook(null)}}>Delete</button><button onClick={()=>setActionBook(null)}>Cancel</button></div>}
+      const cred = await createUserWithEmailAndPassword(
+        auth,
+        email.trim(),
+        password
+      );
 
-    {showCreate&&<div className="bottomSheet"><h3>Create Scrapbook</h3><input placeholder="Scrapbook name" value={newBookName} onChange={e=>setNewBookName(e.target.value)}/><div className="bgPicker">{BACKGROUNDS.map(bg=><button key={bg.id} className={`bgChoice bg-${bg.id}`} onClick={()=>setNewBookBg(bg.id)}><span>{bg.name}</span></button>)}</div><button className="mainBtn" onClick={createBook}>Create</button><button onClick={()=>setShowCreate(false)}>Cancel</button></div>}
+      await updateProfile(cred.user, { displayName: name });
 
-    {showBgPicker&&<div className="bottomSheet"><h3>Change Background</h3><div className="bgPicker">{BACKGROUNDS.map(bg=><button key={bg.id} className={`bgChoice bg-${bg.id}`} onClick={()=>changeBg(bg.id)}><span>{bg.name}</span></button>)}</div><button onClick={()=>setShowBgPicker(false)}>Cancel</button></div>}
+      await addDoc(collection(db, "profiles"), {
+        uid: cred.user.uid,
+        name,
+        username,
+        email: email.trim(),
+        createdAt: serverTimestamp()
+      });
 
-    {showStickers&&<div className="bottomSheet stickerSheet"><h3>Choose Sticker</h3><input placeholder="Search stickers..." value={stickerSearch} onChange={e=>setStickerSearch(e.target.value)}/><div className="stickerGrid">{filteredStickers.map(s=><button key={s} onClick={()=>{addElement(stickerEl(s,150,180));setShowStickers(false)}}><span>{s}</span></button>)}</div><button onClick={()=>setShowStickers(false)}>Cancel</button></div>}
+      flash("Account created 💖");
+      go("home");
+    } catch (e) {
+      flash("Signup error: " + e.message);
+    }
+  }
 
-    {confirmDelete&&<div className="cuteOverlay"><div className="cuteModal"><div className="modalTape"></div><div className="modalIcon">🗑️</div><h2>Delete scrapbook?</h2><p>Delete <strong>{confirmDelete.title}</strong>? This cannot be undone.</p><button className="modalBtn dangerBtn" onClick={()=>deleteBook(confirmDelete)}>Yes, delete</button><button className="modalBtn lightBtn" onClick={()=>setConfirmDelete(null)}>Keep it</button></div></div>}
+  return (
+    <div className="phone">
+      <div className="screen paper auth-page">
+        <div className="auth-logo">Pocket Scrapbook</div>
+        <h1>Create Your Account ✨</h1>
 
-    {modal&&<div className="cuteOverlay"><div className="cuteModal"><div className="modalTape"></div><button className="modalX" onClick={()=>setModal(null)}>×</button><div className="modalIcon">{modal.icon}</div><h2>{modal.title}</h2><p>{modal.text}</p><button className="modalBtn" onClick={()=>setModal(null)}>{modal.button}</button></div></div>}
-  </div></div>
+        <div className="auth-card">
+          <input
+            placeholder="Full Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+
+          <input
+            placeholder="Username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+
+          <input
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+
+          <div className="passwordWrap">
+            <input
+              placeholder="Password"
+              type={showPass ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") submit();
+              }}
+            />
+
+            <button className="showBtn" onClick={() => setShowPass(!showPass)}>
+              {showPass ? "🙈" : "👁️"}
+            </button>
+          </div>
+
+          <button onClick={submit}>💖 Create Account</button>
+        </div>
+
+        <button className="text-btn" onClick={() => go("login")}>
+          Already have an account?
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function Forgot({ go, flash }) {
+  const [email, setEmail] = useState("");
+
+  async function reset() {
+    try {
+      await sendPasswordResetEmail(auth, email.trim());
+      flash("Reset email sent 💌");
+      go("login");
+    } catch (e) {
+      flash("Reset error: " + e.message);
+    }
+  }
+
+  return (
+    <div className="phone">
+      <div className="screen paper auth-page">
+        <h1>Forgot Password?</h1>
+
+        <div className="auth-card">
+          <input
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+
+          <button onClick={reset}>Send Reset Link</button>
+        </div>
+
+        <button className="text-btn" onClick={() => go("login")}>
+          Back to Login
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function Home({ user, flash }) {
+  const [books, setBooks] = useState([]);
+  const [title, setTitle] = useState("");
+  const [section, setSection] = useState("home");
+  const [activeBook, setActiveBook] = useState(null);
+  const [openMenuId, setOpenMenuId] = useState(null);
+  const [editorMenuOpen, setEditorMenuOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [selectedItemId, setSelectedItemId] = useState(null);
+  const [dragging, setDragging] = useState(null);
+  const [resizing, setResizing] = useState(null);
+  const [drawing, setDrawing] = useState(false);
+  const [mode, setMode] = useState("select");
+
+  async function loadBooks() {
+    if (!user) return;
+
+    try {
+      setLoading(true);
+
+      const q = query(
+        collection(db, "scrapbooks"),
+        orderBy("createdAt", "desc")
+      );
+
+      const snap = await getDocs(q);
+
+      setBooks(
+        snap.docs
+          .map((d) => ({ id: d.id, ...d.data() }))
+          .filter((b) => b.uid === user.uid)
+      );
+    } catch (e) {
+      flash("Could not load scrapbooks: " + e.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadBooks();
+  }, [user]);
+
+  function getPages() {
+    return activeBook?.pagesData?.length
+      ? activeBook.pagesData
+      : [blankPage()];
+  }
+
+  function currentPageData() {
+    return getPages()[currentPage] || blankPage();
+  }
+
+  function currentItems() {
+    return currentPageData().items || [];
+  }
+
+  function updateActiveBook(nextBook) {
+    setActiveBook(nextBook);
+    setBooks((old) => old.map((b) => (b.id === nextBook.id ? nextBook : b)));
+  }
+
+  function updateCurrentPage(nextPage) {
+    const pagesData = [...getPages()];
+    pagesData[currentPage] = nextPage;
+
+    updateActiveBook({
+      ...activeBook,
+      pagesData,
+      pages: pagesData.length,
+      updated: "just now"
+    });
+  }
+
+  function updateCurrentItems(nextItems) {
+    updateCurrentPage({
+      ...currentPageData(),
+      items: nextItems
+    });
+  }
+
+  function changeBackground(backgroundClass) {
+    updateCurrentPage({
+      ...currentPageData(),
+      background: backgroundClass
+    });
+
+    flash("Background changed 🎨");
+  }
+
+  function templateDefaultBg() {
+    if (activeBook?.templateType === "babyGirl") return "bgBabyPinkPlaid";
+    if (activeBook?.templateType === "babyBoy") return "bgBabyBluePlaid";
+    return currentPageData().background || "bgGrid";
+  }
+
+  async function createBook() {
+    if (!title.trim()) {
+      flash("Add a scrapbook title 💕");
+      return;
+    }
+
+    try {
+      const data = {
+        uid: user.uid,
+        title: title.trim(),
+        pages: 1,
+        cover: "📔",
+        updated: "just now",
+        createdAt: serverTimestamp(),
+        templateType: "blank",
+        pagesData: [blankPage()]
+      };
+
+      const docRef = await addDoc(collection(db, "scrapbooks"), data);
+      const newBook = { id: docRef.id, ...data };
+
+      setBooks([newBook, ...books]);
+      setTitle("");
+      setActiveBook(newBook);
+      setCurrentPage(0);
+      setSelectedItemId(null);
+      setSection("editor");
+      flash("Scrapbook created 💖");
+    } catch (e) {
+      flash("Create error: " + e.message);
+    }
+  }
+
+  async function createBabyTemplate(gender) {
+    try {
+      const isBoy = gender === "boy";
+
+      const pagesData = [
+        babyPage("baby's\nfirst year ♡", isBoy ? "our little boy" : "our little girl", 2, gender),
+        babyPage("hello\nworld ♡", "the day you were born", 1, gender),
+        babyPage("tiny hands\nbig love ♡", "so much love", 1, gender),
+        babyPage("1\nmonth", "you are so loved", 1, gender),
+        babyPage("2\nmonths", "growing so fast ♡", 2, gender),
+        babyPage("3\nmonths", isBoy ? "sweet boy ♡" : "sweet girl ♡", 1, gender),
+        babyPage("4\nmonths", "so happy ♡", 1, gender),
+        babyPage("5\nmonths", "little blessing ♡", 2, gender),
+        babyPage("6\nmonths", "little love ♡", 1, gender),
+        babyPage("7\nmonths", "cutest smile ♡", 2, gender),
+        babyPage("8\nmonths", "learning & growing ♡", 1, gender),
+        babyPage("9\nmonths", "so curious ♡", 2, gender),
+        babyPage("10\nmonths", "so much joy ♡", 2, gender),
+        babyPage("11\nmonths", "almost one! ♡", 2, gender),
+        babyPage("12\nmonths", "what a year ♡", 2, gender),
+        babyPage("one year\nof you ♡", "our greatest blessing ♡", 1, gender)
+      ];
+
+      const data = {
+        uid: user.uid,
+        title: isBoy ? "Baby’s First Year (Boy)" : "Baby’s First Year (Girl)",
+        pages: pagesData.length,
+        cover: isBoy ? "🧸" : "🎀",
+        updated: "just now",
+        createdAt: serverTimestamp(),
+        templateType: isBoy ? "babyBoy" : "babyGirl",
+        pagesData
+      };
+
+      const docRef = await addDoc(collection(db, "scrapbooks"), data);
+      const newBook = { id: docRef.id, ...data };
+
+      setBooks([newBook, ...books]);
+      setActiveBook(newBook);
+      setCurrentPage(0);
+      setSelectedItemId(null);
+      setSection("editor");
+      flash(`${data.title} created 💖`);
+    } catch (e) {
+      flash("Template error: " + e.message);
+    }
+  }
+
+  async function deleteBook(book) {
+    try {
+      await deleteDoc(doc(db, "scrapbooks", book.id));
+      setBooks(books.filter((b) => b.id !== book.id));
+      setOpenMenuId(null);
+      flash("Scrapbook deleted 🗑️");
+    } catch (e) {
+      flash("Delete failed: " + e.message);
+    }
+  }
+
+  function exportBook(book = activeBook) {
+    if (!book) return;
+
+    const data = JSON.stringify(book, null, 2);
+    const blob = new Blob([data], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${book.title || "scrapbook"}.json`;
+    a.click();
+
+    URL.revokeObjectURL(url);
+    setEditorMenuOpen(false);
+    flash("Export downloaded 💌");
+  }
+
+  function openBook(book) {
+    setActiveBook({
+      ...book,
+      pagesData: book.pagesData?.length ? book.pagesData : [blankPage()],
+      templateType: book.templateType || "blank"
+    });
+
+    setCurrentPage(0);
+    setSelectedItemId(null);
+    setOpenMenuId(null);
+    setSection("editor");
+  }
+
+  async function saveBook() {
+    if (!activeBook?.id) return;
+
+    try {
+      await updateDoc(doc(db, "scrapbooks", activeBook.id), {
+        pagesData: getPages(),
+        pages: getPages().length,
+        updated: "just now",
+        templateType: activeBook.templateType || "blank"
+      });
+
+      flash("Saved 💖");
+    } catch (e) {
+      flash("Save failed: " + e.message);
+    }
+  }
+
+  async function uploadPhoto(e) {
+    const file = e.target.files?.[0];
+
+    if (!file || !activeBook?.id || !user) return;
+
+    try {
+      const storageRef = ref(
+        storage,
+        `users/${user.uid}/scrapbooks/${activeBook.id}/${Date.now()}-${file.name}`
+      );
+
+      await uploadBytes(storageRef, file);
+      const url = await getDownloadURL(storageRef);
+
+      const newItem = {
+        id: id(),
+        type: "photo",
+        url,
+        x: 55,
+        y: 175,
+        w: 140,
+        h: 170,
+        rotate: 0
+      };
+
+      updateCurrentItems([...currentItems(), newItem]);
+      setSelectedItemId(newItem.id);
+      setMode("select");
+      flash("Photo added 📷");
+    } catch (e) {
+      flash("Photo upload failed: " + e.message);
+    }
+  }
+
+  function addText() {
+    const text = prompt("Enter your text:");
+    if (!text) return;
+
+    const newItem = {
+      id: id(),
+      type: "text",
+      text,
+      x: 90,
+      y: 120,
+      w: 180,
+      h: 70,
+      fontSize: 24,
+      fontFamily: "Georgia",
+      color: "#5A463A",
+      rotate: 0
+    };
+
+    updateCurrentItems([...currentItems(), newItem]);
+    setSelectedItemId(newItem.id);
+    setMode("select");
+  }
+
+  function addSticker() {
+    const sticker = prompt(
+      "Enter a sticker emoji like 🍼 🧸 ⭐ 🌙 🛏️ 👶 🦋 💗:",
+      "🍼"
+    );
+
+    if (!sticker) return;
+
+    const newItem = {
+      id: id(),
+      type: "sticker",
+      text: sticker,
+      x: 135,
+      y: 180,
+      w: 55,
+      h: 55,
+      fontSize: 42,
+      rotate: 0
+    };
+
+    updateCurrentItems([...currentItems(), newItem]);
+    setSelectedItemId(newItem.id);
+  }
+
+  function addBabySticker(sticker) {
+    const newItem = {
+      id: id(),
+      type: "sticker",
+      text: sticker,
+      x: 135,
+      y: 180,
+      w: 55,
+      h: 55,
+      fontSize: 42,
+      rotate: 0
+    };
+
+    updateCurrentItems([...currentItems(), newItem]);
+    setSelectedItemId(newItem.id);
+  }
+
+  function deleteSelected() {
+    if (!selectedItemId) {
+      flash("Tap something first.");
+      return;
+    }
+
+    updateCurrentItems(currentItems().filter((item) => item.id !== selectedItemId));
+    setSelectedItemId(null);
+    flash("Deleted 🗑️");
+  }
+
+  function changeSelectedFontSize(amount) {
+    if (!selectedItemId) {
+      flash("Tap text or a sticker first 💕");
+      return;
+    }
+
+    updateCurrentItems(
+      currentItems().map((item) =>
+        item.id === selectedItemId &&
+        (item.type === "text" || item.type === "sticker" || item.type === "placeholder")
+          ? { ...item, fontSize: Math.max(12, (item.fontSize || 24) + amount) }
+          : item
+      )
+    );
+  }
+
+  function addPage() {
+    const pagesData = [...getPages(), blankPage(templateDefaultBg())];
+
+    updateActiveBook({
+      ...activeBook,
+      pagesData,
+      pages: pagesData.length,
+      updated: "just now"
+    });
+
+    setCurrentPage(pagesData.length - 1);
+    setSelectedItemId(null);
+  }
+
+  function deletePage() {
+    const pagesData = [...getPages()];
+
+    if (pagesData.length <= 1) {
+      flash("You need at least one page.");
+      return;
+    }
+
+    pagesData.splice(currentPage, 1);
+
+    updateActiveBook({
+      ...activeBook,
+      pagesData,
+      pages: pagesData.length,
+      updated: "just now"
+    });
+
+    setCurrentPage(Math.max(0, currentPage - 1));
+    setSelectedItemId(null);
+    flash("Page deleted 🗑️");
+  }
+
+  function handlePointerDown(e, item) {
+    if (e.target.classList.contains("resizeHandle")) return;
+
+    const rect = e.currentTarget.parentElement.getBoundingClientRect();
+
+    setSelectedItemId(item.id);
+    setDragging({
+      id: item.id,
+      offsetX: e.clientX - rect.left - item.x,
+      offsetY: e.clientY - rect.top - item.y
+    });
+  }
+
+  function startResize(e, item, corner) {
+    e.stopPropagation();
+
+    setSelectedItemId(item.id);
+    setResizing({
+      id: item.id,
+      corner,
+      startX: e.clientX,
+      startY: e.clientY,
+      item: { ...item }
+    });
+  }
+
+  function startDoodle(e) {
+    if (mode !== "doodle") return;
+
+    const rect = e.currentTarget.getBoundingClientRect();
+
+    const newItem = {
+      id: id(),
+      type: "doodle",
+      points: [{ x: e.clientX - rect.left, y: e.clientY - rect.top }],
+      color: "#5A463A"
+    };
+
+    updateCurrentItems([...currentItems(), newItem]);
+    setSelectedItemId(newItem.id);
+    setDrawing(true);
+  }
+
+  function handleCanvasMove(e) {
+    const rect = e.currentTarget.getBoundingClientRect();
+
+    if (dragging) {
+      const x = e.clientX - rect.left - dragging.offsetX;
+      const y = e.clientY - rect.top - dragging.offsetY;
+
+      updateCurrentItems(
+        currentItems().map((item) =>
+          item.id === dragging.id ? { ...item, x, y } : item
+        )
+      );
+    }
+
+    if (resizing) {
+      const dx = e.clientX - resizing.startX;
+      const dy = e.clientY - resizing.startY;
+
+      updateCurrentItems(
+        currentItems().map((item) => {
+          if (item.id !== resizing.id) return item;
+
+          let next = { ...resizing.item };
+
+          if (resizing.corner.includes("r")) next.w = Math.max(30, resizing.item.w + dx);
+          if (resizing.corner.includes("l")) {
+            next.w = Math.max(30, resizing.item.w - dx);
+            next.x = resizing.item.x + dx;
+          }
+          if (resizing.corner.includes("b")) next.h = Math.max(30, resizing.item.h + dy);
+          if (resizing.corner.includes("t")) {
+            next.h = Math.max(30, resizing.item.h - dy);
+            next.y = resizing.item.y + dy;
+          }
+
+          if (next.type === "text" || next.type === "sticker" || next.type === "placeholder") {
+            next.fontSize = Math.max(12, Math.round(next.h * 0.35));
+          }
+
+          return next;
+        })
+      );
+    }
+
+    if (drawing && selectedItemId) {
+      updateCurrentItems(
+        currentItems().map((item) =>
+          item.id === selectedItemId && item.type === "doodle"
+            ? {
+                ...item,
+                points: [
+                  ...(item.points || []),
+                  { x: e.clientX - rect.left, y: e.clientY - rect.top }
+                ]
+              }
+            : item
+        )
+      );
+    }
+  }
+
+  function stopActions() {
+    setDragging(null);
+    setResizing(null);
+    setDrawing(false);
+  }
+
+  function renderItem(item) {
+    const selected = selectedItemId === item.id;
+
+    if (item.type === "doodle") {
+      const d = (item.points || [])
+        .map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`)
+        .join(" ");
+
+      return (
+        <svg
+          key={item.id}
+          className="doodleSvg"
+          onClick={() => setSelectedItemId(item.id)}
+        >
+          <path
+            d={d}
+            stroke={item.color || "#5A463A"}
+            strokeWidth="4"
+            fill="none"
+            strokeLinecap="round"
+          />
+        </svg>
+      );
+    }
+
+    return (
+      <div
+        key={item.id}
+        className={`editableItem ${selected ? "selectedEditableItem" : ""} ${
+          item.type === "placeholder" ? "photoPlaceholder" : ""
+        }`}
+        style={{
+          left: item.x,
+          top: item.y,
+          width: item.w,
+          height: item.h,
+          transform: `rotate(${item.rotate || 0}deg)`
+        }}
+        onPointerDown={(e) => handlePointerDown(e, item)}
+        onClick={() => setSelectedItemId(item.id)}
+      >
+        {item.type === "photo" && <img src={item.url} alt="" />}
+
+        {item.type === "sticker" && (
+          <div className="editableSticker" style={{ fontSize: item.fontSize || 42 }}>
+            {item.text}
+          </div>
+        )}
+
+        {(item.type === "text" || item.type === "placeholder") && (
+          <div
+            className="editableText"
+            style={{
+              fontSize: item.fontSize || 24,
+              fontFamily: item.fontFamily || "Georgia",
+              color: item.color || "#5A463A"
+            }}
+          >
+            {item.text}
+          </div>
+        )}
+
+        {selected && (
+          <>
+            <button
+              className="resizeHandle tl"
+              onPointerDown={(e) => startResize(e, item, "tl")}
+            ></button>
+            <button
+              className="resizeHandle tr"
+              onPointerDown={(e) => startResize(e, item, "tr")}
+            ></button>
+            <button
+              className="resizeHandle bl"
+              onPointerDown={(e) => startResize(e, item, "bl")}
+            ></button>
+            <button
+              className="resizeHandle br"
+              onPointerDown={(e) => startResize(e, item, "br")}
+            ></button>
+          </>
+        )}
+      </div>
+    );
+  }
+
+  async function logout() {
+    await signOut(auth);
+    flash("Logged out ✨");
+  }
+
+  if (section === "create") {
+    return (
+      <div className="phone">
+        <div className="screen paper auth-page">
+          <button className="text-btn" onClick={() => setSection("home")}>
+            ← Back
+          </button>
+
+          <h1>Create New Scrapbook</h1>
+
+          <div className="auth-card">
+            <input
+              placeholder="Scrapbook title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+
+            <button onClick={createBook}>Create & Start Editing 💖</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (section === "flipbook") {
+    return (
+      <div className="phone">
+        <div className="screen paper editorScreenPretty">
+          <div className="editorHeaderPretty">
+            <button className="plainIcon" onClick={() => setSection("editor")}>
+              ‹
+            </button>
+
+            <b>Flipbook Preview</b>
+
+            <button className="savePill" onClick={() => exportBook(activeBook)}>
+              Export
+            </button>
+          </div>
+
+          <div className="pageCounter">
+            Page {currentPage + 1} / {getPages().length}
+          </div>
+
+          className={`scrapCanvas ${
+  activeBook?.templateType === "babyBoy"
+    ? "bgBabyBluePlaid"
+    : activeBook?.templateType === "babyGirl"
+    ? "bgBabyPinkPlaid"
+    : currentPageData().background || "bgGrid"
+}`}
+
+          <div className="fontControls">
+            <button
+              onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
+            >
+              Previous
+            </button>
+
+            <button
+              onClick={() =>
+                setCurrentPage(Math.min(getPages().length - 1, currentPage + 1))
+              }
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (section === "editor") {
+    return (
+      <div className="phone">
+        <div className="screen paper editorScreenPretty">
+          <div className="editorHeaderPretty">
+            <button className="plainIcon" onClick={() => setSection("home")}>
+              ‹
+            </button>
+
+            <button className="plainIcon">↶</button>
+            <button className="plainIcon faded">↷</button>
+
+            <button className="savePill" onClick={saveBook}>
+              Save
+            </button>
+
+            <div className="editorMenuWrap">
+              <button
+                className="plainIcon"
+                onClick={() => setEditorMenuOpen(!editorMenuOpen)}
+              >
+                ⋯
+              </button>
+
+              {editorMenuOpen && (
+                <div className="miniMenu editorMenu">
+                  <button
+                    onClick={() => {
+                      setEditorMenuOpen(false);
+                      setSection("flipbook");
+                    }}
+                  >
+                    View Flipbook
+                  </button>
+
+                  <button onClick={() => exportBook(activeBook)}>
+                    Export
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="pageCounter">
+            Page {currentPage + 1} / {getPages().length}
+          </div>
+
+          <div
+            className={`scrapCanvas ${currentPageData().background || "bgGrid"}`}
+            onPointerDown={startDoodle}
+            onPointerMove={handleCanvasMove}
+            onPointerUp={stopActions}
+            onPointerLeave={stopActions}
+          >
+            {currentItems().map((item) => renderItem(item))}
+          </div>
+
+          <div className="toolPanel fixedTools">
+            <label>
+              🖼️
+              <span>Photo</span>
+              <input type="file" accept="image/*" hidden onChange={uploadPhoto} />
+            </label>
+
+            <button onClick={addSticker}>
+              💬
+              <span>Sticker</span>
+            </button>
+
+            <button onClick={addText}>
+              𝑇
+              <span>Text</span>
+            </button>
+
+            <button onClick={() => setMode(mode === "doodle" ? "select" : "doodle")}>
+              ✎
+              <span>Doodle</span>
+            </button>
+
+            <button onClick={deleteSelected}>
+              🗑️
+              <span>Delete</span>
+            </button>
+          </div>
+
+          <div className="fontControls">
+            <button onClick={() => changeSelectedFontSize(-4)}>A-</button>
+            <button onClick={() => changeSelectedFontSize(4)}>A+</button>
+            <button onClick={() => changeBackground("bgGrid")}>Grid</button>
+            <button onClick={() => changeBackground("bgDots")}>Dots</button>
+            <button onClick={() => changeBackground("bgPaper")}>Paper</button>
+            <button onClick={() => changeBackground("bgLavender")}>Lavender</button>
+            <button onClick={() => changeBackground("bgFloral")}>Floral</button>
+            <button onClick={() => changeBackground("bgBabyPinkPlaid")}>Pink Plaid</button>
+            <button onClick={() => changeBackground("bgBabyBluePlaid")}>Blue Plaid</button>
+          </div>
+
+          <div className="fontControls">
+            {["🍼", "🧸", "⭐", "🌙", "🛏️", "👶", "🦋", "💗"].map((sticker) => (
+              <button key={sticker} onClick={() => addBabySticker(sticker)}>
+                {sticker}
+              </button>
+            ))}
+          </div>
+
+          <div className="pageStrip">
+            {getPages().map((page, index) => (
+              <div
+                key={index}
+                className={
+                  index === currentPage ? "pageThumb activePageThumb" : "pageThumb"
+                }
+                onClick={() => {
+                  setCurrentPage(index);
+                  setSelectedItemId(null);
+                }}
+              >
+                <div>📔</div>
+                <small>{index + 1}</small>
+              </div>
+            ))}
+
+            <button className="addPageBtn" onClick={addPage}>
+              ＋
+            </button>
+
+            <button className="deletePageBtn" onClick={deletePage}>
+              Delete Page
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (section === "settings") {
+    return (
+      <div className="phone">
+        <div className="screen paper auth-page">
+          <button className="text-btn" onClick={() => setSection("home")}>
+            ← Back
+          </button>
+
+          <h1>Settings ⚙️</h1>
+
+          <div className="settings-card">
+            <div className="setting-row">
+              <div>
+                <h3>Profile 👤</h3>
+                <p>View account info.</p>
+              </div>
+
+              <button onClick={() => setSection("profile")}>Open</button>
+            </div>
+
+            <div className="setting-row">
+              <div>
+                <h3>Templates 📚</h3>
+                <p>Browse templates.</p>
+              </div>
+
+              <button onClick={() => setSection("templates")}>Open</button>
+            </div>
+
+            <div className="setting-row">
+              <div>
+                <h3>Logout 🚪</h3>
+                <p>Sign out.</p>
+              </div>
+
+              <button onClick={logout}>Logout</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (section === "profile") {
+    return (
+      <div className="phone">
+        <div className="screen paper auth-page">
+          <button className="text-btn" onClick={() => setSection("home")}>
+            ← Back
+          </button>
+
+          <h1>Profile</h1>
+
+          <div className="auth-card">
+            <p>{user?.displayName}</p>
+            <p>{user?.email}</p>
+            <p>Scrapbooks: {books.length}</p>
+            <button onClick={logout}>Logout</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (section === "templates") {
+    return (
+      <div className="phone">
+        <div className="screen paper">
+          <button className="text-btn" onClick={() => setSection("home")}>
+            ← Back
+          </button>
+
+          <h1>Templates</h1>
+
+          <button className="templateHomeCard" onClick={() => createBabyTemplate("girl")}>
+            <div className="templateIcon">🎀</div>
+            <div>
+              <h2>Baby’s First Year Girl</h2>
+              <p>Pink plaid, 16 editable pages</p>
+            </div>
+          </button>
+
+          <button className="templateHomeCard" onClick={() => createBabyTemplate("boy")}>
+            <div className="templateIcon">🧸</div>
+            <div>
+              <h2>Baby’s First Year Boy</h2>
+              <p>Blue plaid, 16 editable pages</p>
+            </div>
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="phone">
+      <div className="screen paper homeLikeScreenshot">
+        <div className="homeHeader">
+          <button className="circleBtn" onClick={() => setSection("settings")}>
+            ⚙️
+          </button>
+
+          <div className="headerIcons">
+            <button className="circleBtn">👑</button>
+            <button className="circleBtn" onClick={() => flash("No notifications 🔔")}>
+              🔔
+            </button>
+          </div>
+        </div>
+
+        <div className="brandLogo">
+          Pocket<span>Scrapbook</span>
+        </div>
+
+        <p className="homeTagline">
+          Turn your memories into
+          <br />
+          beautiful stories 💗
+        </p>
+
+        <div className="decorPolaroid">
+          <span className="flower">🌼</span>
+          <div className="miniPhoto">🌅</div>
+          <span className="butterfly">🦋</span>
+          <span className="heart">💗</span>
+        </div>
+
+        <button className="bigCreateCard" onClick={() => setSection("create")}>
+          <div className="bigPlus">＋</div>
+          <div>
+            <h2>Create New Scrapbook</h2>
+            <p>Start a new scrapbook</p>
+          </div>
+          <div className="bookArt">📔</div>
+        </button>
+
+        <button className="templateHomeCard" onClick={() => createBabyTemplate("girl")}>
+          <div className="templateIcon">🎀</div>
+          <div>
+            <h2>Baby’s First Year Girl</h2>
+            <p>Create 16 editable pages</p>
+          </div>
+        </button>
+
+        <button className="templateHomeCard" onClick={() => createBabyTemplate("boy")}>
+          <div className="templateIcon">🧸</div>
+          <div>
+            <h2>Baby’s First Year Boy</h2>
+            <p>Create 16 editable pages</p>
+          </div>
+        </button>
+
+        <div className="row">
+          <h2>My Scrapbooks</h2>
+          <button className="seeAll" onClick={() => flash("Showing all scrapbooks")}>
+            See All ›
+          </button>
+        </div>
+
+        {loading ? (
+          <p className="muted">Loading scrapbooks...</p>
+        ) : books.length === 0 ? (
+          <p className="muted">No scrapbooks yet. Create your first one 💕</p>
+        ) : (
+          books.map((book) => (
+            <div className="scrapBookRow" key={book.id}>
+              <div className="bookCover">{book.cover || "📔"}</div>
+
+              <div className="bookInfo" onClick={() => openBook(book)}>
+                <h3>{book.title}</h3>
+                <p>{book.updated || "Updated just now"}</p>
+              </div>
+
+              <div className="bookMeta">
+                <button
+                  className="dots"
+                  onClick={() => setOpenMenuId(openMenuId === book.id ? null : book.id)}
+                >
+                  ⋯
+                </button>
+
+                <span>{book.pages || 1} Pages</span>
+
+                {openMenuId === book.id && (
+                  <div className="miniMenu">
+                    <button onClick={() => openBook(book)}>Edit</button>
+                    <button onClick={() => exportBook(book)}>Export</button>
+                    <button onClick={() => deleteBook(book)}>Delete</button>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      <div className="bottom">
+        <button onClick={() => setSection("home")}>
+          🏠
+          <br />
+          Home
+        </button>
+
+        <button onClick={() => setSection("templates")}>
+          📖
+          <br />
+          Templates
+        </button>
+
+        <button className="plus" onClick={() => setSection("create")}>
+          ＋
+        </button>
+
+        <button onClick={() => setSection("profile")}>
+          ♡
+          <br />
+          Profile
+        </button>
+      </div>
+    </div>
+  );
 }
 
 createRoot(document.getElementById("root")).render(<App />);
