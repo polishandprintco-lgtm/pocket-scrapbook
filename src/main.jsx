@@ -133,6 +133,15 @@ const BACKGROUNDS = [
 ];
 
 const STICKERS = ["♡","♥","🎀","✿","🌸","🌼","🌿","🦋","🧸","🐰","🐶","🐱","🦊","🐾","📷","🎞️","📝","📚","✈️","🌎","📍","☕","🏠","🎁","🎈","🎂","★","✦","☾","☁"];
+const PNG_STICKERS = [
+  { name: "Watercolor Sticker Sheet", src: "/stickers/sticker-sheet.png" },
+];
+const PNG_STICKERS = [
+  {
+    name: "Sticker Sheet",
+    src: "/stickers/sticker-sheet.png",
+  },
+];
 
 const FREE_FONTS = ["Poppins", "Montserrat", "Caveat", "Dancing Script", "Georgia", "Playfair Display"];
 const PREMIUM_FONTS = ["Great Vibes", "Pacifico", "Amatic SC", "Archivo Black"];
@@ -141,6 +150,21 @@ function makeId(){return crypto?.randomUUID?crypto.randomUUID():`${Date.now()}-$
 function photoEl(x,y,w=160,h=160){return{id:makeId(),type:"photo",x,y,w,h,r:0,src:"",cropX:50,cropY:50}}
 function textEl(value,x,y,size=22){return{id:makeId(),type:"text",value,x,y,w:210,h:80,r:0,size,color:"#2f2528",font:"Georgia",bold:false,italic:false,underline:false,align:"center"}}
 function stickerEl(value,x,y){return{id:makeId(),type:"sticker",value,x,y,w:60,h:60,r:0,size:36}}
+function imageStickerEl(src,x,y){
+  return{id:makeId(),type:"imageSticker",src,x,y,w:190,h:130,r:0}
+}
+function imageStickerEl(src, x, y) {
+  return {
+    id: makeId(),
+    type: "imageSticker",
+    src,
+    x,
+    y,
+    w: 180,
+    h: 120,
+    r: 0,
+  };
+}
 
 function makeBook(title,bg="cream"){
   return{id:makeId(),title,bg,pages:[{id:makeId(),bg,elements:[textEl(title,90,40,28),photoEl(95,150,210,210),stickerEl("♡",285,390)]}]}
@@ -283,6 +307,7 @@ function exportBook(book){
   function nudgeCrop(dir){if(!selectedElement||selectedElement.type!=="photo")return;const el={...selectedElement};if(dir==="left")el.cropX=Math.max(0,el.cropX-5);if(dir==="right")el.cropX=Math.min(100,el.cropX+5);if(dir==="up")el.cropY=Math.max(0,el.cropY-5);if(dir==="down")el.cropY=Math.min(100,el.cropY+5);updateElement(el)}
 
   function renderElement(el){
+    {el.type==="imageSticker"&&<img className="imageSticker" src={el.src} alt=""/>}
     const selected=selectedElement?.id===el.id;
     return <div key={el.id} className={`scrapElement ${selected?"selected":""}`} style={{left:el.x,top:el.y,width:el.w,height:el.h,transform:`rotate(${el.r||0}deg)`}} onMouseDown={e=>startDrag(e,el,"move")} onTouchStart={e=>startDrag(e,el,"move")} onClick={e=>{e.stopPropagation();setSelectedElement(el)}}>
       {el.type==="photo"&&<div className="photoFrame">{el.src?<img src={el.src} alt="" style={{objectPosition:`${el.cropX}% ${el.cropY}%`}}/>:<label className="emptyPhoto">+ Photo<input hidden type="file" accept="image/*" onChange={e=>uploadPhoto(el,e.target.files[0])}/></label>}</div>}
@@ -290,6 +315,13 @@ function exportBook(book){
       {el.type==="sticker"&&<div className="stickerElement" style={{fontSize:el.size}}>{el.value}</div>}
       {selected&&<><button className="handle rotateHandle" onMouseDown={e=>startDrag(e,el,"rotate")}>↻</button><button className="handle resizeHandle" onMouseDown={e=>startDrag(e,el,"resize")}>↘</button><div className="elementBubble"><button onClick={duplicateElement}>Duplicate</button><button onClick={deleteElement}>Delete</button></div></>}
     </div>
+    {el.type === "imageSticker" && (
+  <img
+    src={el.src}
+    alt=""
+    className="imageSticker"
+  />
+)}
   }
 
   function TextToolbar(){
@@ -332,7 +364,7 @@ function exportBook(book){
 
     {showBgPicker&&<div className="bottomSheet"><h3>Change Background</h3><div className="bgPicker">{BACKGROUNDS.map(bg=><button key={bg.id} className={`bgChoice bg-${bg.id}`} onClick={()=>changeBg(bg.id)}><span>{bg.name}</span></button>)}</div><button onClick={()=>setShowBgPicker(false)}>Cancel</button></div>}
 
-    {showStickers&&<div className="bottomSheet stickerSheet"><h3>Choose Sticker</h3><input placeholder="Search stickers..." value={stickerSearch} onChange={e=>setStickerSearch(e.target.value)}/><div className="stickerGrid">{filteredStickers.map(s=><button key={s} onClick={()=>{addElement(stickerEl(s,150,180));setShowStickers(false)}}><span>{s}</span></button>)}</div><button onClick={()=>setShowStickers(false)}>Cancel</button></div>}
+    {showStickers&&<div className="bottomSheet stickerSheet"><h3>Choose Sticker</h3><input placeholder="Search stickers..." value={stickerSearch} onChange={e=>setStickerSearch(e.target.value)}/><div className="stickerGrid">{PNG_STICKERS.map(s=><button key={s.name} onClick={()=>{addElement(imageStickerEl(s.src,80,120));setShowStickers(false)}}><img src={s.src} alt={s.name} style={{width:"100%",borderRadius:"12px"}}/><small>{s.name}</small></button>).concat(filteredStickers.map(s=><button key={s} onClick={()=>{addElement(stickerEl(s,150,180));setShowStickers(false)}}><span>{s}</span></button>)))}</div><button onClick={()=>setShowStickers(false)}>Cancel</button></div>}
 
     {confirmDelete&&<div className="cuteOverlay"><div className="cuteModal"><div className="modalTape"></div><div className="modalIcon">🗑️</div><h2>Delete scrapbook?</h2><p>Delete <strong>{confirmDelete.title}</strong>? This cannot be undone.</p><button className="modalBtn dangerBtn" onClick={()=>deleteBook(confirmDelete)}>Yes, delete</button><button className="modalBtn lightBtn" onClick={()=>setConfirmDelete(null)}>Keep it</button></div></div>}
 
