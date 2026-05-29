@@ -238,73 +238,108 @@ function Auth() {
 }
 
 function Home({ scrapbooks, createBook, openBook, deleteBook }) {
-  const [name, setName] = useState("");
-  const [bg, setBg] = useState("cream");
-  const [menu, setMenu] = useState(null);
-  return (
-    <main className="page">
-      <div className="hero"><h1>Pocket Scrapbook</h1><p>Soft, pretty scrapbook pages that save automatically.</p></div>
-      <section className="createPanel">
-        <h2>Create a scrapbook</h2>
-        <input placeholder="Name your scrapbook" value={name} onChange={(e) => setName(e.target.value)} />
-        <select value={bg} onChange={(e) => setBg(e.target.value)}>{backgrounds.map((b) => <option key={b.value} value={b.value}>{b.name}</option>)}</select>
-        <button onClick={() => createBook(name || "My First Scrapbook", bg)}>Create Free Scrapbook</button>
-      </section>
-      
-      <h2>My Scrapbooks</h2>
-      <section className="bookGrid">
-        {scrapbooks.map((b) => (
-          <article className="bookCard" key={b.id}>
-            <button className="dots" onClick={() => setMenu(menu === b.id ? null : b.id)}>⋯</button>
-            {menu === b.id && <div className="cardMenu"><button onClick={() => { const n = prompt("Rename scrapbook", b.name); if (n) updateDoc(doc(db, "users", auth.currentUser.uid, "scrapbooks", b.id), { name: n, updatedAt: serverTimestamp() }); }}>Rename</button><button onClick={() => openBook(b, true)}>View flipbook</button><button onClick={() => window.print()}>Export</button><button className="danger" onClick={() => deleteBook(b)}>Delete</button></div>}
-            <h3>{b.name}</h3><p>{b.pages?.length || 1} page(s)</p><button onClick={() => openBook(b)}>Edit</button>
-          </article>
-            ))}
-        </section>
-      
-      <h2>Templates</h2>
+  const [name, setName] = useState("");
+  const [bg, setBg] = useState("cream");
+  const [menu, setMenu] = useState(null);
 
-<section className="templateGrid">
-  <button
-    className="templateCard"
-    onClick={() =>
-      createBook(
-        "My First Scrapbook",
-        bg,
-        myLifeTemplate(bg)
-      )
-    }
-  >
-    My Life
-  </button>
+  return (
+    <main className="page">
+      <section className="heroCard">
+        <h1>Pocket Scrapbook</h1>
+        <p>Soft, pretty scrapbook pages that save automatically.</p>
+      </section>
 
-  <button
-    className="templateCard"
-    onClick={() =>
-      createBook(
-        "Baby Boy First Year",
-        "babyBlue",
-        babyTemplate("boy")
-      )
-    }
-  >
-    Baby Boy
-  </button>
+      <section className="createPanel">
+        <h2>Create a scrapbook</h2>
 
-  <button
-    className="templateCard"
-    onClick={() =>
-      createBook(
-        "Baby Girl First Year",
-        "babyPink",
-        babyTemplate("girl")
-      )
-    }
-  >
-    Baby Girl
-  </button>
-</section>
+        <input
+          placeholder="Name your scrapbook"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
 
+        <select value={bg} onChange={(e) => setBg(e.target.value)}>
+          {backgrounds.map((b) => (
+            <option key={b.value} value={b.value}>
+              {b.name}
+            </option>
+          ))}
+        </select>
+
+        <button onClick={() => createBook(name || "My First Scrapbook", bg)}>
+          Create Free Scrapbook
+        </button>
+      </section>
+
+      <h2>My Scrapbooks</h2>
+
+      <section className="bookGrid">
+        {scrapbooks.map((b) => (
+          <article className="bookCard" key={b.id}>
+            <button
+              className="dots"
+              onClick={() => setMenu(menu === b.id ? null : b.id)}
+            >
+              ⋯
+            </button>
+
+            {menu === b.id && (
+              <div className="cardMenu">
+                <button onClick={() => openBook(b)}>Edit</button>
+                <button onClick={() => openBook(b, true)}>View Flipbook</button>
+                <button onClick={() => alert("Export coming soon")}>Export</button>
+                <button
+                  onClick={() => {
+                    const n = prompt("Rename scrapbook", b.name);
+                    if (n) {
+                      updateDoc(
+                        doc(db, "users", auth.currentUser.uid, "scrapbooks", b.id),
+                        { name: n }
+                      );
+                    }
+                  }}
+                >
+                  Rename
+                </button>
+                <button onClick={() => deleteBook(b)}>Delete</button>
+              </div>
+            )}
+
+            <h3>{b.name}</h3>
+            <p>{b.pages?.length || 1} page(s)</p>
+
+            <button onClick={() => openBook(b)}>Open</button>
+          </article>
+        ))}
+      </section>
+
+      <h2>Templates</h2>
+
+      <section className="templateGrid">
+        <button
+          className="templateCard"
+          onClick={() => createBook("My First Scrapbook", bg, myLifeTemplate(bg))}
+        >
+          My Life
+        </button>
+
+        <button
+          className="templateCard"
+          onClick={() => createBook("Baby Boy First Year", "babyBlue", babyTemplate("boy"))}
+        >
+          Baby Boy
+        </button>
+
+        <button
+          className="templateCard"
+          onClick={() => createBook("Baby Girl First Year", "babyPink", babyTemplate("girl"))}
+        >
+          Baby Girl
+        </button>
+      </section>
+    </main>
+  );
+}
 
 function Editor({ book, pageIndex, setPageIndex, saveBook, setScreen, profile }) {
   const [selected, setSelected] = useState(null);
