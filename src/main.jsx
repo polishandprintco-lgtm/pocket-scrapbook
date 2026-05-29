@@ -2,6 +2,7 @@ import React, { Component, useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./style.css";
 import { auth, db, storage } from "./firebase";
+import { deleteUser } from "firebase/auth";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -169,7 +170,7 @@ function Notice({ children }) { return <div className="paperNotice"><div classNa
 function Confirm({ book, onCancel, onDelete }) { return <div className="modalShade"><div className="paperModal"><div className="tape"></div><h3>Delete scrapbook?</h3><p>Are you sure you want to delete “{book.name}”? This can’t be undone.</p><div className="modalButtons"><button onClick={onCancel}>Cancel</button><button className="danger" onClick={onDelete}>Delete</button></div></div></div>; }
 
 function Auth() {
-  const [mode, setMode] = useState("login");
+  const [mode, setMode] = useState("signup");
   const [email, setEmail] = useState("");
   const [pass, setPass] = useState("");
   const [show, setShow] = useState(false);
@@ -213,6 +214,25 @@ function Editor({ book, pageIndex, setPageIndex, saveBook, setScreen, notify }) 
 }
 function Flipbook({ book, pageIndex, setPageIndex, setScreen, deleteBook, notify }) { const [menu, setMenu] = useState(false); const [del, setDel] = useState(false); const p = book.pages[pageIndex] || page(); function exportPage() { const blob = new Blob([JSON.stringify(p, null, 2)], { type: "application/json" }); const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `${book.name}-page-${pageIndex + 1}.json`; a.click(); notify("Export downloaded ♡"); } return <main className="page"><header className="flipTop"><button className="cuteBack" onClick={() => setScreen("editor")}>‹ Back</button><strong>{book.name}</strong><button className="dotsTop" onClick={() => setMenu(!menu)}>⋯</button></header>{menu && <div className="paperPopup flipMenu"><div className="tape"></div><button onClick={() => setScreen("editor")}>Edit</button><button onClick={exportPage}>Export</button><button onClick={() => setDel(true)}>Delete</button></div>}<div className={`scrapPage flipBookPage ${p.bg}`}><Preview book={{ pages: [p] }} /></div><div className="pageNav"><button disabled={pageIndex === 0} onClick={() => setPageIndex(pageIndex - 1)}>Prev</button><span>{pageIndex + 1}/{book.pages.length}</span><button disabled={pageIndex === book.pages.length - 1} onClick={() => setPageIndex(pageIndex + 1)}>Next</button></div>{del && <Confirm book={book} onCancel={() => setDel(false)} onDelete={() => deleteBook(book)} />}</main>; }
 function Premium({ profile }) { return <main className="page"><Header setScreen={() => {}} home={false} /><section className="paper premiumCard"><div className="tape"></div><h2>Premium</h2><p>Your plan: {profile.subscription || "Free"}</p><table><tbody><tr><th>Feature</th><th>Free</th><th>Premium</th></tr><tr><td>Scrapbooks</td><td>3</td><td>Unlimited</td></tr><tr><td>Baby templates</td><td>99¢ each</td><td>Included</td></tr><tr><td>Photo uploads</td><td>15</td><td>Unlimited</td></tr></tbody></table><button className="primary">Upgrade $4.99/mo</button><p className="hint">Payments need Stripe before real charging works.</p></section></main>; }
-function Profile({ user, profile, notify }) { const [name, setName] = useState(profile.name || user.displayName || ""); const [email, setEmail] = useState(user.email || ""); const [pass, setPass] = useState(""); useEffect(() => setName(profile.name || user.displayName || ""), [profile.name, user.displayName]); async function uploadProfile(e) { const file = e.target.files?.[0]; if (!file) return; try { const storageRef = ref(storage, `users/${user.uid}/profile/${Date.now()}-${file.name}`); await uploadBytes(storageRef, file); const url = await getDownloadURL(storageRef); await updateProfile(user, { photoURL: url }); await updateDoc(doc(db, "users", user.uid), { photoURL: url }); notify("Profile photo saved ♡"); } catch (err) { notify("Profile upload failed"); } } return <main className="page"><Header setScreen={() => {}} home={false} /><section className="profileCard paper"><div className="tape"></div><label className="avatar"><img src={profile.photoURL || user.photoURL || "https://images.unsplash.com/photo-1526047932273-341f2a7631f9?w=300"} /><span>Change Photo</span><input type="file" hidden accept="image/*" onChange={uploadProfile} /></label><input value={name} onChange={(e) => setName(e.target.value)} placeholder="Name" /><button onClick={async () => { await updateProfile(user, { displayName: name }); await updateDoc(doc(db, "users", user.uid), { name }); notify("Name saved ♡"); }}>Save Name</button><h3>Settings</h3><label className="toggle">Dark theme <input type="checkbox" checked={!!profile.dark} onChange={(e) => updateDoc(doc(db, "users", user.uid), { dark: e.target.checked })} /></label><input value={email} onChange={(e) => setEmail(e.target.value)} /><button onClick={() => updateEmail(user, email).then(() => notify("Email updated")).catch(() => notify("Sign in again to update email"))}>Update Email</button><input type="password" value={pass} onChange={(e) => setPass(e.target.value)} placeholder="New password" /><button onClick={() => pass && updatePassword(user, pass).then(() => notify("Password updated")).catch(() => notify("Sign in again to update password"))}>Update Password</button><p>Subscription: {profile.subscription || "Free"}</p><button className="danger" onClick={() => signOut(auth)}>Logout</button></section></main>; }
+function Profile({ user, profile, notify }) { const [name, setName] = useState(profile.name || user.displayName || ""); const [email, setEmail] = useState(user.email || ""); const [pass, setPass] = useState(""); useEffect(() => setName(profile.name || user.displayName || ""), [profile.name, user.displayName]); async function uploadProfile(e) { const file = e.target.files?.[0]; if (!file) return; try { const storageRef = ref(storage, `users/${user.uid}/profile/${Date.now()}-${file.name}`); await uploadBytes(storageRef, file); const url = await getDownloadURL(storageRef); await updateProfile(user, { photoURL: url }); await updateDoc(doc(db, "users", user.uid), { photoURL: url }); notify("Profile photo saved ♡"); } catch (err) { notify("Profile upload failed"); } } return <main className="page"><Header setScreen={() => {}} home={false} /><section className="profileCard paper"><div className="tape"></div><label className="avatar"><img src={profile.photoURL || user.photoURL || "https://images.unsplash.com/photo-1526047932273-341f2a7631f9?w=300"} /><span>Change Photo</span><input type="file" hidden accept="image/*" onChange={uploadProfile} /></label><input value={name} onChange={(e) => setName(e.target.value)} placeholder="Name" /><button onClick={async () => { await updateProfile(user, { displayName: name }); await updateDoc(doc(db, "users", user.uid), { name }); notify("Name saved ♡"); }}>Save Name</button><h3>Settings</h3><label className="toggle">Dark theme <input type="checkbox" checked={!!profile.dark} onChange={(e) => updateDoc(doc(db, "users", user.uid), { dark: e.target.checked })} /></label><input value={email} onChange={(e) => setEmail(e.target.value)} /><button onClick={() => updateEmail(user, email).then(() => notify("Email updated")).catch(() => notify("Sign in again to update email"))}>Update Email</button><input type="password" value={pass} onChange={(e) => setPass(e.target.value)} placeholder="New password" /><button onClick={() => pass && updatePassword(user, pass).then(() => notify("Password updated")).catch(() => notify("Sign in again to update password"))}>Update Password</button><p>Subscription: {profile.subscription || "Free"}</p><button className="danger" onClick={() => signOut(auth)}>Logout</button></section></main>; <button
+  className="danger"
+  onClick={async () => {
+    const ok = window.confirm(
+      "Are you sure you want to permanently delete your account and all scrapbooks?"
+    );
+
+    if (!ok) return;
+
+    try {
+      await deleteUser(user);
+    } catch (err) {
+      alert(
+        "For security reasons you may need to log out and log back in before deleting your account."
+      );
+    }
+  }}
+>
+  Delete Account
+</button> }
 
 createRoot(document.getElementById("root")).render(<ErrorBoundary><App /></ErrorBoundary>);
