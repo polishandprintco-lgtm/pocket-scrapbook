@@ -299,3 +299,11 @@ nav button{
     #f8f5ff 36px
   );
 }
+.logo{
+  font-size:52px;
+  line-height:.9;
+  text-align:center;
+  color:#3a2b31;
+  margin-bottom:10px;
+  letter-spacing:-1px;
+}
