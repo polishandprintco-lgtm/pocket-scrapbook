@@ -83,3 +83,17 @@
   margin-left: auto;
   margin-right: auto;
 }
+.danger{
+  background:#ffd6df;
+  color:#8f4d63;
+  border:none;
+  border-radius:18px;
+  padding:12px;
+  width:100%;
+  font-weight:700;
+  margin-top:10px;
+}
+
+.danger:hover{
+  opacity:.9;
+}
