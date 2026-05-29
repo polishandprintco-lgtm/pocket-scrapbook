@@ -70,3 +70,60 @@
   position: relative;
   z-index: 2;
 }
+html, body {
+  display: flex;
+  justify-content: center;
+  background: #eaded5;
+}
+
+.app,
+.authPage {
+  width: 100%;
+  max-width: 430px;
+  min-height: 100vh;
+  margin: 0 auto;
+  overflow-x: hidden;
+}
+
+.page,
+.editorPage {
+  width: 100%;
+  max-width: 430px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.authPage {
+  background:
+    url("https://images.unsplash.com/photo-1526047932273-341f2a7631f9?w=500") left 90px / 135px 175px no-repeat,
+    url("https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=500") right 260px / 135px 175px no-repeat,
+    linear-gradient(180deg, #fff8f3, #f9eee9);
+}
+
+.leftPhoto,
+.rightPhoto {
+  display: none !important;
+}
+
+.authCard {
+  width: calc(100% - 40px);
+  max-width: 360px;
+  margin: 20px auto;
+}
+
+.brand {
+  padding-top: 60px;
+  text-align: center;
+}
+
+.scrapPage {
+  width: 100%;
+  max-width: 390px;
+  aspect-ratio: 3 / 4;
+  margin: 20px auto;
+  border-radius: 24px;
+  position: relative;
+  overflow: hidden;
+  background: #fffaf0;
+  box-shadow: 0 12px 35px rgba(0,0,0,.12);
+}
