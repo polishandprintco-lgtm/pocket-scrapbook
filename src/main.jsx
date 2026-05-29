@@ -250,7 +250,7 @@ function Home({ scrapbooks, createBook, openBook, deleteBook }) {
         <select value={bg} onChange={(e) => setBg(e.target.value)}>{backgrounds.map((b) => <option key={b.value} value={b.value}>{b.name}</option>)}</select>
         <button onClick={() => createBook(name || "My First Scrapbook", bg)}>Create Free Scrapbook</button>
       </section>
-      <h2>Templates</h2>
+      
       <h2>My Scrapbooks</h2>
       <section className="bookGrid">
         {scrapbooks.map((b) => (
@@ -259,6 +259,10 @@ function Home({ scrapbooks, createBook, openBook, deleteBook }) {
             {menu === b.id && <div className="cardMenu"><button onClick={() => { const n = prompt("Rename scrapbook", b.name); if (n) updateDoc(doc(db, "users", auth.currentUser.uid, "scrapbooks", b.id), { name: n, updatedAt: serverTimestamp() }); }}>Rename</button><button onClick={() => openBook(b, true)}>View flipbook</button><button onClick={() => window.print()}>Export</button><button className="danger" onClick={() => deleteBook(b)}>Delete</button></div>}
             <h3>{b.name}</h3><p>{b.pages?.length || 1} page(s)</p><button onClick={() => openBook(b)}>Edit</button>
           </article>
+            ))}
+        </section>
+      
+      <h2>Templates</h2>
       <section className="templateGrid">
         <button className="templateCard" onClick={() => createBook("My First Scrapbook", bg, myLifeTemplate(bg))}><div className="mini cream">my life<br />scrapbook</div><b>My First Scrapbook</b><span>Free</span></button>
         <button className="templateCard" onClick={() => createBook("Baby Boy First Year", "babyBlue", babyTemplate("boy"))}><div className="mini babyBlue">baby boy<br />first year</div><b>Baby Boy Template</b><span>Paid preview · .99</span></button>
