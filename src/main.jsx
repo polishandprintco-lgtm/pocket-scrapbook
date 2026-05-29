@@ -326,7 +326,11 @@ function App() {
     return (
       <div className={`app ${darkMode ? "dark" : ""}`}>
         <div className="card loginCard">
-          <h1>pocket<br />scrapbook</h1>
+         <h1>
+  pocket
+  <br />
+  scrapbook ♡
+</h1>
           <p>cherish every moment ♡</p>
           <input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
           <input placeholder="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
