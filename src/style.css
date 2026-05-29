@@ -492,3 +492,146 @@ nav button{
     font-size: 28px;
   }
 }
+/* Pretty scrapbook login page */
+.app:has(.loginCard){
+  max-width: none;
+  width: 100%;
+  min-height: 100vh;
+  padding: 36px 18px;
+  background:
+    radial-gradient(circle at 10% 18%, rgba(215,205,190,.35) 0 120px, transparent 125px),
+    radial-gradient(circle at 88% 28%, rgba(220,205,188,.30) 0 150px, transparent 155px),
+    linear-gradient(180deg,#fffdf9,#f7f0e9);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.app:has(.loginCard)::before{
+  content:"my life\A SCRAPBOOK\A♡";
+  white-space: pre;
+  text-align: center;
+  font-family: Georgia, serif;
+  font-size: 42px;
+  letter-spacing: 9px;
+  line-height: 1.15;
+  color: #2f2c2b;
+  margin: 35px 0 8px;
+}
+
+.app:has(.loginCard)::after{
+  content:"Your story, beautifully saved     ♡ Memories that last     🔒 Safe, private & secure";
+  display:block;
+  max-width: 640px;
+  margin-top: 24px;
+  text-align:center;
+  font-family: Georgia, serif;
+  font-size: 15px;
+  color:#5f554f;
+}
+
+.loginCard{
+  width: min(92vw, 560px);
+  margin: 20px auto 0 !important;
+  padding: 34px 34px 28px !important;
+  border-radius: 28px !important;
+  background: rgba(255,255,255,.82) !important;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(190,170,150,.25);
+  box-shadow: 0 22px 60px rgba(75,55,40,.12) !important;
+  text-align: center;
+}
+
+.loginCard h1{
+  font-family: Georgia, serif !important;
+  font-size: 0 !important;
+  margin: 0 !important;
+}
+
+.loginCard h1::after{
+  content:"Welcome back ♡";
+  display:block;
+  font-size: 34px;
+  line-height: 1.15;
+  letter-spacing: 0;
+  color:#2d2927;
+}
+
+.loginCard p{
+  font-family: Georgia, serif;
+  font-size: 17px;
+  color:#756962;
+  margin: 8px 0 26px !important;
+}
+
+.loginCard p::before{
+  content:"Log in to continue your journey";
+  font-size:17px;
+}
+
+.loginCard p{
+  font-size:0;
+}
+
+.loginCard input{
+  height: 58px;
+  border-radius: 14px !important;
+  border: 1px solid #ded5cc !important;
+  background: rgba(255,255,255,.65) !important;
+  margin-bottom: 16px !important;
+  font-family: Georgia, serif;
+  font-size: 16px;
+  padding-left: 22px !important;
+}
+
+.loginCard input::placeholder{
+  color:#91857d;
+}
+
+.loginCard button{
+  width: 100%;
+  height: 58px;
+  border-radius: 14px !important;
+  font-family: Georgia, serif;
+  font-size: 20px;
+  font-weight: 500;
+  margin-top: 10px;
+}
+
+.loginCard button:first-of-type{
+  background: linear-gradient(135deg,#c7b7a6,#b79f8a) !important;
+  color:white !important;
+}
+
+.loginCard .lightBtn{
+  background: transparent !important;
+  color:#9b765e !important;
+  height:auto;
+  box-shadow:none;
+}
+
+.loginCard .lightBtn::before{
+  content:"New here? ";
+  color:#3c3632;
+}
+
+.loginCard .lightBtn::after{
+  content:" ♡";
+}
+
+@media(max-width:520px){
+  .app:has(.loginCard)::before{
+    font-size: 30px;
+    letter-spacing: 6px;
+    margin-top: 22px;
+  }
+
+  .loginCard{
+    width: 94vw;
+    padding: 26px 20px !important;
+  }
+
+  .loginCard h1::after{
+    font-size: 28px;
+  }
+}
