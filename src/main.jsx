@@ -1,4 +1,3 @@
-
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./style.css";
@@ -141,17 +140,62 @@ function App() {
   const [toast, setToast] = useState(null);
   const notify = (msg) => { setToast(msg); setTimeout(() => setToast(null), 2500); };
 
-  useEffect(() => onAuthStateChanged(auth, async (u) => {
-    setUser(u);
-    if (!u) { setScreen("auth"); return; }
-    const pref = doc(db, "users", u.uid);
-    await setDoc(pref, { name: u.displayName || "", email: u.email || "", photoURL: u.photoURL || "", subscription: "Free", uploadsUsed: 0, uploadLimit: 15, dark: false }, { merge: true });
-    const unsubProfile = onSnapshot(pref, (s) => setProfile(s.data() || {}));
-    const q = query(collection(db, "users", u.uid, "scrapbooks"), orderBy("updatedAt", "desc"));
-    const unsubBooks = onSnapshot(q, (s) => setBooks(s.docs.map((d) => ({ id: d.id, ...d.data() }))));
-    setScreen("home");
-    return () => { unsubProfile(); unsubBooks(); };
-  }), []);
+  useEffect(() => {
+    let unsubProfile = null;
+    let unsubBooks = null;
+
+    const unsubAuth = onAuthStateChanged(auth, (u) => {
+      setUser(u);
+
+      if (!u) {
+        setProfile({});
+        setBooks([]);
+        setScreen("auth");
+        return;
+      }
+
+      setScreen("home");
+
+      const pref = doc(db, "users", u.uid);
+
+      setDoc(
+        pref,
+        {
+          name: u.displayName || "",
+          email: u.email || "",
+          photoURL: u.photoURL || "",
+          subscription: "Free",
+          uploadsUsed: 0,
+          uploadLimit: 15,
+          dark: false,
+        },
+        { merge: true }
+      ).catch(() => notify("Profile could not save. Check Firestore rules."));
+
+      unsubProfile = onSnapshot(
+        pref,
+        (s) => setProfile(s.data() || {}),
+        () => setProfile({ name: u.displayName || "", email: u.email || "" })
+      );
+
+      const q = query(
+        collection(db, "users", u.uid, "scrapbooks"),
+        orderBy("updatedAt", "desc")
+      );
+
+      unsubBooks = onSnapshot(
+        q,
+        (s) => setBooks(s.docs.map((d) => ({ id: d.id, ...d.data() }))),
+        () => notify("Scrapbooks could not load. Check Firestore rules.")
+      );
+    });
+
+    return () => {
+      unsubAuth();
+      if (unsubProfile) unsubProfile();
+      if (unsubBooks) unsubBooks();
+    };
+  }, []);
   useEffect(() => document.body.classList.toggle("dark", !!profile.dark), [profile.dark]);
 
   async function saveBook(book) {
@@ -256,4 +300,18 @@ function Flipbook({ book, pageIndex, setPageIndex, setScreen, deleteBook, notify
 function Premium({ profile }) { return <main className="page"><LogoHeader setScreen={()=>{}} showHome={false}/><section className="paper premiumCard"><div className="tape"></div><h2>Premium</h2><p>Your plan: {profile.subscription || "Free"}</p><table><tbody><tr><th>Feature</th><th>Free</th><th>Premium</th></tr><tr><td>Scrapbooks</td><td>3</td><td>Unlimited</td></tr><tr><td>Baby templates</td><td>99¢ each</td><td>Included</td></tr><tr><td>Photo uploads</td><td>15</td><td>Unlimited</td></tr><tr><td>Advanced text effects</td><td>—</td><td>✓</td></tr></tbody></table><button className="primary">Upgrade $4.99/mo</button><p className="hint">Payments need Stripe before real charging works.</p></section></main> }
 function Profile({ user, profile = {}, notify }) { const [name,setName]=useState(profile?.name||user?.displayName||""), [email,setEmail]=useState(user?.email||""), [pass,setPass]=useState(""); useEffect(()=>setName(profile?.name||user?.displayName||""),[profile?.name,user?.displayName]); async function pic(e){const f=e.target.files?.[0]; if(!f)return; try{const r=ref(storage,`users/${user.uid}/profile/profile-${Date.now()}-${f.name}`); await uploadBytes(r,f); const url=await getDownloadURL(r); await updateProfile(user,{photoURL:url}); await updateDoc(doc(db,"users",user.uid),{photoURL:url}); notify("Profile photo saved ♡");}catch(err){notify("Profile upload failed. Check Storage rules.")}} return <main className="page profilePage"><LogoHeader setScreen={()=>{}} showHome={false}/><section className="profileCard paper"><div className="tape"></div><label className="avatar"><img src={profile?.photoURL||user?.photoURL||"https://images.unsplash.com/photo-1526047932273-341f2a7631f9?w=300"}/><span>Change Photo</span><input type="file" hidden accept="image/*" onChange={pic}/></label><input value={name} onChange={e=>setName(e.target.value)} placeholder="Name"/><button onClick={async()=>{await updateProfile(user,{displayName:name}); await updateDoc(doc(db,"users",user.uid),{name});notify("Name saved ♡")}}>Save Name</button><h3>Settings</h3><label className="toggle">Dark theme <input type="checkbox" checked={!!profile.dark} onChange={e=>updateDoc(doc(db,"users",user.uid),{dark:e.target.checked})}/></label><input value={email} onChange={e=>setEmail(e.target.value)}/><button onClick={()=>updateEmail(user,email).then(()=>notify("Email updated ♡")).catch(()=>notify("Sign in again to update email"))}>Update Email</button><input type="password" value={pass} onChange={e=>setPass(e.target.value)} placeholder="New password"/><button onClick={()=>pass&&updatePassword(user,pass).then(()=>notify("Password updated ♡")).catch(()=>notify("Sign in again to update password"))}>Update Password</button><p>Subscription: {profile.subscription || "Free"}</p><button className="danger" onClick={()=>signOut(auth)}>Logout</button></section></main> }
 
-createRoot(document.getElementById("root")).render(<App />);
+function RootErrorBoundary() {
+  const [error, setError] = useState(null);
+  useEffect(() => {
+    const handler = (event) => setError(event.error || event.message);
+    window.addEventListener("error", handler);
+    window.addEventListener("unhandledrejection", (event) => setError(event.reason));
+    return () => window.removeEventListener("error", handler);
+  }, []);
+  if (error) {
+    return <div className="phoneFrame"><main className="page"><section className="paper"><div className="tape"></div><h2>App error</h2><p>{String(error?.message || error)}</p></section></main></div>;
+  }
+  return <App />;
+}
+
+createRoot(document.getElementById("root")).render(<RootErrorBoundary />);
