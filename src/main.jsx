@@ -648,4 +648,3 @@ function ErrorBoundaryApp() {
 
 createRoot(document.getElementById("root")).render(<ErrorBoundaryApp />);
 
-  
