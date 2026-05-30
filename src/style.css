@@ -547,3 +547,24 @@
   font-weight: 800;
   font-size: 12px;
 }
+button {
+  color: #302926;
+  -webkit-text-fill-color: #302926;
+}
+
+.quickGrid button,
+.quickGrid button b,
+.quickGrid button small {
+  color: #302926 !important;
+  -webkit-text-fill-color: #302926 !important;
+}
+
+.bottomNav button {
+  color: #584c45 !important;
+  -webkit-text-fill-color: #584c45 !important;
+}
+
+.bottomNav .active {
+  color: #7d4b63 !important;
+  -webkit-text-fill-color: #7d4b63 !important;
+}
