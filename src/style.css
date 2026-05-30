@@ -93,23 +93,69 @@ button, button *, a, a:visited, a:hover, a:active {
 
 /* Auth side cover also looks like a real scrapbook */
 .authScrapbookCover{
-  background:linear-gradient(135deg,#f5c4d6,#fff3ed) !important;
-  color:transparent !important;
-  overflow:visible !important;
-  border-radius:12px !important;
-}
-.authScrapbookCover::before{
-  content:"memories";
   position:absolute;
-  left:14px;right:14px;top:44px;height:66px;
-  display:grid;place-items:center;
-  background:#fffaf3;border:1px solid #ead9c9;border-radius:8px;
-  font-family:"Brush Script MT",cursive;font-size:22px;color:#302926;
-  transform:rotate(-2deg);box-shadow:0 8px 16px rgba(0,0,0,.08);
+  left:-18px;
+  top:92px;
+  width:128px;
+  height:168px;
+  background:linear-gradient(135deg,#f6d8e4,#fff7ef) !important;
+  border:10px solid #fff;
+  border-radius:16px !important;
+  box-shadow:0 18px 34px rgba(62,45,34,.16);
+  transform:rotate(-7deg);
+  z-index:0;
+  overflow:visible !important;
+  color:#302926 !important;
 }
+
+.authScrapbookCover::before{
+  content:"";
+  position:absolute;
+  inset:22px 14px 18px;
+  background:#fffaf3;
+  border:1px solid #ead9c9;
+  border-radius:10px;
+  box-shadow:0 8px 16px rgba(0,0,0,.08);
+}
+
 .authScrapbookCover::after{
-  content:"";position:absolute;top:-14px;left:34px;width:70px;height:24px;border-radius:5px;
-  background:repeating-linear-gradient(90deg,#eac2cf 0 14px,#d89bb7 14px 28px);
+  content:"";
+  position:absolute;
+  top:-14px;
+  left:34px;
+  width:68px;
+  height:24px;
+  border-radius:5px;
+  background:repeating-linear-gradient(
+    90deg,
+    #f2c1d5 0 14px,
+    #d99ab8 14px 28px
+  );
+  z-index:3;
+}
+
+.authCoverCenter{
+  position:absolute;
+  inset:0;
+  display:grid;
+  place-content:center;
+  text-align:center;
+  z-index:4;
+}
+
+.authCoverScript{
+  font-family:"Brush Script MT",cursive;
+  font-size:20px;
+  color:#9f4e76;
+  line-height:1;
+}
+
+.authCoverTitle{
+  margin-top:4px;
+  font-family:"Playfair Display",serif;
+  font-size:16px;
+  letter-spacing:2px;
+  color:#302926;
 }
 
 /* Template thumbnails: use the actual first page but make it show as a cover */
