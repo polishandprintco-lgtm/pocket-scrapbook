@@ -380,7 +380,13 @@ function Auth() {
 
   return (
     <div className="phoneFrame authScreen">
-      <div className="authScrapbookCover cuteAuthPhoto"><span>pocket memories</span></div>
+      <div className="authScrapbookCover">
+  <div className="authTape"></div>
+  <div className="authCoverCenter">
+    <div className="authCoverScript">pocket</div>
+    <div className="authCoverTitle">SCRAPBOOK</div>
+  </div>
+</div>
       <header className="authBrand">
         <div className="brandBadge">♡</div>
         <div className="brandScript">pocket</div>
