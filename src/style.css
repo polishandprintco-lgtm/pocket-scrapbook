@@ -197,33 +197,81 @@ button, button *, a, a:visited, a:hover, a:active {
 
 /* Buy 20 more photo uploads card */
 .photoBuyCard{margin:22px 0;padding:18px;border:1px solid var(--line);border-radius:24px;background:#fff8f4;box-shadow:var(--shadow);display:flex;align-items:center;gap:12px}.photoBuyIcon{width:58px;height:58px;border-radius:18px;background:#ffd6e4;display:grid;place-items:center;font-size:28px;flex:0 0 auto}.photoBuyInfo{flex:1}.photoBuyInfo h3{margin:0;font-family:'Playfair Display',serif;color:#c96d99;font-size:20px}.photoBuyInfo p{margin:4px 0 0;color:var(--muted);font-size:12px}.photoBuyPrice{font-weight:800;color:#c96d99}.photoBuyCard button{border:0;border-radius:999px;background:#d66f9c;color:white;padding:10px 12px;font-weight:800;font-size:12px}
-.editorEl.sticker,
-.editorEl.sticker .stickerImg,
-.editorEl.sticker img,
-.stickerText {
-  width: 100% !important;
-  height: 100% !important;
+
+/* FINAL HOME + CREATE + EMOJI STICKER PATCH */
+.heroPolaroid.beachHeroPhoto,
+.heroPolaroid.scrapbookHeroCover{
+  position:absolute !important;
+  right:10px !important;
+  top:35px !important;
+  width:130px !important;
+  height:158px !important;
+  border:12px solid #fff !important;
+  border-radius:8px !important;
+  box-shadow:var(--shadow) !important;
+  transform:rotate(8deg) !important;
+  overflow:visible !important;
+  background:
+    linear-gradient(rgba(255,255,255,.08),rgba(255,255,255,.08)),
+    url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&auto=format&fit=crop') center/cover !important;
+}
+.heroPolaroid.beachHeroPhoto::before,
+.heroPolaroid.scrapbookHeroCover::before{
+  content:'' !important;
+  position:absolute !important;
+  top:-22px !important;
+  left:35px !important;
+  width:70px !important;
+  height:22px !important;
+  background:#d4b898 !important;
+  border-radius:4px !important;
+  z-index:5 !important;
+}
+.heroPolaroid.beachHeroPhoto .heroTape,
+.heroPolaroid.beachHeroPhoto .heroCoverLabel,
+.heroPolaroid.scrapbookHeroCover .heroTape,
+.heroPolaroid.scrapbookHeroCover .heroCoverLabel{display:none!important;}
+
+.authScrapbookCover.cuteAuthPhoto,
+.authScrapbookCover{
+  background:
+    linear-gradient(rgba(255,255,255,.12),rgba(255,255,255,.12)),
+    url('https://images.unsplash.com/photo-1519682337058-a94d519337bc?w=500&auto=format&fit=crop') center/cover !important;
+  color:transparent!important;
+  border:10px solid white!important;
+  border-radius:9px!important;
+  overflow:visible!important;
+}
+.authScrapbookCover.cuteAuthPhoto::before,
+.authScrapbookCover::before{
+  content:'pocket memories'!important;
+  position:absolute;left:10px;right:10px;bottom:14px;top:auto;height:42px;
+  display:grid;place-items:center;background:rgba(255,250,243,.88);
+  border:1px solid #ead9c9;border-radius:8px;
+  font-family:'Brush Script MT',cursive;font-size:19px;color:#302926!important;
+  transform:rotate(-2deg);box-shadow:0 8px 16px rgba(0,0,0,.08);
+}
+.authScrapbookCover.cuteAuthPhoto::after,
+.authScrapbookCover::after{
+  content:''!important;position:absolute;top:-14px;left:34px;width:70px;height:24px;border-radius:5px;
+  background:repeating-linear-gradient(90deg,#eac2cf 0 14px,#d89bb7 14px 28px);
 }
 
-.editorEl.sticker img,
-.stickerImg {
-  object-fit: contain !important;
-  display: block !important;
-  pointer-events: none;
-}
+.chooseTitle{margin:18px 0 10px;font-size:16px;color:#302926;}
+.bgPreviewGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0;}
+.bgPreviewBtn{border:1px solid var(--line);border-radius:18px;background:#fffdf8;padding:10px;text-align:left;color:#302926!important;-webkit-text-fill-color:#302926!important;box-shadow:0 5px 12px rgba(62,45,34,.06);}
+.bgPreviewBtn.selected{outline:3px solid #d894b4;background:#fff7fb;}
+.bgPreviewSwatch{display:block;height:76px;border-radius:14px;border:1px solid var(--line);margin-bottom:8px;overflow:hidden;}
+.bgPreviewBtn b{font-size:13px;color:#302926!important;-webkit-text-fill-color:#302926!important;}
+.bgPreviewSwatch.cream,.bgPreviewSwatch.paper,.bgPreviewSwatch.blank,.bgPreviewSwatch.wedding{background:#fffaf0;}
+.bgPreviewSwatch.grid{background-image:linear-gradient(#e7ddd4 1px,transparent 1px),linear-gradient(90deg,#e7ddd4 1px,transparent 1px);background-size:18px 18px;background-color:#fffaf0;}
+.bgPreviewSwatch.dots{background-image:radial-gradient(#d6cbc3 1.5px,transparent 1.5px);background-size:15px 15px;background-color:#fffaf0;}
+.bgPreviewSwatch.babyBlue{background-color:#eaf4ff;background-image:linear-gradient(#b9cfe8 1px,transparent 1px),linear-gradient(90deg,#b9cfe8 1px,transparent 1px);background-size:12px 12px;}
+.bgPreviewSwatch.babyPink{background-color:#fff0f5;background-image:linear-gradient(#f2b9c9 1px,transparent 1px),linear-gradient(90deg,#f2b9c9 1px,transparent 1px);background-size:12px 12px;}
+.bgPreviewSwatch.lavender{background:#f2eafa;}
+.bgPreviewSwatch.christmas{background:linear-gradient(135deg,#fff8ee,#f3e3d1);}
 
-.stickerText {
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
-  font-size: clamp(18px, 8vw, 80px) !important;
-  line-height: 1 !important;
-}
-
-.el.sticker,
-.el.sticker img,
-.el.sticker .stickerImg {
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: contain !important;
-}
+.stickerGrid{grid-template-columns:repeat(5,1fr)!important;}
+.stickerGrid button{font-size:27px!important;line-height:1!important;color:#302926!important;-webkit-text-fill-color:#302926!important;}
+.stickerEmoji{width:100%!important;height:100%!important;display:flex!important;align-items:center!important;justify-content:center!important;font-size:clamp(22px,10vw,96px)!important;line-height:1!important;}
+.editorEl img,.previewEl img{width:100%!important;height:100%!important;object-fit:contain!important;}
