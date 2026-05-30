@@ -441,7 +441,13 @@ function Home({ books, openBook, setScreen }) {
       <AppHeader setScreen={setScreen} />
       <section className="welcomeHero">
         <div><h1>Welcome<br />back ♡</h1><p>Every story matters.<br />What will you capture today?</p></div>
-        <div className="heroPolaroid" />
+        <div className="heroPolaroid scrapbookHeroCover">
+  <div className="heroTape"></div>
+  <div className="heroCoverLabel">
+    <span>memories</span>
+    <small>pocket scrapbook</small>
+  </div>
+</div>
       </section>
       <section className="quickGrid">
         <button onClick={() => setScreen("create")}><span>＋</span><b>New Scrapbook</b><small>Start a new chapter</small></button>
