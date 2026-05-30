@@ -278,7 +278,6 @@ button, button *, a, a:visited, a:hover, a:active {
 .heroPolaroid.scrapbookHeroCover .heroTape,
 .heroPolaroid.scrapbookHeroCover .heroCoverLabel{display:none!important;}
 
-.authScrapbookCover.cuteAuthPhoto,
 .authScrapbookCover{
   background:
     linear-gradient(rgba(255,255,255,.12),rgba(255,255,255,.12)),
@@ -288,7 +287,7 @@ button, button *, a, a:visited, a:hover, a:active {
   border-radius:9px!important;
   overflow:visible!important;
 }
-.authScrapbookCover.cuteAuthPhoto::before,
+
 .authScrapbookCover::before{
   content:'pocket memories'!important;
   position:absolute;left:10px;right:10px;bottom:14px;top:auto;height:42px;
