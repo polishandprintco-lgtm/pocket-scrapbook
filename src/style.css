@@ -420,3 +420,19 @@ button, button *, a, a:visited, a:hover, a:active {
   background:repeating-linear-gradient(90deg,#f2c1d5 0 14px,#d99ab8 14px 28px) !important;
   z-index:5 !important;
 }
+.authScrapbookCover{
+  display:none !important;
+}
+
+.authScrapbookPhoto{
+  position:absolute;
+  left:-18px;
+  top:88px;
+  width:150px;
+  height:185px;
+  background:url("/auth-cover.jpg") center/cover no-repeat;
+  border-radius:28px;
+  box-shadow:0 18px 34px rgba(62,45,34,.18);
+  transform:rotate(-7deg);
+  z-index:0;
+}
