@@ -319,3 +319,55 @@ button, button *, a, a:visited, a:hover, a:active {
 .stickerGrid button{font-size:27px!important;line-height:1!important;color:#302926!important;-webkit-text-fill-color:#302926!important;}
 .stickerEmoji{width:100%!important;height:100%!important;display:flex!important;align-items:center!important;justify-content:center!important;font-size:clamp(22px,10vw,96px)!important;line-height:1!important;}
 .editorEl img,.previewEl img{width:100%!important;height:100%!important;object-fit:contain!important;}
+
+/* FIX AUTH COVER - OVERRIDE OLD GLITCHY RULES */
+.authScrapbookCover,
+.authScrapbookCover.cuteAuthPhoto{
+  position:absolute !important;
+  left:-18px !important;
+  top:92px !important;
+  width:128px !important;
+  height:168px !important;
+  background:linear-gradient(135deg,#f6d8e4,#fff7ef) !important;
+  border:10px solid #fff !important;
+  border-radius:16px !important;
+  box-shadow:0 18px 34px rgba(62,45,34,.16) !important;
+  transform:rotate(-7deg) !important;
+  z-index:0 !important;
+  overflow:visible !important;
+  color:transparent !important;
+}
+
+.authScrapbookCover span,
+.authScrapbookCover.cuteAuthPhoto span{
+  display:none !important;
+}
+
+.authScrapbookCover::before,
+.authScrapbookCover.cuteAuthPhoto::before{
+  content:"" !important;
+  position:absolute !important;
+  inset:18px !important;
+  background:#fffaf4 !important;
+  border-radius:10px !important;
+  border:1px solid #ead9c9 !important;
+  box-shadow:none !important;
+  transform:none !important;
+}
+
+.authScrapbookCover::after,
+.authScrapbookCover.cuteAuthPhoto::after{
+  content:"" !important;
+  position:absolute !important;
+  top:-14px !important;
+  left:34px !important;
+  width:68px !important;
+  height:24px !important;
+  border-radius:5px !important;
+  background:repeating-linear-gradient(
+    90deg,
+    #f2c1d5 0 14px,
+    #d99ab8 14px 28px
+  ) !important;
+  z-index:3 !important;
+}
