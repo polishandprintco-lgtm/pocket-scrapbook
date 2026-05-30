@@ -651,5 +651,5 @@ function ErrorBoundaryApp() {
   if (err) return <div className="phoneFrame"><div className="errorBox"><h1>App Error</h1><p>{String(err?.message || err)}</p></div></div>;
   return <App />;
 }
-
+ 
 createRoot(document.getElementById("root")).render(<ErrorBoundaryApp />);
