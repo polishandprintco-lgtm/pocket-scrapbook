@@ -189,18 +189,18 @@ function simpleTemplate(title, bg = "cream", pages = 6) {
 }
 
 const TEMPLATES = [
-  { id: "blank", name: "Blank Book", label: "Free", premium: false, price: "Free", maker: () => [page("cream", [])] },
-  { id: "memory", name: "Memory Book", label: "Free", premium: false, price: "Free", maker: () => simpleTemplate("memory book", "paper", 8) },
-  { id: "adventure", name: "Adventure Book", label: "$0.99", premium: true, price: "$0.99", maker: () => simpleTemplate("my adventure book", "paper", 12) },
-  { id: "babyBoy", name: "Baby Boy First Year", label: "$0.99", premium: true, price: "$0.99", maker: () => babyPages("boy") },
-  { id: "babyGirl", name: "Baby Girl First Year", label: "$0.99", premium: true, price: "$0.99", maker: () => babyPages("girl") },
-  { id: "wedding", name: "Wedding Book", label: "$0.99", premium: true, price: "$0.99", maker: () => simpleTemplate("our wedding book", "wedding", 16) },
-  { id: "pregnancy", name: "Pregnancy Journey", label: "$0.99", premium: true, price: "$0.99", maker: () => simpleTemplate("our pregnancy journey", "paper", 8) },
-  { id: "vacation", name: "Vacation Memories", label: "$0.99", premium: true, price: "$0.99", maker: () => simpleTemplate("our vacation memories", "paper", 8) },
-  { id: "graduation", name: "Graduation Memories", label: "$0.99", premium: true, price: "$0.99", maker: () => simpleTemplate("my graduation memories", "paper", 8) },
-  { id: "christmas", name: "Christmas Memories", label: "$0.99", premium: true, price: "$0.99", maker: () => simpleTemplate("our christmas memories", "christmas", 8) },
-  { id: "thanksgiving", name: "Thanksgiving Memories", label: "$0.99", premium: true, price: "$0.99", maker: () => simpleTemplate("thanksgiving memories", "paper", 8) },
-  { id: "family", name: "Family Reunion", label: "$0.99", premium: true, price: "$0.99", maker: () => simpleTemplate("family reunion memories", "paper", 8) },
+  { id: "blank", category: "Free", name: "Blank Book", label: "Free", premium: false, price: "Free", maker: () => [page("cream", [])] },
+  { id: "memory", category: "Free", name: "Memory Book", label: "Free", premium: false, price: "Free", maker: () => simpleTemplate("memory book", "paper", 8) },
+  { id: "adventure", category: "Travel", name: "Adventure Book", label: "$0.99", premium: true, price: "$0.99", maker: () => simpleTemplate("my adventure book", "paper", 12) },
+  { id: "babyBoy", category: "Baby", name: "Baby Boy First Year", label: "$0.99", premium: true, price: "$0.99", maker: () => babyPages("boy") },
+  { id: "babyGirl", category: "Baby", name: "Baby Girl First Year", label: "$0.99", premium: true, price: "$0.99", maker: () => babyPages("girl") },
+  { id: "wedding", category: "Wedding", name: "Wedding Book", label: "$0.99", premium: true, price: "$0.99", maker: () => simpleTemplate("our wedding book", "wedding", 16) },
+  { id: "pregnancy", category: "Family", name: "Pregnancy Journey", label: "$0.99", premium: true, price: "$0.99", maker: () => simpleTemplate("our pregnancy journey", "paper", 8) },
+  { id: "vacation", category: "Travel", name: "Vacation Memories", label: "$0.99", premium: true, price: "$0.99", maker: () => simpleTemplate("our vacation memories", "paper", 8) },
+  { id: "graduation", category: "Family", name: "Graduation Memories", label: "$0.99", premium: true, price: "$0.99", maker: () => simpleTemplate("my graduation memories", "paper", 8) },
+  { id: "christmas", category: "Seasonal", name: "Christmas Memories", label: "$0.99", premium: true, price: "$0.99", maker: () => simpleTemplate("our christmas memories", "christmas", 8) },
+  { id: "thanksgiving", category: "Seasonal", name: "Thanksgiving Memories", label: "$0.99", premium: true, price: "$0.99", maker: () => simpleTemplate("thanksgiving memories", "paper", 8) },
+  { id: "family", category: "Family", name: "Family Reunion", label: "$0.99", premium: true, price: "$0.99", maker: () => simpleTemplate("family reunion memories", "paper", 8) },
 ];
 
 function useToast() {
@@ -226,6 +226,40 @@ function PaperModal({ title, message, confirmText = "Okay", cancelText = "Cancel
       </div>
     </div>
   );
+}
+
+
+function exportBookHTML(book) {
+  const esc = (v) => String(v ?? "").replace(/[&<>\"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" }[c]));
+  const pages = (book.pages || []).map((p, idx) => {
+    const els = (p.elements || []).map((el) => {
+      const style = `left:${el.x}%;top:${el.y}%;width:${el.w}%;height:${el.h}%;transform:rotate(${el.rotate || 0}deg);color:${el.color || "#302926"};font-family:${el.font || "Poppins"};font-size:${el.size || 16}px;`;
+      if (el.type === "photo" && el.src) return `<div class="el photo" style="${style}"><img src="${esc(el.src)}" /></div>`;
+      if (el.type === "photo") return `<div class="el photo blank" style="${style}">Photo</div>`;
+      if (el.type === "text") return `<div class="el text" style="${style}">${esc(el.text).replace(/\n/g, "<br>")}</div>`;
+      if (el.type === "sticker" && el.src) return `<div class="el sticker" style="${style}"><img src="${esc(el.src)}" /></div>`;
+      return `<div class="el sticker deco" style="${style}">${esc(el.label || el.value || "")}</div>`;
+    }).join("");
+    return `<section class="exportPage ${esc(p.bg)}"><span class="pageNum">${idx + 1}</span>${els}</section>`;
+  }).join("");
+
+  const html = `<!doctype html><html><head><meta charset="utf-8"><title>${esc(book.name)} Export</title><style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Poppins:wght@400;600;700&display=swap');
+  body{margin:0;background:#efe7de;font-family:Poppins,sans-serif;color:#302926}.wrap{max-width:1000px;margin:0 auto;padding:28px}h1{font-family:'Playfair Display',serif}.exportPage{width:100%;aspect-ratio:4/3;background:#fffaf0;border:1px solid #e4d8ce;border-radius:18px;margin:0 0 28px;position:relative;overflow:hidden;page-break-after:always;box-shadow:0 12px 26px rgba(62,45,34,.12)}.babyBlue{background-color:#eaf4ff;background-image:linear-gradient(#b9cfe8 1px,transparent 1px),linear-gradient(90deg,#b9cfe8 1px,transparent 1px);background-size:12px 12px}.babyPink{background-color:#fff0f5;background-image:linear-gradient(#f2b9c9 1px,transparent 1px),linear-gradient(90deg,#f2b9c9 1px,transparent 1px);background-size:12px 12px}.paper{background:#fffdf8}.christmas{background:#fff8ee}.el{position:absolute;white-space:pre-wrap;text-align:center}.el img{width:100%;height:100%;object-fit:cover}.photo.blank{display:grid;place-items:center;background:#f4f0ea;border:2px dashed #cbbfb4;font-weight:700}.pageNum{position:absolute;right:10px;bottom:8px;font-size:12px;color:#766b65}@media print{body{background:white}.wrap{padding:0}.exportPage{box-shadow:none;border-radius:0;margin:0;width:100vw}}
+  </style></head><body><div class="wrap"><h1>${esc(book.name)}</h1><button onclick="window.print()">Print / Save PDF</button>${pages}</div></body></html>`;
+  const win = window.open("", "_blank");
+  if (win) {
+    win.document.open();
+    win.document.write(html);
+    win.document.close();
+  } else {
+    const blob = new Blob([html], { type: "text/html" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `${(book.name || "scrapbook").replace(/[^a-z0-9]+/gi, "-").toLowerCase()}.html`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
 }
 
 function App() {
@@ -401,19 +435,54 @@ function BookCover({ book, onClick, menu }) {
 
 function Scrapbooks({ books, openBook, deleteBook }) {
   const [menu, setMenu] = useState(null);
-  return <main className="page"><h1>My Scrapbooks</h1><div className="scrapbookGrid">{books.map((book) => <div key={book.id} className="bookWrap"><BookCover book={book} onClick={() => openBook(book)} /><button className="dots" onClick={() => setMenu(menu === book.id ? null : book.id)}>⋯</button>{menu === book.id && <div className="paperMenu"><div className="washiTape" /><button onClick={() => openBook(book)}>Edit</button><button onClick={() => openBook(book, true)}>Flipbook</button><button onClick={() => alert("Export coming soon")}>Export</button><button onClick={() => deleteBook(book)}>Delete</button></div>}</div>)}</div></main>;
+  return <main className="page"><h1>My Scrapbooks</h1><div className="scrapbookGrid">{books.map((book) => <div key={book.id} className="bookWrap"><BookCover book={book} onClick={() => openBook(book)} /><button className="dots" onClick={() => setMenu(menu === book.id ? null : book.id)}>⋯</button>{menu === book.id && <div className="paperMenu"><div className="washiTape" /><button onClick={() => openBook(book)}>Edit</button><button onClick={() => openBook(book, true)}>Flipbook</button><button onClick={() => exportBookHTML(book)}>Export</button><button onClick={() => deleteBook(book)}>Delete</button></div>}</div>)}</div></main>;
 }
 
 function Templates({ createBook, profile, setModal }) {
+  const [category, setCategory] = useState("All");
+  const list = TEMPLATES.filter(t => t.id !== "pocket").filter(t => category === "All" || t.category === category || (category === "Baby" && t.id.toLowerCase().includes("baby")));
+
   function choose(t) {
     if (t.premium && profile?.subscription !== "Premium") {
-      setModal({ title: "Premium Template", message: `${t.name} is ${t.price} or included with Premium. Payments are demo only until Stripe is connected.`, confirmText: "Preview Anyway", onCancel: () => setModal(null), onConfirm: () => { setModal(null); createBook(t.name, t.maker()); } });
+      setModal({
+        title: "Premium Template",
+        message: `${t.name} is ${t.price} or included with Premium. Payments are demo only until Stripe is connected.`,
+        confirmText: "Preview Anyway",
+        onCancel: () => setModal(null),
+        onConfirm: () => { setModal(null); createBook(t.name, t.maker()); }
+      });
       return;
     }
     createBook(t.name, t.maker());
   }
-  return <main className="page"><h1>Templates</h1><div className="templateGrid">{TEMPLATES.filter(t => t.id !== "pocket").map((t) => <button key={t.id} className={`templateCard ${t.premium ? "locked" : ""}`} onClick={() => choose(t)}><div className={`templatePreview ${t.id}`}><span>{t.name.split(" ").slice(0, 2).join(" ")}</span></div><b>{t.name}</b><small>{t.label}</small></button>)}</div></main>;
+
+  return <main className="page"><h1>Templates</h1>
+    <div className="templateTabs">
+      {["All","Baby","Wedding","Travel","Seasonal","Family"].map(c => <button key={c} className={category === c ? "active" : ""} onClick={() => setCategory(c)}>{c}</button>)}
+    </div>
+    <div className="templateGrid">{list.map((t) => <button key={t.id} className={`templateCard ${t.premium ? "locked" : ""}`} onClick={() => choose(t)}>
+      <TemplateThumb template={t} />
+      <b>{t.name}</b><small>{t.label}</small>
+    </button>)}</div>
+  </main>;
 }
+
+function TemplateThumb({ template }) {
+  let first;
+  try { first = template.maker()?.[0] || page("cream", []); } catch { first = page("cream", []); }
+  const els = (first.elements || []).slice(0, 14);
+  return <div className={`templatePreview ${template.id} ${first.bg || "cream"}`}>
+    {els.map((el) => <div key={el.id} className="templateThumbEl" style={{ left: `${el.x}%`, top: `${el.y}%`, width: `${el.w}%`, height: `${el.h}%`, transform: `rotate(${el.rotate || 0}deg)`, color: el.color, fontFamily: el.font, fontSize: Math.max(6, (el.size || 16) * .38) }}>
+      {el.type === "photo" && <div className="templatePhotoMini" />}
+      {el.type === "text" && <span>{el.text}</span>}
+      {el.type === "sticker" && el.src && <img src={el.src} alt="" />}
+      {el.type === "sticker" && !el.src && el.kind && <DecoSticker kind={el.kind} label={el.label || el.value} />}
+      {el.type === "sticker" && !el.src && !el.kind && <span>{el.value}</span>}
+    </div>)}
+    {template.premium && <em className="priceBubble">{template.price}</em>}
+  </div>;
+}
+
 
 function Create({ createBook, setScreen, setModal }) {
   const [name, setName] = useState("");
@@ -534,7 +603,7 @@ function Flipbook({ book, pageIndex, setPageIndex, setScreen, deleteBook }) {
   const spreadStart = Math.floor(pageIndex / 2) * 2;
   const left = book.pages?.[spreadStart] || page();
   const right = book.pages?.[spreadStart + 1] || null;
-  function exportPage() { window.print(); }
+  function exportPage() { exportBookHTML(book); }
   return <main className="page flipPageScreen"><header className="flipHeader"><button className="backBtn" onClick={() => setScreen("editor")}>← Back</button><strong>{book.name}</strong><button className="dots" onClick={() => setMenu(!menu)}>⋯</button></header>{menu && <div className="paperMenu flip"><div className="washiTape" /><button onClick={exportPage}>Export / Print</button><button onClick={() => setScreen("editor")}>Edit</button><button onClick={() => deleteBook(book)}>Delete</button></div>}<div className="flipBookShell"><div className="flipSpread"><PreviewPage p={left} />{right ? <PreviewPage p={right} /> : <div className="scrapPage flipSpreadPage blank" />}</div></div><div className="pageNav"><button disabled={spreadStart === 0} onClick={() => setPageIndex(Math.max(0, spreadStart - 2))}>Prev</button><span>Pages {spreadStart + 1}{right ? `–${spreadStart + 2}` : ""} of {book.pages.length}</span><button disabled={spreadStart + 2 >= book.pages.length} onClick={() => setPageIndex(spreadStart + 2)}>Next</button></div></main>;
 }
 
