@@ -1,4 +1,4 @@
- import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./style.css";
 import { auth, db, storage } from "./firebase";
@@ -26,6 +26,28 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+
+
+const CREATOR_EMAILS = [
+  "DuBosemo2@gmail.com",
+  "Haileemccowen@icloud.com",
+  "Sweetkybug09@gmail.com",
+];
+
+function isCreatorEmail(email) {
+  return !!email && CREATOR_EMAILS.some((e) => e.toLowerCase() === email.toLowerCase());
+}
+
+function withCreatorUnlock(profile, user) {
+  const creator = isCreatorEmail(user?.email);
+  return {
+    ...(profile || {}),
+    isCreator: creator,
+    subscription: creator ? "Premium" : profile?.subscription || "Free",
+    photoLimit: creator ? 999999 : profile?.photoLimit || 15,
+    photoCredits: creator ? 999999 : profile?.photoCredits || 0,
+  };
+}
 
 const uid = () =>
   typeof crypto !== "undefined" && crypto.randomUUID
@@ -281,7 +303,10 @@ function App() {
         name: u.displayName || "",
         email: u.email || "",
         photoURL: u.photoURL || "",
-        subscription: "Free",
+        subscription: isCreatorEmail(u.email) ? "Premium" : "Free",
+        isCreator: isCreatorEmail(u.email),
+        photoLimit: isCreatorEmail(u.email) ? 999999 : 15,
+        photoCredits: isCreatorEmail(u.email) ? 999999 : 0,
         notifications: true,
         dark: false,
       }, { merge: true });
@@ -329,6 +354,8 @@ function App() {
   function openBook(book, flip = false) { setActive(book); setPageIndex(0); setScreen(flip ? "flipbook" : "editor"); }
   function home() { setScreen("home"); }
 
+  const unlockedProfile = withCreatorUnlock(profile, user);
+
   if (screen === "loading") return <div className="phoneFrame"><div className="loading">Loading...</div></div>;
   if (!user) return <Auth />;
 
@@ -336,11 +363,11 @@ function App() {
     <div className="phoneFrame">
       {screen === "home" && <Home books={books} openBook={openBook} setScreen={setScreen} />}
       {screen === "scrapbooks" && <Scrapbooks books={books} openBook={openBook} deleteBook={askDeleteBook} />}
-      {screen === "templates" && <Templates createBook={createBook} profile={profile} setModal={setModal} />}
+      {screen === "templates" && <Templates createBook={createBook} profile={unlockedProfile} setModal={setModal} />}
       {screen === "create" && <Create createBook={createBook} setScreen={setScreen} setModal={setModal} />}
-      {screen === "premium" && <Premium profile={profile} />}
-      {screen === "profile" && <Profile user={user} profile={profile} setModal={setModal} showToast={showToast} />}
-      {screen === "editor" && active && <Editor book={active} pageIndex={pageIndex} setPageIndex={setPageIndex} saveBook={saveBook} setScreen={setScreen} home={home} profile={profile} showToast={showToast} setModal={setModal} />}
+      {screen === "premium" && <Premium profile={unlockedProfile} />}
+      {screen === "profile" && <Profile user={user} profile={unlockedProfile} setModal={setModal} showToast={showToast} />}
+      {screen === "editor" && active && <Editor book={active} pageIndex={pageIndex} setPageIndex={setPageIndex} saveBook={saveBook} setScreen={setScreen} home={home} profile={unlockedProfile} showToast={showToast} setModal={setModal} />}
       {screen === "flipbook" && active && <Flipbook book={active} pageIndex={pageIndex} setPageIndex={setPageIndex} setScreen={setScreen} deleteBook={askDeleteBook} />}
       {!["editor", "flipbook"].includes(screen) && <BottomNav screen={screen} setScreen={setScreen} />}
       {modal && <PaperModal {...modal} />}
@@ -492,7 +519,7 @@ function Create({ createBook, setScreen, setModal }) {
 }
 
 function Premium({ profile }) {
-  return <main className="page"><h1>Premium</h1><section className="createPaper"><div className="washiTape" /><h2>Your plan: {profile?.subscription || "Free"}</h2><table><tbody><tr><th>Feature</th><th>Free</th><th>Premium</th></tr><tr><td>Photo uploads</td><td>15</td><td>Unlimited</td></tr><tr><td>Premium templates</td><td>$0.99 each</td><td>Included</td></tr><tr><td>Advanced stickers</td><td>Basic</td><td>All</td></tr><tr><td>Curved text</td><td>—</td><td>✓</td></tr></tbody></table><div className="photoBuyCard"><div className="photoBuyIcon">📷</div><div className="photoBuyInfo"><h3>Need more photo space?</h3><p>Add 20 more photo uploads to your account.</p></div><div className="photoBuyPrice">$0.99</div><button onClick={() => alert("Stripe checkout coming soon ♡")}>Buy 20</button></div><button className="gradientBtn">Upgrade $4.99/mo</button><p className="hint">Stripe needed before real payments work.</p></section></main>;
+  return <main className="page"><h1>Premium</h1><section className="createPaper"><div className="washiTape" /><h2>Your plan: {profile?.isCreator ? "Creator / Premium" : profile?.subscription || "Free"}</h2>{profile?.isCreator && <p className="hint">⭐ Creator account — everything is unlocked free.</p>}<table><tbody><tr><th>Feature</th><th>Free</th><th>Premium</th></tr><tr><td>Photo uploads</td><td>15</td><td>Unlimited</td></tr><tr><td>Premium templates</td><td>$0.99 each</td><td>Included</td></tr><tr><td>Advanced stickers</td><td>Basic</td><td>All</td></tr><tr><td>Curved text</td><td>—</td><td>✓</td></tr></tbody></table><div className="photoBuyCard"><div className="photoBuyIcon">📷</div><div className="photoBuyInfo"><h3>Need more photo space?</h3><p>Add 20 more photo uploads to your account.</p></div><div className="photoBuyPrice">$0.99</div><button onClick={() => alert("Stripe checkout coming soon ♡")}>Buy 20</button></div><button className="gradientBtn">Upgrade $4.99/mo</button><p className="hint">Stripe needed before real payments work.</p></section></main>;
 }
 
 function Profile({ user, profile, setModal, showToast }) {
