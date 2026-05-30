@@ -441,19 +441,13 @@ function Home({ books, openBook, setScreen }) {
       <AppHeader setScreen={setScreen} />
       <section className="welcomeHero">
         <div><h1>Welcome<br />back ♡</h1><p>Every story matters.<br />What will you capture today?</p></div>
-        <div className="heroPolaroid scrapbookHeroCover">
-  <div className="heroTape"></div>
-  <div className="heroCoverLabel">
-    <span>memories</span>
-    <small>pocket scrapbook</small>
-  </div>
-</div>
+        <div className="heroPolaroid scrapbookHeroCover"><div className="heroTape" /><div className="heroCoverLabel"><span>memories</span><small>pocket scrapbook</small></div></div>
       </section>
       <section className="quickGrid">
-        <button onClick={() => setScreen("create")}><span>＋</span><b>New Scrapbook</b><small>Start a new chapter</small></button>
-        <button onClick={() => setScreen("scrapbooks")}><span>📖</span><b>My Scrapbooks</b><small>View and manage</small></button>
-        <button onClick={() => setScreen("templates")}><span>▧</span><b>Templates</b><small>Browse beautiful pages</small></button>
-        <button onClick={() => setScreen("premium")}><span>♡</span><b>Premium</b><small>Unlock more</small></button>
+        <button onClick={() => setScreen("create")}><span>📔</span><b>New Scrapbook</b><small>Start a new chapter</small></button>
+        <button onClick={() => setScreen("scrapbooks")}><span>📚</span><b>My Scrapbooks</b><small>View and manage</small></button>
+        <button onClick={() => setScreen("templates")}><span>🖼️</span><b>Templates</b><small>Browse beautiful pages</small></button>
+        <button onClick={() => setScreen("premium")}><span>💎</span><b>Premium</b><small>Unlock more</small></button>
       </section>
       <div className="sectionTitle"><h2>My Scrapbooks</h2><button onClick={() => setScreen("scrapbooks")}>View all ›</button></div>
       <div className="coverRow">{recent.length ? recent.map((b) => <BookCover key={b.id} book={b} onClick={() => openBook(b)} />) : <p className="empty">No scrapbooks yet. Tap + to create one.</p>}</div>
@@ -651,5 +645,5 @@ function ErrorBoundaryApp() {
   if (err) return <div className="phoneFrame"><div className="errorBox"><h1>App Error</h1><p>{String(err?.message || err)}</p></div></div>;
   return <App />;
 }
- 
+
 createRoot(document.getElementById("root")).render(<ErrorBoundaryApp />);
