@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./style.css";
 import { auth, db, storage } from "./firebase";
@@ -90,100 +90,93 @@ function photoEl(x, y, w, h, opts = {}) {
 function stickerEl(value, x, y, w, h, opts = {}) {
   return element("sticker", { value, x, y, w, h, ...opts });
 }
-function cssSticker(kind, x, y, w, h, opts = {}) {
-  return stickerEl("", x, y, w, h, { kind, locked: true, ...opts });
-}
 function page(bg = "cream", elements = []) {
   return { id: uid(), bg, elements };
+}
+
+function decoEl(kind, x, y, w, h, opts = {}) {
+  return stickerEl(opts.label || "", x, y, w, h, { kind, locked: true, ...opts });
 }
 
 function babyPages(kind = "girl") {
   const girl = kind === "girl";
   const bg = girl ? "babyPink" : "babyBlue";
   const accent = girl ? "#d889a7" : "#7595b6";
-  const babyWord = girl ? "our little girl" : "our little boy";
-  const bow = girl ? "bowPink" : "bowBlue";
-  const heart = girl ? "heartPink" : "heartBlue";
-  const star = girl ? "flowerPink" : "starBlue";
-  const bunny = girl ? "bunnyPink" : "bunnyBlue";
-
+  const label = girl ? "our little girl" : "our little boy";
+  const sweet = girl ? "sweet girl ♡" : "sweet boy ♡";
+  const blessing = girl ? "little blessing ♡" : "little blessing ♡";
   const pages = [];
 
-  // Cover page — scrapbook style with stickers/decorations, not emojis
+  // Cover page — built like a real scrapbook cover, fully editable after creating
   pages.push(page(bg, [
-    cssSticker(bow, 3, 3, 16, 16),
-    cssSticker("paperTitle", 18, 6, 62, 26, { rotate: -2 }),
-    textEl("baby's", 34, 10, 28, 8, { font: "Brush Script MT", size: 28, color: "#1e1b1a", locked: true }),
-    textEl("first year", 33, 20, 36, 8, { font: "Courier New", size: 18, color: "#1e1b1a", locked: true }),
-    textEl("♡", 47, 29, 9, 7, { font: "Courier New", size: 18, color: "#1e1b1a", locked: true }),
-    cssSticker("labelBlue", 60, 25, 28, 9, { rotate: -3 }),
-    textEl(babyWord, 64, 27, 20, 4, { font: "Courier New", size: 9, color: "#1e1b1a", locked: true }),
-    photoEl(10, 48, 32, 34, { rotate: -4 }),
-    photoEl(57, 42, 28, 25, { rotate: 6 }),
-    cssSticker("washiTan", 63, 39, 20, 5),
-    cssSticker("buttonTan", 7, 82, 8, 8),
-    cssSticker(star, 82, 8, 8, 8),
-    cssSticker("outlineStar", 88, 16, 7, 7),
-    cssSticker("flowerSprig", 80, 70, 12, 20),
-    cssSticker("paperNote", 52, 72, 25, 18, { rotate: -1 }),
-    textEl("so much\nlove\n♡", 57, 75, 15, 9, { font: "Courier New", size: 10, color: "#1e1b1a", locked: true }),
+    decoEl(girl ? "bowPink" : "bowBlue", 3, 3, 15, 15),
+    decoEl("paperTitle", 18, 7, 58, 27, { label: "baby's\nfirst year\n♡" }),
+    decoEl(girl ? "tagPink" : "tagBlue", 67, 33, 24, 8, { label }),
+    photoEl(7, 46, 34, 38, { rotate: -4 }),
+    photoEl(55, 43, 28, 27, { rotate: 6 }),
+    decoEl("tapeTan", 58, 40, 18, 5),
+    decoEl("noteTan", 54, 74, 26, 14, { label: "so much\nlove\n♡" }),
+    decoEl(girl ? "heartPink" : "heartBlue", 8, 79, 12, 12),
+    decoEl("buttonTan", 4, 84, 9, 9),
+    decoEl(girl ? "flowerPink" : "flowerBlue", 82, 72, 14, 18),
+    decoEl(girl ? "starPink" : "starBlue", 81, 8, 8, 8),
+    decoEl(girl ? "starPink" : "starBlue", 90, 15, 7, 7),
   ]));
 
-  // Hello world page
   pages.push(page(bg, [
-    cssSticker("tornNote", 10, 12, 30, 55),
-    textEl("hello\nworld\n♡", 15, 16, 18, 16, { font: "Courier New", size: 17, color: "#1e1b1a", locked: true }),
-    textEl("date:\ntime:\nweight:\nlength:", 14, 48, 24, 18, { font: "Courier New", size: 9, color: "#1e1b1a" }),
-    cssSticker("flowerSprig", 35, 16, 10, 22),
-    photoEl(51, 13, 34, 50, { rotate: 5 }),
-    cssSticker("washiBlue", 58, 10, 20, 5),
-    cssSticker("labelBlue", 29, 35, 26, 10, { rotate: -2 }),
-    textEl("the day\nyou were born ♡", 33, 37, 18, 6, { font: "Courier New", size: 7, color: "#1e1b1a", locked: true }),
+    decoEl("paperTall", 9, 10, 29, 58, { label: "hello\nworld\n♡\n\nthe day\nyou were born ♡\n\ndate: ____\ntime: ____\nweight: ____\nlength: ____" }),
+    photoEl(48, 12, 36, 52, { rotate: 4 }),
+    decoEl(girl ? "tapePink" : "tapeBlue", 54, 8, 23, 5),
+    decoEl(girl ? "flowerPink" : "flowerBlue", 31, 22, 11, 20),
+    decoEl(girl ? "heartPink" : "heartBlue", 80, 70, 10, 10),
   ]));
 
-  // Tiny hands
   pages.push(page(bg, [
-    textEl("tiny\nhands\nbig\nlove\n♡", 12, 16, 24, 30, { font: "Courier New", size: 18, color: "#1e1b1a", locked: true }),
-    photoEl(50, 12, 34, 50, { rotate: 7 }),
-    cssSticker("washiTan", 57, 9, 20, 5),
-    cssSticker(star, 8, 8, 8, 8),
-    cssSticker("outlineStar", 15, 16, 6, 6),
-    cssSticker("buttonTan", 22, 72, 8, 8),
-    cssSticker(heart, 72, 65, 13, 13),
-    cssSticker("flowerSprig", 12, 66, 10, 18),
+    textEl("tiny\nhands\nbig\nlove\n♡", 13, 16, 30, 42, { font: "Courier New", size: 20, locked: true }),
+    photoEl(50, 12, 35, 50, { rotate: 5 }),
+    decoEl(girl ? "heartPinkPlaid" : "heartBluePlaid", 72, 62, 15, 15),
+    decoEl("buttonTan", 22, 72, 9, 9),
+    decoEl(girl ? "starPink" : "starBlue", 7, 8, 8, 8),
+    decoEl(girl ? "starPink" : "starBlue", 14, 14, 6, 6),
+    decoEl(girl ? "flowerPink" : "flowerBlue", 10, 68, 12, 18),
   ]));
 
-  const labelTexts = ["you are\nso loved ♡", "growing\nso fast ♡", "sweet boy ♡", "so happy ♡", "little\nblessing ♡", "cutest\nsmile ♡", "learning\n& growing ♡", "so\ncurious ♡", "so much\njoy ♡", "almost\none! ♡", "what a\nyear! ♡", "one year\nof you ♡"];
+  const monthLabels = [
+    "you are\nso loved\n♡", "growing\nso fast ♡", sweet, "so happy ♡",
+    "cutest\nsmile ♡", blessing, "cutest\nsmile ♡", "learning\n& growing ♡",
+    "so\ncurious ♡", "so much\njoy ♡", "almost\none! ♡", "what a\nyear! ♡"
+  ];
+
   for (let i = 1; i <= 12; i++) {
-    const twoPhotos = [2,5,7,9,11].includes(i);
+    const twoPhotos = [2,5,7,9,10,11,12].includes(i);
+    const noteText = monthLabels[i - 1];
     pages.push(page(bg, [
-      cssSticker("monthPaper", 7, 8, 22, 20, { rotate: -2 }),
-      textEl(i === 12 ? "12\nmonths" : `${i}\nmonth${i === 1 ? "" : "s"}`, 12, 10, 12, 11, { font: "Courier New", size: 16, color: "#1e1b1a", locked: true }),
-      cssSticker(star, 7, 6, 7, 7),
-      twoPhotos ? photoEl(30, 24, 24, 36, { rotate: -2 }) : photoEl(39, 17, 40, 42),
-      twoPhotos ? photoEl(57, 22, 24, 35, { rotate: 4 }) : null,
-      cssSticker("washiTan", twoPhotos ? 36 : 50, twoPhotos ? 21 : 14, 16, 4),
-      twoPhotos ? cssSticker("washiTan", 62, 19, 16, 4) : null,
-      cssSticker("labelBlue", 60, 70, 27, 9, { rotate: -2 }),
-      textEl(labelTexts[i - 1] || "sweet memory ♡", 63, 71, 18, 6, { font: "Courier New", size: 7, color: "#1e1b1a", locked: true }),
-      i % 3 === 0 ? cssSticker(bunny, 18, 62, 18, 20) : cssSticker(heart, 9, 63, 13, 13),
-      i % 2 === 0 ? cssSticker("flowerSprig", 82, 55, 10, 20) : cssSticker("outlineStar", 84, 34, 7, 7),
-      i === 3 ? cssSticker("blocks", 18, 56, 14, 14) : null,
-      i === 10 ? cssSticker("linedNote", 60, 25, 26, 45) : null,
+      decoEl(girl ? "starPink" : "starBlue", 3, 6, 8, 8),
+      decoEl("monthNote", 8, 8, 24, 22, { label: `${i}\nmonth${i === 1 ? "" : "s"}` }),
+      twoPhotos ? photoEl(33, 22, 26, 36, { rotate: -2 }) : photoEl(38, 20, 42, 42),
+      twoPhotos ? photoEl(59, 18, 27, 36, { rotate: 3 }) : null,
+      i % 3 === 1 ? decoEl("linedNote", 58, 61, 29, 18, { label: noteText }) : decoEl(girl ? "tagPink" : "tagBlue", 56, 70, 30, 9, { label: noteText }),
+      i === 3 ? decoEl(girl ? "bearPink" : "bearBlue", 26, 55, 16, 18) : null,
+      i === 4 ? decoEl(girl ? "rattlePink" : "rattleBlue", 82, 36, 10, 20) : null,
+      i === 6 ? decoEl(girl ? "bunnyPink" : "bunnyBlue", 68, 51, 18, 24) : null,
+      i === 7 ? decoEl(girl ? "heartPinkPlaid" : "heartBluePlaid", 20, 63, 13, 13) : null,
+      i === 8 ? decoEl(girl ? "paperListPink" : "paperListBlue", 61, 23, 24, 42) : null,
+      i === 10 ? decoEl(girl ? "flowerPink" : "flowerBlue", 78, 49, 12, 20) : null,
+      i === 12 ? decoEl("buttonTan", 18, 82, 8, 8) : null,
+      decoEl(girl ? "heartPink" : "heartBlue", 83, 76, 10, 10),
+      decoEl(girl ? "flowerPink" : "flowerBlue", 87, 42, 10, 18),
     ].filter(Boolean)));
   }
 
-  // Final one-year page
   pages.push(page(bg, [
-    textEl("one\nyear\nof you\n♡", 18, 18, 22, 24, { font: "Courier New", size: 18, color: "#1e1b1a", locked: true }),
-    photoEl(55, 38, 28, 36, { rotate: 6 }),
-    cssSticker("washiTan", 60, 35, 18, 5),
-    cssSticker("linedNote", 18, 50, 28, 35),
-    cssSticker(heart, 15, 72, 13, 13),
-    cssSticker("flowerSprig", 82, 28, 10, 22),
-    cssSticker("buttonTan", 50, 82, 8, 8),
-    cssSticker("labelBlue", 70, 73, 25, 9, { rotate: -2 }),
-    textEl("our greatest\nblessing ♡", 73, 74, 15, 5, { font: "Courier New", size: 7, color: "#1e1b1a", locked: true }),
+    decoEl("paperTitle", 18, 9, 58, 25, { label: "one year\nof you\n♡" }),
+    photoEl(52, 38, 32, 42, { rotate: 5 }),
+    decoEl(girl ? "tagPink" : "tagBlue", 10, 72, 25, 11, { label: "what a\nyear! ♡" }),
+    decoEl(girl ? "tagPink" : "tagBlue", 70, 82, 24, 11, { label: "one year\nof you ♡" }),
+    decoEl(girl ? "heartPinkPlaid" : "heartBluePlaid", 13, 50, 15, 15),
+    decoEl("linedNote", 10, 38, 31, 27, { label: "favorite\nmemories:\n\n\n" }),
+    decoEl(girl ? "flowerPink" : "flowerBlue", 86, 62, 11, 19),
+    decoEl("buttonTan", 9, 84, 8, 8),
   ]));
 
   return pages;
@@ -412,66 +405,14 @@ function Scrapbooks({ books, openBook, deleteBook }) {
 }
 
 function Templates({ createBook, profile, setModal }) {
-  const [selectedId, setSelectedId] = useState("babyBoy");
-  const selected = TEMPLATES.find((t) => t.id === selectedId) || TEMPLATES[0];
-
   function choose(t) {
     if (t.premium && profile?.subscription !== "Premium") {
-      setModal({
-        title: "Premium Template",
-        message: `${t.name} is ${t.price} or included with Premium. Payments are demo only until Stripe is connected.`,
-        confirmText: "Preview Anyway",
-        onCancel: () => setModal(null),
-        onConfirm: () => { setModal(null); createBook(t.name, t.maker()); }
-      });
+      setModal({ title: "Premium Template", message: `${t.name} is ${t.price} or included with Premium. Payments are demo only until Stripe is connected.`, confirmText: "Preview Anyway", onCancel: () => setModal(null), onConfirm: () => { setModal(null); createBook(t.name, t.maker()); } });
       return;
     }
     createBook(t.name, t.maker());
   }
-
-  return <main className="page templateStudio">
-    <h1>Templates</h1>
-    <p className="hint">Tap a cover to preview. The cover page is editable after you create the scrapbook.</p>
-    <div className="templateTabs"><button>All</button><button>Baby</button><button>Wedding</button><button>Travel</button><button>Holiday</button></div>
-    <div className="templatePickerGrid">
-      {TEMPLATES.filter(t => !["blank", "memory"].includes(t.id)).map((t) => (
-        <button key={t.id} className={`templateMiniCard ${selectedId === t.id ? "active" : ""}`} onClick={() => setSelectedId(t.id)}>
-          <div className={`templateMiniPreview templateCoverArt ${t.id}`}><TemplateArt type={t.id} /></div>
-          <b>{t.name}</b><small>{t.label}</small>{t.premium && <span className="premiumTag">$0.99</span>}
-        </button>
-      ))}
-    </div>
-    <section className={`templateBigPreview templateCoverArt ${selected.id}`}><TemplateArt type={selected.id} big /></section>
-    <button className="gradientBtn" onClick={() => choose(selected)}>Use Template</button>
-  </main>;
-}
-
-function TemplateArt({ type }) {
-  const isGirl = type === "babyGirl";
-  const isBoy = type === "babyBoy";
-  const isBaby = isGirl || isBoy;
-  return <>
-    <div className="tplPaperTitle">
-      {isBaby ? <><em>baby's</em><span>first year</span><small>{isGirl ? "our little girl" : "our little boy"}</small></> : null}
-      {type === "wedding" ? <><em>our</em><span>wedding book</span><small>favorite memories</small></> : null}
-      {type === "pregnancy" ? <><em>our</em><span>pregnancy journey</span><small>baby memories</small></> : null}
-      {type === "vacation" ? <><em>our</em><span>vacation memories</span><small>adventure notes</small></> : null}
-      {type === "graduation" ? <><em>my</em><span>graduation</span><small>class memories</small></> : null}
-      {type === "christmas" ? <><em>our</em><span>christmas</span><small>holiday magic</small></> : null}
-      {type === "thanksgiving" ? <><em>our</em><span>thanksgiving</span><small>full hearts</small></> : null}
-      {type === "family" ? <><em>our</em><span>family reunion</span><small>together</small></> : null}
-      {type === "adventure" ? <><em>my</em><span>adventure book</span><small>moments</small></> : null}
-    </div>
-    <div className="tplPhoto one">Upload Photo</div>
-    <div className="tplPhoto two">Upload Photo</div>
-    <span className="tplWashi tan" />
-    <span className="tplSticker bow" />
-    <span className="tplSticker star" />
-    <span className="tplSticker heart" />
-    <span className="tplSticker sprig" />
-    <span className="tplSticker button" />
-    <div className="tplLabel">{isBaby ? "so much love ♡" : "memory notes ♡"}</div>
-  </>;
+  return <main className="page"><h1>Templates</h1><div className="templateGrid">{TEMPLATES.filter(t => t.id !== "pocket").map((t) => <button key={t.id} className={`templateCard ${t.premium ? "locked" : ""}`} onClick={() => choose(t)}><div className={`templatePreview ${t.id}`}><span>{t.name.split(" ").slice(0, 2).join(" ")}</span></div><b>{t.name}</b><small>{t.label}</small></button>)}</div></main>;
 }
 
 function Create({ createBook, setScreen, setModal }) {
@@ -482,7 +423,7 @@ function Create({ createBook, setScreen, setModal }) {
 }
 
 function Premium({ profile }) {
-  return <main className="page"><h1>Premium</h1><section className="createPaper"><div className="washiTape" /><h2>Your plan: {profile?.subscription || "Free"}</h2><table><tbody><tr><th>Feature</th><th>Free</th><th>Premium</th></tr><tr><td>Photo uploads</td><td>15</td><td>Unlimited</td></tr><tr><td>Premium templates</td><td>$0.99 each</td><td>Included</td></tr><tr><td>Advanced stickers</td><td>Basic</td><td>All</td></tr><tr><td>Curved text</td><td>—</td><td>✓</td></tr></tbody></table><button className="gradientBtn">Upgrade $4.99/mo</button><p className="hint">Stripe needed before real payments work.</p></section></main>;
+  return <main className="page"><h1>Premium</h1><section className="createPaper"><div className="washiTape" /><h2>Your plan: {profile?.subscription || "Free"}</h2><table><tbody><tr><th>Feature</th><th>Free</th><th>Premium</th></tr><tr><td>Photo uploads</td><td>15</td><td>Unlimited</td></tr><tr><td>Premium templates</td><td>$0.99 each</td><td>Included</td></tr><tr><td>Advanced stickers</td><td>Basic</td><td>All</td></tr><tr><td>Curved text</td><td>—</td><td>✓</td></tr></tbody></table><div className="photoBuyCard"><div className="photoBuyIcon">📷</div><div className="photoBuyInfo"><h3>Need more photo space?</h3><p>Add 20 more photo uploads to your account.</p></div><div className="photoBuyPrice">$0.99</div><button onClick={() => alert("Stripe checkout coming soon ♡")}>Buy 20</button></div><button className="gradientBtn">Upgrade $4.99/mo</button><p className="hint">Stripe needed before real payments work.</p></section></main>;
 }
 
 function Profile({ user, profile, setModal, showToast }) {
@@ -508,6 +449,10 @@ function Profile({ user, profile, setModal, showToast }) {
     setModal({ title: "Delete Account?", message: "Are you sure? This permanently deletes your account. You may need to log in again first.", danger: true, confirmText: "Delete", onCancel: () => setModal(null), onConfirm: async () => { try { await deleteUser(user); setModal(null); } catch { setModal({ title: "Log in again", message: "For security, log out and log back in before deleting your account.", confirmText: "Okay", onConfirm: () => setModal(null) }); } } });
   }
   return <main className="page profilePage"><h1>Profile</h1><section className="profileCard"><div className="washiTape" /><label className="avatarFrame"><img src={profile?.photoURL || user?.photoURL || "https://images.unsplash.com/photo-1526047932273-341f2a7631f9?w=300"} alt="profile" /><input type="file" hidden accept="image/*" onChange={uploadProfile} /></label><input value={name} onChange={(e) => setName(e.target.value)} placeholder="Name" /><button onClick={async () => { await updateProfile(user, { displayName: name }); await updateDoc(doc(db, "users", user.uid), { name }); showToast("Name saved ♡"); }}>Save Name</button><h2>Settings</h2><label className="toggle">Email notifications about new updates <input type="checkbox" checked={!!profile?.notifications} onChange={(e) => updateDoc(doc(db, "users", user.uid), { notifications: e.target.checked })} /></label><label className="toggle">Dark theme <input type="checkbox" checked={!!profile?.dark} onChange={(e) => updateDoc(doc(db, "users", user.uid), { dark: e.target.checked })} /></label><input value={email} onChange={(e) => setEmail(e.target.value)} /><button onClick={() => updateEmail(user, email)}>Update Email</button><input type="password" value={pass} onChange={(e) => setPass(e.target.value)} placeholder="New password" /><button onClick={() => pass && updatePassword(user, pass)}>Update Password</button><p>Subscription: {profile?.subscription || "Free"}</p><button onClick={() => signOut(auth)}>Logout</button><button className="dangerBtn full" onClick={deleteAccount}>Delete Account</button></section></main>;
+}
+
+function DecoSticker({ kind, label }) {
+  return <div className={`decoSticker ${kind || ""}`}>{label && <span>{label}</span>}</div>;
 }
 
 function Editor({ book, pageIndex, setPageIndex, saveBook, setScreen, home, profile, showToast, setModal }) {
@@ -577,14 +522,20 @@ function Editor({ book, pageIndex, setPageIndex, saveBook, setScreen, home, prof
 
   const filtered = STICKERS.filter(s => `${s.name} ${s.category}`.toLowerCase().includes(search.toLowerCase()));
 
-  return <main className="editorPage"><header className="editorHeader"><button onClick={home}>⌂ Home</button><strong>{book.name}</strong><button onClick={() => setScreen("flipbook")}>Flipbook</button></header><div className="editorScroll"><div ref={pageRef} className={`scrapPage ${cur.bg}`} onClick={() => setSelected(null)} onDragOver={(e) => e.preventDefault()} onDrop={onDrop}>{cur.elements.map((el) => <div key={el.id} className={`editorEl ${selected === el.id ? "selected" : ""} ${el.locked ? "locked" : ""}`} style={{ left: `${el.x}%`, top: `${el.y}%`, width: `${el.w}%`, height: `${el.h}%`, transform: `rotate(${el.rotate || 0}deg)` }} onMouseDown={(e) => pointerDown(e, el)} onClick={(e) => { e.stopPropagation(); setSelected(el.id); }}>{el.type === "photo" && (el.src ? <img src={el.src} alt="" /> : <label className="uploadBox">Upload Photo<input type="file" accept="image/*" hidden onChange={(e) => uploadPhoto(e, el.id)} /></label>)}{el.type === "text" && <textarea disabled={el.locked} value={el.text} style={{ fontSize: el.size, color: el.color, fontFamily: el.font }} onChange={(e) => updateElement(el.id, { text: e.target.value })} />}{el.type === "sticker" && (el.src ? <img src={el.src} alt={el.value || "sticker"} /> : el.kind ? <div className={`cssSticker ${el.kind}`} /> : <div className="stickerEmoji">{el.value}</div>)}{selected === el.id && <><div className="miniTools"><button onClick={() => updateElement(el.id, { locked: !el.locked })}>{el.locked ? "🔒" : "🔓"}</button><button disabled={el.locked} onClick={() => updateElement(el.id, { rotate: (el.rotate || 0) + 10 })}>↻</button><button disabled={el.locked} onClick={() => duplicateElement(el)}>⧉</button><button disabled={el.locked} onClick={() => removeElement(el.id)}>🗑</button></div>{!el.locked && <span className="resizeHandle" onMouseDown={(e) => resizeDown(e, el)} />}</>}</div>)}</div><div className="pageNav"><button disabled={pageIndex === 0} onClick={() => setPageIndex(pageIndex - 1)}>Prev</button><span>Page {pageIndex + 1} of {book.pages.length}</span><button disabled={pageIndex === book.pages.length - 1} onClick={() => setPageIndex(pageIndex + 1)}>Next</button></div>{selectedEl?.type === "text" && !selectedEl.locked && <div className="textPanel"><select value={selectedEl.font} onChange={(e) => updateElement(selectedEl.id, { font: e.target.value })}>{FONT_OPTIONS.map(f => <option key={f} value={f}>{f}</option>)}</select><input type="range" min="10" max="54" value={selectedEl.size} onChange={(e) => updateElement(selectedEl.id, { size: Number(e.target.value) })} /><div className="colorRow">{COLORS.map(c => <button key={c} style={{ background: c }} onClick={() => updateElement(selectedEl.id, { color: c })} />)}</div><button onClick={() => setModal({ title: "Premium Effect", message: "Curved text is part of Premium.", confirmText: "Okay", onConfirm: () => setModal(null) })}>Curve Text ✨</button></div>}</div><nav className="editorTools"><button onClick={() => addElement(textEl("New text", 25, 25, 42, 10, { size: 22 }))}>Text</button><button onClick={() => addElement(photoEl(20, 22, 52, 42))}>Photo</button><button onClick={() => setSheet(sheet === "stickers" ? null : "stickers")}>Stickers</button><button onClick={() => setSheet(sheet === "backgrounds" ? null : "backgrounds")}>Backgrounds</button><button onClick={() => changePage((p, next) => next.pages.push(page("cream", [])))}>Page</button></nav>{sheet && <div className="stickerSheet"><div className="washiTape" />{sheet === "stickers" ? <><input placeholder="Search stickers..." value={search} onChange={(e) => setSearch(e.target.value)} /><div className="stickerGrid">{emojiStickers.map((s) => <button key={s} onClick={() => { addElement(stickerEl(s, 30, 30, 12, 12)); setSheet(null); }}>{s}</button>)}{filtered.map((s) => <button key={s.src} className={s.premium ? "premiumSticker" : ""} onClick={() => { if (s.premium && profile?.subscription !== "Premium") { setModal({ title: "Premium Sticker", message: `${s.name} is part of Premium stickers.`, confirmText: "Okay", onConfirm: () => setModal(null) }); return; } addElement(stickerEl(s.name, 30, 30, 18, 18, { src: s.src })); setSheet(null); }}><img src={s.src} alt={s.name} />{s.premium && <span>🔒</span>}</button>)}</div></> : <div className="backgroundGrid">{BG_OPTIONS.map((b) => <button key={b.id} onClick={() => { changePage((p) => { p.bg = b.id; }); setSheet(null); }}>{b.name}</button>)}</div>}</div>}</main>;
+  return <main className="editorPage"><header className="editorHeader"><button onClick={home}>⌂ Home</button><strong>{book.name}</strong><button onClick={() => setScreen("flipbook")}>Flipbook</button></header><div className="editorScroll"><div ref={pageRef} className={`scrapPage ${cur.bg}`} onClick={() => setSelected(null)} onDragOver={(e) => e.preventDefault()} onDrop={onDrop}>{cur.elements.map((el) => <div key={el.id} className={`editorEl ${selected === el.id ? "selected" : ""} ${el.locked ? "locked" : ""}`} style={{ left: `${el.x}%`, top: `${el.y}%`, width: `${el.w}%`, height: `${el.h}%`, transform: `rotate(${el.rotate || 0}deg)` }} onMouseDown={(e) => pointerDown(e, el)} onClick={(e) => { e.stopPropagation(); setSelected(el.id); }}>{el.type === "photo" && (el.src ? <img src={el.src} alt="" /> : <label className="uploadBox">Upload Photo<input type="file" accept="image/*" hidden onChange={(e) => uploadPhoto(e, el.id)} /></label>)}{el.type === "text" && <textarea disabled={el.locked} value={el.text} style={{ fontSize: el.size, color: el.color, fontFamily: el.font }} onChange={(e) => updateElement(el.id, { text: e.target.value })} />}{el.type === "sticker" && (el.src ? <img src={el.src} alt={el.value || "sticker"} /> : el.kind ? <DecoSticker kind={el.kind} label={el.label || el.value} /> : <div className="stickerEmoji">{el.value}</div>)}{selected === el.id && <><div className="miniTools"><button onClick={() => updateElement(el.id, { locked: !el.locked })}>{el.locked ? "🔒" : "🔓"}</button><button disabled={el.locked} onClick={() => updateElement(el.id, { rotate: (el.rotate || 0) + 10 })}>↻</button><button disabled={el.locked} onClick={() => duplicateElement(el)}>⧉</button><button disabled={el.locked} onClick={() => removeElement(el.id)}>🗑</button></div>{!el.locked && <span className="resizeHandle" onMouseDown={(e) => resizeDown(e, el)} />}</>}</div>)}</div><div className="pageNav"><button disabled={pageIndex === 0} onClick={() => setPageIndex(pageIndex - 1)}>Prev</button><span>Page {pageIndex + 1} of {book.pages.length}</span><button disabled={pageIndex === book.pages.length - 1} onClick={() => setPageIndex(pageIndex + 1)}>Next</button></div>{selectedEl?.type === "text" && !selectedEl.locked && <div className="textPanel"><select value={selectedEl.font} onChange={(e) => updateElement(selectedEl.id, { font: e.target.value })}>{FONT_OPTIONS.map(f => <option key={f} value={f}>{f}</option>)}</select><input type="range" min="10" max="54" value={selectedEl.size} onChange={(e) => updateElement(selectedEl.id, { size: Number(e.target.value) })} /><div className="colorRow">{COLORS.map(c => <button key={c} style={{ background: c }} onClick={() => updateElement(selectedEl.id, { color: c })} />)}</div><button onClick={() => setModal({ title: "Premium Effect", message: "Curved text is part of Premium.", confirmText: "Okay", onConfirm: () => setModal(null) })}>Curve Text ✨</button></div>}</div><nav className="editorTools"><button onClick={() => addElement(textEl("New text", 25, 25, 42, 10, { size: 22 }))}>Text</button><button onClick={() => addElement(photoEl(20, 22, 52, 42))}>Photo</button><button onClick={() => setSheet(sheet === "stickers" ? null : "stickers")}>Stickers</button><button onClick={() => setSheet(sheet === "backgrounds" ? null : "backgrounds")}>Backgrounds</button><button onClick={() => changePage((p, next) => next.pages.push(page("cream", [])))}>Page</button></nav>{sheet && <div className="stickerSheet"><div className="washiTape" />{sheet === "stickers" ? <><input placeholder="Search stickers..." value={search} onChange={(e) => setSearch(e.target.value)} /><div className="stickerGrid">{emojiStickers.map((s) => <button key={s} onClick={() => { addElement(stickerEl(s, 30, 30, 12, 12)); setSheet(null); }}>{s}</button>)}{filtered.map((s) => <button key={s.src} className={s.premium ? "premiumSticker" : ""} onClick={() => { if (s.premium && profile?.subscription !== "Premium") { setModal({ title: "Premium Sticker", message: `${s.name} is part of Premium stickers.`, confirmText: "Okay", onConfirm: () => setModal(null) }); return; } addElement(stickerEl(s.name, 30, 30, 18, 18, { src: s.src })); setSheet(null); }}><img src={s.src} alt={s.name} />{s.premium && <span>🔒</span>}</button>)}</div></> : <div className="backgroundGrid">{BG_OPTIONS.map((b) => <button key={b.id} onClick={() => { changePage((p) => { p.bg = b.id; }); setSheet(null); }}>{b.name}</button>)}</div>}</div>}</main>;
+}
+
+function PreviewPage({ p }) {
+  return <div className={`scrapPage flipSpreadPage ${p.bg}`}>{(p.elements || []).map(el => <div key={el.id} className="previewEl" style={{ left: `${el.x}%`, top: `${el.y}%`, width: `${el.w}%`, height: `${el.h}%`, transform: `rotate(${el.rotate || 0}deg)`, color: el.color, fontFamily: el.font, fontSize: el.size }}>{el.type === "text" ? el.text : el.type === "photo" && el.src ? <img src={el.src} alt="" /> : el.type === "sticker" && el.src ? <img src={el.src} alt="" /> : el.type === "sticker" && el.kind ? <DecoSticker kind={el.kind} label={el.label || el.value} /> : el.value}</div>)}</div>;
 }
 
 function Flipbook({ book, pageIndex, setPageIndex, setScreen, deleteBook }) {
   const [menu, setMenu] = useState(false);
-  const p = book.pages?.[pageIndex] || page();
+  const spreadStart = Math.floor(pageIndex / 2) * 2;
+  const left = book.pages?.[spreadStart] || page();
+  const right = book.pages?.[spreadStart + 1] || null;
   function exportPage() { window.print(); }
-  return <main className="page flipPageScreen"><header className="flipHeader"><button className="backBtn" onClick={() => setScreen("editor")}>← Back</button><strong>{book.name}</strong><button className="dots" onClick={() => setMenu(!menu)}>⋯</button></header>{menu && <div className="paperMenu flip"><div className="washiTape" /><button onClick={exportPage}>Export / Print</button><button onClick={() => setScreen("editor")}>Edit</button><button onClick={() => deleteBook(book)}>Delete</button></div>}<div className={`scrapPage ${p.bg}`}>{p.elements.map(el => <div key={el.id} className="previewEl" style={{ left: `${el.x}%`, top: `${el.y}%`, width: `${el.w}%`, height: `${el.h}%`, transform: `rotate(${el.rotate || 0}deg)`, color: el.color, fontFamily: el.font, fontSize: el.size }}>{el.type === "text" ? el.text : el.type === "photo" && el.src ? <img src={el.src} /> : el.type === "sticker" && el.src ? <img src={el.src} /> : el.type === "sticker" && el.kind ? <div className={`cssSticker ${el.kind}`} /> : el.value}</div>)}</div><div className="pageNav"><button disabled={pageIndex === 0} onClick={() => setPageIndex(pageIndex - 1)}>Prev</button><span>{pageIndex + 1}/{book.pages.length}</span><button disabled={pageIndex === book.pages.length - 1} onClick={() => setPageIndex(pageIndex + 1)}>Next</button></div></main>;
+  return <main className="page flipPageScreen"><header className="flipHeader"><button className="backBtn" onClick={() => setScreen("editor")}>← Back</button><strong>{book.name}</strong><button className="dots" onClick={() => setMenu(!menu)}>⋯</button></header>{menu && <div className="paperMenu flip"><div className="washiTape" /><button onClick={exportPage}>Export / Print</button><button onClick={() => setScreen("editor")}>Edit</button><button onClick={() => deleteBook(book)}>Delete</button></div>}<div className="flipBookShell"><div className="flipSpread"><PreviewPage p={left} />{right ? <PreviewPage p={right} /> : <div className="scrapPage flipSpreadPage blank" />}</div></div><div className="pageNav"><button disabled={spreadStart === 0} onClick={() => setPageIndex(Math.max(0, spreadStart - 2))}>Prev</button><span>Pages {spreadStart + 1}{right ? `–${spreadStart + 2}` : ""} of {book.pages.length}</span><button disabled={spreadStart + 2 >= book.pages.length} onClick={() => setPageIndex(spreadStart + 2)}>Next</button></div></main>;
 }
 
 function ErrorBoundaryApp() {
