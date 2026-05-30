@@ -371,3 +371,52 @@ button, button *, a, a:visited, a:hover, a:active {
   ) !important;
   z-index:3 !important;
 }
+.authScrapbookCover{
+  background:#f7dbe6 !important;
+  border:10px solid #fff !important;
+  border-radius:16px !important;
+  box-shadow:0 18px 34px rgba(62,45,34,.16) !important;
+  overflow:visible !important;
+}
+
+.authScrapbookCover::before{
+  content:"" !important;
+  background:#fffaf4 !important;
+  border:1px solid #ead9c9 !important;
+  border-radius:10px !important;
+  position:absolute !important;
+  inset:18px !important;
+}
+
+.authCoverCenter{
+  position:absolute !important;
+  inset:0 !important;
+  display:grid !important;
+  place-content:center !important;
+  text-align:center !important;
+  z-index:4 !important;
+}
+
+.authCoverScript{
+  font-family:"Brush Script MT", cursive !important;
+  color:#9f4e76 !important;
+  font-size:20px !important;
+}
+
+.authCoverTitle{
+  font-family:"Playfair Display", serif !important;
+  color:#302926 !important;
+  font-size:16px !important;
+  letter-spacing:2px !important;
+}
+
+.authTape{
+  position:absolute !important;
+  top:-14px !important;
+  left:34px !important;
+  width:68px !important;
+  height:24px !important;
+  border-radius:5px !important;
+  background:repeating-linear-gradient(90deg,#f2c1d5 0 14px,#d99ab8 14px 28px) !important;
+  z-index:5 !important;
+}
