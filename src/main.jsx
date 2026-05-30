@@ -70,25 +70,12 @@ const BG_OPTIONS = [
 const FONT_OPTIONS = ["Playfair Display", "Georgia", "Poppins", "Courier New", "Brush Script MT", "Arial"];
 const COLORS = ["#2f2825", "#a95379", "#7a8fa6", "#81916e", "#c38f65", "#111111", "#ffffff"];
 
-const STICKERS = [
-  { name: "Doodle 1", src: "/doodles_01.png", category: "Doodles", premium: false },
-  { name: "Doodle 2", src: "/doodles_02.png", category: "Doodles", premium: false },
-  { name: "Doodle 3", src: "/doodles_03.png", category: "Doodles", premium: false },
-  { name: "Doodle 4", src: "/doodles_04.png", category: "Doodles", premium: false },
-  { name: "Doodle 5", src: "/doodles_05.png", category: "Doodles", premium: false },
-  { name: "Doodle 6", src: "/doodles_06.png", category: "Doodles", premium: false },
-  { name: "Celebration 1", src: "/celebration_01.png", category: "Celebration", premium: false },
-  { name: "Celebration 2", src: "/celebration_02.png", category: "Celebration", premium: true },
-  { name: "Animal 1", src: "/animals_01.png", category: "Animals", premium: true },
-  { name: "Animal 2", src: "/animals_02.png", category: "Animals", premium: true },
-  { name: "Dream Plan 1", src: "/dream_plan_01.png", category: "Dream & Plan", premium: true },
-  { name: "Dream Plan 2", src: "/dream_plan_02.png", category: "Dream & Plan", premium: true },
-  { name: "Dream Plan 3", src: "/dream_plan_03.png", category: "Dream & Plan", premium: true },
-  { name: "Frame Label 1", src: "/frames_labels_01.png", category: "Frames & Labels", premium: false },
-  { name: "Frame Label 2", src: "/frames_labels_02.png", category: "Frames & Labels", premium: true },
-];
+const STICKERS = [];
 
-const emojiStickers = ["♡", "☆", "✿", "🌸", "🌿", "🎀", "🧸", "📷", "✈️", "🎂", "🏡", "💍", "🎓", "🎄"];
+
+const emojiStickers = [
+  "♡","♥","❤","💕","💗","💖","💘","💝","💞","💓","💌","💋","🌸","🌷","🌹","🌻","🌼","🌺","🌿","🍃","🍀","🌵","🌙","⭐","✨","☁️","🌈","☀️","❄️","🎀","🧸","🐻","🐰","🐶","🐱","🦊","🐼","🦋","🐝","🐞","📷","📸","🖼️","📚","📖","✏️","📝","💭","💬","🏡","☕","🍪","🧁","🎂","🎈","🎁","🎉","🥳","✈️","🚗","🗺️","🌎","🏖️","⛰️","🏕️","🧳","💍","👰","🤵","💒","💐","🥂","🍼","👶","🧦","🧷","🎓","🎄","🎅","🎃","🍂","🦃","⛄","❤️‍🔥"
+];
 
 function element(type, props = {}) {
   return {
@@ -393,7 +380,7 @@ function Auth() {
 
   return (
     <div className="phoneFrame authScreen">
-      <div className="authScrapbookCover">memories</div>
+      <div className="authScrapbookCover cuteAuthPhoto"><span>pocket memories</span></div>
       <header className="authBrand">
         <div className="brandBadge">♡</div>
         <div className="brandScript">pocket</div>
@@ -441,7 +428,7 @@ function Home({ books, openBook, setScreen }) {
       <AppHeader setScreen={setScreen} />
       <section className="welcomeHero">
         <div><h1>Welcome<br />back ♡</h1><p>Every story matters.<br />What will you capture today?</p></div>
-        <div className="heroPolaroid scrapbookHeroCover"><div className="heroTape" /><div className="heroCoverLabel"><span>memories</span><small>pocket scrapbook</small></div></div>
+        <div className="heroPolaroid beachHeroPhoto" />
       </section>
       <section className="quickGrid">
         <button onClick={() => setScreen("create")}><span>📔</span><b>New Scrapbook</b><small>Start a new chapter</small></button>
@@ -513,9 +500,39 @@ function TemplateThumb({ template }) {
 
 function Create({ createBook, setScreen, setModal }) {
   const [name, setName] = useState("");
-  const [templateId, setTemplateId] = useState("blank");
-  const selected = TEMPLATES.find((t) => t.id === templateId) || TEMPLATES[0];
-  return <main className="page"><button className="backBtn" onClick={() => setScreen("home")}>⌂ Home</button><section className="createPaper"><div className="washiTape" /><h1>Create Scrapbook</h1><input placeholder="Name your scrapbook" value={name} onChange={(e) => setName(e.target.value)} /><select value={templateId} onChange={(e) => setTemplateId(e.target.value)}>{TEMPLATES.map(t => <option key={t.id} value={t.id}>{t.name} — {t.label}</option>)}</select><button className="gradientBtn" onClick={() => createBook(name || selected.name, selected.maker())}>Create Scrapbook</button></section></main>;
+  const [bg, setBg] = useState("cream");
+  return (
+    <main className="page createScreen">
+      <button className="backBtn" onClick={() => setScreen("home")}>⌂ Home</button>
+      <section className="createPaper">
+        <div className="washiTape" />
+        <h1>Create Scrapbook</h1>
+        <input
+          placeholder="Name your scrapbook"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+        <h3 className="chooseTitle">Choose a background</h3>
+        <div className="bgPreviewGrid">
+          {BG_OPTIONS.map((b) => (
+            <button
+              key={b.id}
+              type="button"
+              className={`bgPreviewBtn ${bg === b.id ? "selected" : ""}`}
+              onClick={() => setBg(b.id)}
+            >
+              <span className={`bgPreviewSwatch ${b.id}`}></span>
+              <b>{b.name}</b>
+            </button>
+          ))}
+        </div>
+        <button className="gradientBtn" onClick={() => createBook(name || "Untitled Scrapbook", [page(bg, [])])}>
+          Create Scrapbook
+        </button>
+        <p className="hint">For themed books, use the Templates tab so the scrapbook opens ready to edit.</p>
+      </section>
+    </main>
+  );
 }
 
 function Premium({ profile }) {
@@ -618,7 +635,7 @@ function Editor({ book, pageIndex, setPageIndex, saveBook, setScreen, home, prof
 
   const filtered = STICKERS.filter(s => `${s.name} ${s.category}`.toLowerCase().includes(search.toLowerCase()));
 
-  return <main className="editorPage"><header className="editorHeader"><button onClick={home}>⌂ Home</button><strong>{book.name}</strong><button onClick={() => setScreen("flipbook")}>Flipbook</button></header><div className="editorScroll"><div ref={pageRef} className={`scrapPage ${cur.bg}`} onClick={() => setSelected(null)} onDragOver={(e) => e.preventDefault()} onDrop={onDrop}>{cur.elements.map((el) => <div key={el.id} className={`editorEl ${selected === el.id ? "selected" : ""} ${el.locked ? "locked" : ""}`} style={{ left: `${el.x}%`, top: `${el.y}%`, width: `${el.w}%`, height: `${el.h}%`, transform: `rotate(${el.rotate || 0}deg)` }} onMouseDown={(e) => pointerDown(e, el)} onClick={(e) => { e.stopPropagation(); setSelected(el.id); }}>{el.type === "photo" && (el.src ? <img src={el.src} alt="" /> : <label className="uploadBox">Upload Photo<input type="file" accept="image/*" hidden onChange={(e) => uploadPhoto(e, el.id)} /></label>)}{el.type === "text" && <textarea disabled={el.locked} value={el.text} style={{ fontSize: el.size, color: el.color, fontFamily: el.font }} onChange={(e) => updateElement(el.id, { text: e.target.value })} />}{el.type === "sticker" && (el.src ? <img src={el.src} alt={el.value || "sticker"} /> : el.kind ? <DecoSticker kind={el.kind} label={el.label || el.value} /> : <div className="stickerEmoji">{el.value}</div>)}{selected === el.id && <><div className="miniTools"><button onClick={() => updateElement(el.id, { locked: !el.locked })}>{el.locked ? "🔒" : "🔓"}</button><button disabled={el.locked} onClick={() => updateElement(el.id, { rotate: (el.rotate || 0) + 10 })}>↻</button><button disabled={el.locked} onClick={() => duplicateElement(el)}>⧉</button><button disabled={el.locked} onClick={() => removeElement(el.id)}>🗑</button></div>{!el.locked && <span className="resizeHandle" onMouseDown={(e) => resizeDown(e, el)} />}</>}</div>)}</div><div className="pageNav"><button disabled={pageIndex === 0} onClick={() => setPageIndex(pageIndex - 1)}>Prev</button><span>Page {pageIndex + 1} of {book.pages.length}</span><button disabled={pageIndex === book.pages.length - 1} onClick={() => setPageIndex(pageIndex + 1)}>Next</button></div>{selectedEl?.type === "text" && !selectedEl.locked && <div className="textPanel"><select value={selectedEl.font} onChange={(e) => updateElement(selectedEl.id, { font: e.target.value })}>{FONT_OPTIONS.map(f => <option key={f} value={f}>{f}</option>)}</select><input type="range" min="10" max="54" value={selectedEl.size} onChange={(e) => updateElement(selectedEl.id, { size: Number(e.target.value) })} /><div className="colorRow">{COLORS.map(c => <button key={c} style={{ background: c }} onClick={() => updateElement(selectedEl.id, { color: c })} />)}</div><button onClick={() => setModal({ title: "Premium Effect", message: "Curved text is part of Premium.", confirmText: "Okay", onConfirm: () => setModal(null) })}>Curve Text ✨</button></div>}</div><nav className="editorTools"><button onClick={() => addElement(textEl("New text", 25, 25, 42, 10, { size: 22 }))}>Text</button><button onClick={() => addElement(photoEl(20, 22, 52, 42))}>Photo</button><button onClick={() => setSheet(sheet === "stickers" ? null : "stickers")}>Stickers</button><button onClick={() => setSheet(sheet === "backgrounds" ? null : "backgrounds")}>Backgrounds</button><button onClick={() => changePage((p, next) => next.pages.push(page("cream", [])))}>Page</button></nav>{sheet && <div className="stickerSheet"><div className="washiTape" />{sheet === "stickers" ? <><input placeholder="Search stickers..." value={search} onChange={(e) => setSearch(e.target.value)} /><div className="stickerGrid">{emojiStickers.map((s) => <button key={s} onClick={() => { addElement(stickerEl(s, 30, 30, 12, 12)); setSheet(null); }}>{s}</button>)}{filtered.map((s) => <button key={s.src} className={s.premium ? "premiumSticker" : ""} onClick={() => { if (s.premium && profile?.subscription !== "Premium") { setModal({ title: "Premium Sticker", message: `${s.name} is part of Premium stickers.`, confirmText: "Okay", onConfirm: () => setModal(null) }); return; } addElement(stickerEl(s.name, 30, 30, 18, 18, { src: s.src })); setSheet(null); }}><img src={s.src} alt={s.name} />{s.premium && <span>🔒</span>}</button>)}</div></> : <div className="backgroundGrid">{BG_OPTIONS.map((b) => <button key={b.id} onClick={() => { changePage((p) => { p.bg = b.id; }); setSheet(null); }}>{b.name}</button>)}</div>}</div>}</main>;
+  return <main className="editorPage"><header className="editorHeader"><button onClick={home}>⌂ Home</button><strong>{book.name}</strong><button onClick={() => setScreen("flipbook")}>Flipbook</button></header><div className="editorScroll"><div ref={pageRef} className={`scrapPage ${cur.bg}`} onClick={() => setSelected(null)} onDragOver={(e) => e.preventDefault()} onDrop={onDrop}>{cur.elements.map((el) => <div key={el.id} className={`editorEl ${selected === el.id ? "selected" : ""} ${el.locked ? "locked" : ""}`} style={{ left: `${el.x}%`, top: `${el.y}%`, width: `${el.w}%`, height: `${el.h}%`, transform: `rotate(${el.rotate || 0}deg)` }} onMouseDown={(e) => pointerDown(e, el)} onClick={(e) => { e.stopPropagation(); setSelected(el.id); }}>{el.type === "photo" && (el.src ? <img src={el.src} alt="" /> : <label className="uploadBox">Upload Photo<input type="file" accept="image/*" hidden onChange={(e) => uploadPhoto(e, el.id)} /></label>)}{el.type === "text" && <textarea disabled={el.locked} value={el.text} style={{ fontSize: el.size, color: el.color, fontFamily: el.font }} onChange={(e) => updateElement(el.id, { text: e.target.value })} />}{el.type === "sticker" && (el.src ? <img src={el.src} alt={el.value || "sticker"} /> : el.kind ? <DecoSticker kind={el.kind} label={el.label || el.value} /> : <div className="stickerEmoji">{el.value}</div>)}{selected === el.id && <><div className="miniTools"><button onClick={() => updateElement(el.id, { locked: !el.locked })}>{el.locked ? "🔒" : "🔓"}</button><button disabled={el.locked} onClick={() => updateElement(el.id, { rotate: (el.rotate || 0) + 10 })}>↻</button><button disabled={el.locked} onClick={() => duplicateElement(el)}>⧉</button><button disabled={el.locked} onClick={() => removeElement(el.id)}>🗑</button></div>{!el.locked && <span className="resizeHandle" onMouseDown={(e) => resizeDown(e, el)} />}</>}</div>)}</div><div className="pageNav"><button disabled={pageIndex === 0} onClick={() => setPageIndex(pageIndex - 1)}>Prev</button><span>Page {pageIndex + 1} of {book.pages.length}</span><button disabled={pageIndex === book.pages.length - 1} onClick={() => setPageIndex(pageIndex + 1)}>Next</button></div>{selectedEl?.type === "text" && !selectedEl.locked && <div className="textPanel"><select value={selectedEl.font} onChange={(e) => updateElement(selectedEl.id, { font: e.target.value })}>{FONT_OPTIONS.map(f => <option key={f} value={f}>{f}</option>)}</select><input type="range" min="10" max="54" value={selectedEl.size} onChange={(e) => updateElement(selectedEl.id, { size: Number(e.target.value) })} /><div className="colorRow">{COLORS.map(c => <button key={c} style={{ background: c }} onClick={() => updateElement(selectedEl.id, { color: c })} />)}</div><button onClick={() => setModal({ title: "Premium Effect", message: "Curved text is part of Premium.", confirmText: "Okay", onConfirm: () => setModal(null) })}>Curve Text ✨</button></div>}</div><nav className="editorTools"><button onClick={() => addElement(textEl("New text", 25, 25, 42, 10, { size: 22 }))}>Text</button><button onClick={() => addElement(photoEl(20, 22, 52, 42))}>Photo</button><button onClick={() => setSheet(sheet === "stickers" ? null : "stickers")}>Stickers</button><button onClick={() => setSheet(sheet === "backgrounds" ? null : "backgrounds")}>Backgrounds</button><button onClick={() => changePage((p, next) => next.pages.push(page("cream", [])))}>Page</button></nav>{sheet && <div className="stickerSheet"><div className="washiTape" />{sheet === "stickers" ? <><input placeholder="Search stickers..." value={search} onChange={(e) => setSearch(e.target.value)} /><div className="stickerGrid">{emojiStickers.filter((s) => s.toLowerCase().includes(search.toLowerCase())).map((s) => <button key={s} onClick={() => { addElement(stickerEl(s, 30, 30, 14, 14)); setSheet(null); }}>{s}</button>)}</div></> : <div className="backgroundGrid">{BG_OPTIONS.map((b) => <button key={b.id} onClick={() => { changePage((p) => { p.bg = b.id; }); setSheet(null); }}>{b.name}</button>)}</div>}</div>}</main>;
 }
 
 function PreviewPage({ p }) {
