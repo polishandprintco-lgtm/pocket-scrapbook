@@ -48,18 +48,6 @@ const BG_OPTIONS = [
 const FONT_OPTIONS = ["Playfair Display", "Georgia", "Poppins", "Courier New", "Brush Script MT", "Arial"];
 const COLORS = ["#2f2825", "#a95379", "#7a8fa6", "#81916e", "#c38f65", "#111111", "#ffffff"];
 
-const CREATOR_EMAILS = [
-  "dubosemo2@gmail.com",
-  "haileemccowen@icloud.com",
-  "sweetkybug09@gmail.com",
-];
-function isCreatorEmail(email) {
-  return !!email && CREATOR_EMAILS.includes(String(email).trim().toLowerCase());
-}
-function hasPremium(profile, user) {
-  return profile?.subscription === "Premium" || isCreatorEmail(profile?.email || user?.email);
-}
-
 const STICKERS = [
   { name: "Doodle 1", src: "/doodles_01.png", category: "Doodles", premium: false },
   { name: "Doodle 2", src: "/doodles_02.png", category: "Doodles", premium: false },
@@ -102,6 +90,9 @@ function photoEl(x, y, w, h, opts = {}) {
 function stickerEl(value, x, y, w, h, opts = {}) {
   return element("sticker", { value, x, y, w, h, ...opts });
 }
+function cssSticker(kind, x, y, w, h, opts = {}) {
+  return stickerEl("", x, y, w, h, { kind, locked: true, ...opts });
+}
 function page(bg = "cream", elements = []) {
   return { id: uid(), bg, elements };
 }
@@ -110,58 +101,94 @@ function babyPages(kind = "girl") {
   const girl = kind === "girl";
   const bg = girl ? "babyPink" : "babyBlue";
   const accent = girl ? "#d889a7" : "#7595b6";
-  const babyWord = girl ? "baby girl" : "baby boy";
-  const deco = girl ? "🎀" : "🧸";
-  const flower = girl ? "🌸" : "☆";
+  const babyWord = girl ? "our little girl" : "our little boy";
+  const bow = girl ? "bowPink" : "bowBlue";
+  const heart = girl ? "heartPink" : "heartBlue";
+  const star = girl ? "flowerPink" : "starBlue";
+  const bunny = girl ? "bunnyPink" : "bunnyBlue";
+
   const pages = [];
 
+  // Cover page — scrapbook style with stickers/decorations, not emojis
   pages.push(page(bg, [
-    textEl("baby's\nfirst year", 8, 8, 40, 18, { font: "Brush Script MT", size: 28, color: "#1e1b1a", locked: true }),
-    photoEl(10, 38, 30, 34, { rotate: -4 }),
-    photoEl(52, 33, 28, 27, { rotate: 5 }),
-    textEl(babyWord + " ♡", 50, 66, 38, 7, { size: 14, color: accent, locked: true }),
-    stickerEl(deco, 72, 12, 12, 12, { locked: true }),
-    stickerEl("♡", 12, 77, 9, 9, { color: accent, locked: true }),
+    cssSticker(bow, 3, 3, 16, 16),
+    cssSticker("paperTitle", 18, 6, 62, 26, { rotate: -2 }),
+    textEl("baby's", 34, 10, 28, 8, { font: "Brush Script MT", size: 28, color: "#1e1b1a", locked: true }),
+    textEl("first year", 33, 20, 36, 8, { font: "Courier New", size: 18, color: "#1e1b1a", locked: true }),
+    textEl("♡", 47, 29, 9, 7, { font: "Courier New", size: 18, color: "#1e1b1a", locked: true }),
+    cssSticker("labelBlue", 60, 25, 28, 9, { rotate: -3 }),
+    textEl(babyWord, 64, 27, 20, 4, { font: "Courier New", size: 9, color: "#1e1b1a", locked: true }),
+    photoEl(10, 48, 32, 34, { rotate: -4 }),
+    photoEl(57, 42, 28, 25, { rotate: 6 }),
+    cssSticker("washiTan", 63, 39, 20, 5),
+    cssSticker("buttonTan", 7, 82, 8, 8),
+    cssSticker(star, 82, 8, 8, 8),
+    cssSticker("outlineStar", 88, 16, 7, 7),
+    cssSticker("flowerSprig", 80, 70, 12, 20),
+    cssSticker("paperNote", 52, 72, 25, 18, { rotate: -1 }),
+    textEl("so much\nlove\n♡", 57, 75, 15, 9, { font: "Courier New", size: 10, color: "#1e1b1a", locked: true }),
   ]));
 
+  // Hello world page
   pages.push(page(bg, [
-    textEl("birth\ndetails", 9, 9, 32, 14, { font: "Brush Script MT", size: 24, locked: true }),
-    photoEl(46, 16, 38, 42, { rotate: 3 }),
-    textEl("date:\ntime:\nweight:\nlength:", 10, 42, 30, 24, { font: "Courier New", size: 12 }),
-    stickerEl(flower, 76, 70, 10, 10, { locked: true }),
+    cssSticker("tornNote", 10, 12, 30, 55),
+    textEl("hello\nworld\n♡", 15, 16, 18, 16, { font: "Courier New", size: 17, color: "#1e1b1a", locked: true }),
+    textEl("date:\ntime:\nweight:\nlength:", 14, 48, 24, 18, { font: "Courier New", size: 9, color: "#1e1b1a" }),
+    cssSticker("flowerSprig", 35, 16, 10, 22),
+    photoEl(51, 13, 34, 50, { rotate: 5 }),
+    cssSticker("washiBlue", 58, 10, 20, 5),
+    cssSticker("labelBlue", 29, 35, 26, 10, { rotate: -2 }),
+    textEl("the day\nyou were born ♡", 33, 37, 18, 6, { font: "Courier New", size: 7, color: "#1e1b1a", locked: true }),
   ]));
 
+  // Tiny hands
   pages.push(page(bg, [
-    textEl("tiny hands\nbig love ♡", 9, 10, 36, 16, { font: "Brush Script MT", size: 24, locked: true }),
-    photoEl(45, 18, 38, 44, { rotate: 4 }),
-    textEl("sweet little memories", 12, 70, 60, 7, { size: 13, color: accent, locked: true }),
-    stickerEl("♡", 78, 70, 10, 10, { locked: true }),
+    textEl("tiny\nhands\nbig\nlove\n♡", 12, 16, 24, 30, { font: "Courier New", size: 18, color: "#1e1b1a", locked: true }),
+    photoEl(50, 12, 34, 50, { rotate: 7 }),
+    cssSticker("washiTan", 57, 9, 20, 5),
+    cssSticker(star, 8, 8, 8, 8),
+    cssSticker("outlineStar", 15, 16, 6, 6),
+    cssSticker("buttonTan", 22, 72, 8, 8),
+    cssSticker(heart, 72, 65, 13, 13),
+    cssSticker("flowerSprig", 12, 66, 10, 18),
   ]));
 
+  const labelTexts = ["you are\nso loved ♡", "growing\nso fast ♡", "sweet boy ♡", "so happy ♡", "little\nblessing ♡", "cutest\nsmile ♡", "learning\n& growing ♡", "so\ncurious ♡", "so much\njoy ♡", "almost\none! ♡", "what a\nyear! ♡", "one year\nof you ♡"];
   for (let i = 1; i <= 12; i++) {
+    const twoPhotos = [2,5,7,9,11].includes(i);
     pages.push(page(bg, [
-      textEl(i === 12 ? "one year" : `${i} month${i === 1 ? "" : "s"}`, 8, 8, 38, 12, { font: "Brush Script MT", size: 25, color: "#1e1b1a", locked: true }),
-      photoEl(24, 23, 52, 42, { rotate: i % 2 === 0 ? 2 : -2 }),
-      textEl("learning & growing ♡", 17, 72, 66, 7, { size: 13, color: accent, locked: true }),
-      stickerEl(flower, 10, 67, 10, 10, { locked: true }),
-      stickerEl("♡", 80, 67, 9, 9, { locked: true }),
-    ]));
+      cssSticker("monthPaper", 7, 8, 22, 20, { rotate: -2 }),
+      textEl(i === 12 ? "12\nmonths" : `${i}\nmonth${i === 1 ? "" : "s"}`, 12, 10, 12, 11, { font: "Courier New", size: 16, color: "#1e1b1a", locked: true }),
+      cssSticker(star, 7, 6, 7, 7),
+      twoPhotos ? photoEl(30, 24, 24, 36, { rotate: -2 }) : photoEl(39, 17, 40, 42),
+      twoPhotos ? photoEl(57, 22, 24, 35, { rotate: 4 }) : null,
+      cssSticker("washiTan", twoPhotos ? 36 : 50, twoPhotos ? 21 : 14, 16, 4),
+      twoPhotos ? cssSticker("washiTan", 62, 19, 16, 4) : null,
+      cssSticker("labelBlue", 60, 70, 27, 9, { rotate: -2 }),
+      textEl(labelTexts[i - 1] || "sweet memory ♡", 63, 71, 18, 6, { font: "Courier New", size: 7, color: "#1e1b1a", locked: true }),
+      i % 3 === 0 ? cssSticker(bunny, 18, 62, 18, 20) : cssSticker(heart, 9, 63, 13, 13),
+      i % 2 === 0 ? cssSticker("flowerSprig", 82, 55, 10, 20) : cssSticker("outlineStar", 84, 34, 7, 7),
+      i === 3 ? cssSticker("blocks", 18, 56, 14, 14) : null,
+      i === 10 ? cssSticker("linedNote", 60, 25, 26, 45) : null,
+    ].filter(Boolean)));
   }
 
+  // Final one-year page
   pages.push(page(bg, [
-    textEl("first birthday", 20, 8, 60, 12, { font: "Brush Script MT", size: 28, locked: true }),
-    photoEl(10, 26, 35, 42, { rotate: -3 }),
-    photoEl(55, 26, 35, 42, { rotate: 3 }),
-    textEl("favorite moments", 20, 75, 55, 7, { size: 14, color: accent, locked: true }),
+    textEl("one\nyear\nof you\n♡", 18, 18, 22, 24, { font: "Courier New", size: 18, color: "#1e1b1a", locked: true }),
+    photoEl(55, 38, 28, 36, { rotate: 6 }),
+    cssSticker("washiTan", 60, 35, 18, 5),
+    cssSticker("linedNote", 18, 50, 28, 35),
+    cssSticker(heart, 15, 72, 13, 13),
+    cssSticker("flowerSprig", 82, 28, 10, 22),
+    cssSticker("buttonTan", 50, 82, 8, 8),
+    cssSticker("labelBlue", 70, 73, 25, 9, { rotate: -2 }),
+    textEl("our greatest\nblessing ♡", 73, 74, 15, 5, { font: "Courier New", size: 7, color: "#1e1b1a", locked: true }),
   ]));
 
-  pages.push(page(bg, [
-    textEl("one year reflection", 11, 9, 78, 10, { font: "Brush Script MT", size: 26, locked: true }),
-    textEl("what I never want to forget...\n\n\n\n", 12, 27, 76, 34, { font: "Courier New", size: 14 }),
-    stickerEl("♡", 45, 70, 12, 12, { locked: true }),
-  ]));
   return pages;
 }
+
 function simpleTemplate(title, bg = "cream", pages = 6) {
   const list = [page(bg, [textEl(title, 14, 17, 72, 20, { font: "Brush Script MT", size: 32, locked: true }), stickerEl("♡", 45, 45, 10, 10, { locked: true })])];
   for (let i = 1; i < pages; i++) list.push(page(bg, [textEl(["About this", "Memories", "Favorite Moments", "Details", "Photos", "Looking Ahead"][i - 1] || "Memories", 12, 8, 76, 10, { size: 22, locked: true }), photoEl(10, 24, 36, 40), textEl("notes:\n\n\n\n", 52, 26, 38, 30, { font: "Courier New", size: 14 }), stickerEl("🌿", 76, 68, 12, 12, { locked: true })]));
@@ -282,11 +309,11 @@ function App() {
     <div className="phoneFrame">
       {screen === "home" && <Home books={books} openBook={openBook} setScreen={setScreen} />}
       {screen === "scrapbooks" && <Scrapbooks books={books} openBook={openBook} deleteBook={askDeleteBook} />}
-      {screen === "templates" && <Templates createBook={createBook} profile={profile} user={user} setModal={setModal} />}
+      {screen === "templates" && <Templates createBook={createBook} profile={profile} setModal={setModal} />}
       {screen === "create" && <Create createBook={createBook} setScreen={setScreen} setModal={setModal} />}
-      {screen === "premium" && <Premium profile={profile} user={user} />}
+      {screen === "premium" && <Premium profile={profile} />}
       {screen === "profile" && <Profile user={user} profile={profile} setModal={setModal} showToast={showToast} />}
-      {screen === "editor" && active && <Editor book={active} pageIndex={pageIndex} setPageIndex={setPageIndex} saveBook={saveBook} setScreen={setScreen} home={home} profile={profile} user={user} showToast={showToast} setModal={setModal} />}
+      {screen === "editor" && active && <Editor book={active} pageIndex={pageIndex} setPageIndex={setPageIndex} saveBook={saveBook} setScreen={setScreen} home={home} profile={profile} showToast={showToast} setModal={setModal} />}
       {screen === "flipbook" && active && <Flipbook book={active} pageIndex={pageIndex} setPageIndex={setPageIndex} setScreen={setScreen} deleteBook={askDeleteBook} />}
       {!["editor", "flipbook"].includes(screen) && <BottomNav screen={screen} setScreen={setScreen} />}
       {modal && <PaperModal {...modal} />}
@@ -384,15 +411,67 @@ function Scrapbooks({ books, openBook, deleteBook }) {
   return <main className="page"><h1>My Scrapbooks</h1><div className="scrapbookGrid">{books.map((book) => <div key={book.id} className="bookWrap"><BookCover book={book} onClick={() => openBook(book)} /><button className="dots" onClick={() => setMenu(menu === book.id ? null : book.id)}>⋯</button>{menu === book.id && <div className="paperMenu"><div className="washiTape" /><button onClick={() => openBook(book)}>Edit</button><button onClick={() => openBook(book, true)}>Flipbook</button><button onClick={() => alert("Export coming soon")}>Export</button><button onClick={() => deleteBook(book)}>Delete</button></div>}</div>)}</div></main>;
 }
 
-function Templates({ createBook, profile, user, setModal }) {
+function Templates({ createBook, profile, setModal }) {
+  const [selectedId, setSelectedId] = useState("babyBoy");
+  const selected = TEMPLATES.find((t) => t.id === selectedId) || TEMPLATES[0];
+
   function choose(t) {
-    if (t.premium && !hasPremium(profile, user)) {
-      setModal({ title: "Premium Template", message: `${t.name} is ${t.price} or included with Premium. Payments are demo only until Stripe is connected.`, confirmText: "Preview Anyway", onCancel: () => setModal(null), onConfirm: () => { setModal(null); createBook(t.name, t.maker()); } });
+    if (t.premium && profile?.subscription !== "Premium") {
+      setModal({
+        title: "Premium Template",
+        message: `${t.name} is ${t.price} or included with Premium. Payments are demo only until Stripe is connected.`,
+        confirmText: "Preview Anyway",
+        onCancel: () => setModal(null),
+        onConfirm: () => { setModal(null); createBook(t.name, t.maker()); }
+      });
       return;
     }
     createBook(t.name, t.maker());
   }
-  return <main className="page"><h1>Templates</h1><div className="templateGrid">{TEMPLATES.filter(t => t.id !== "pocket").map((t) => <button key={t.id} className={`templateCard ${t.premium ? "locked" : ""}`} onClick={() => choose(t)}><div className={`templatePreview ${t.id}`}><span>{t.name.split(" ").slice(0, 2).join(" ")}</span></div><b>{t.name}</b><small>{t.label}</small></button>)}</div></main>;
+
+  return <main className="page templateStudio">
+    <h1>Templates</h1>
+    <p className="hint">Tap a cover to preview. The cover page is editable after you create the scrapbook.</p>
+    <div className="templateTabs"><button>All</button><button>Baby</button><button>Wedding</button><button>Travel</button><button>Holiday</button></div>
+    <div className="templatePickerGrid">
+      {TEMPLATES.filter(t => !["blank", "memory"].includes(t.id)).map((t) => (
+        <button key={t.id} className={`templateMiniCard ${selectedId === t.id ? "active" : ""}`} onClick={() => setSelectedId(t.id)}>
+          <div className={`templateMiniPreview templateCoverArt ${t.id}`}><TemplateArt type={t.id} /></div>
+          <b>{t.name}</b><small>{t.label}</small>{t.premium && <span className="premiumTag">$0.99</span>}
+        </button>
+      ))}
+    </div>
+    <section className={`templateBigPreview templateCoverArt ${selected.id}`}><TemplateArt type={selected.id} big /></section>
+    <button className="gradientBtn" onClick={() => choose(selected)}>Use Template</button>
+  </main>;
+}
+
+function TemplateArt({ type }) {
+  const isGirl = type === "babyGirl";
+  const isBoy = type === "babyBoy";
+  const isBaby = isGirl || isBoy;
+  return <>
+    <div className="tplPaperTitle">
+      {isBaby ? <><em>baby's</em><span>first year</span><small>{isGirl ? "our little girl" : "our little boy"}</small></> : null}
+      {type === "wedding" ? <><em>our</em><span>wedding book</span><small>favorite memories</small></> : null}
+      {type === "pregnancy" ? <><em>our</em><span>pregnancy journey</span><small>baby memories</small></> : null}
+      {type === "vacation" ? <><em>our</em><span>vacation memories</span><small>adventure notes</small></> : null}
+      {type === "graduation" ? <><em>my</em><span>graduation</span><small>class memories</small></> : null}
+      {type === "christmas" ? <><em>our</em><span>christmas</span><small>holiday magic</small></> : null}
+      {type === "thanksgiving" ? <><em>our</em><span>thanksgiving</span><small>full hearts</small></> : null}
+      {type === "family" ? <><em>our</em><span>family reunion</span><small>together</small></> : null}
+      {type === "adventure" ? <><em>my</em><span>adventure book</span><small>moments</small></> : null}
+    </div>
+    <div className="tplPhoto one">Upload Photo</div>
+    <div className="tplPhoto two">Upload Photo</div>
+    <span className="tplWashi tan" />
+    <span className="tplSticker bow" />
+    <span className="tplSticker star" />
+    <span className="tplSticker heart" />
+    <span className="tplSticker sprig" />
+    <span className="tplSticker button" />
+    <div className="tplLabel">{isBaby ? "so much love ♡" : "memory notes ♡"}</div>
+  </>;
 }
 
 function Create({ createBook, setScreen, setModal }) {
@@ -402,22 +481,8 @@ function Create({ createBook, setScreen, setModal }) {
   return <main className="page"><button className="backBtn" onClick={() => setScreen("home")}>⌂ Home</button><section className="createPaper"><div className="washiTape" /><h1>Create Scrapbook</h1><input placeholder="Name your scrapbook" value={name} onChange={(e) => setName(e.target.value)} /><select value={templateId} onChange={(e) => setTemplateId(e.target.value)}>{TEMPLATES.map(t => <option key={t.id} value={t.id}>{t.name} — {t.label}</option>)}</select><button className="gradientBtn" onClick={() => createBook(name || selected.name, selected.maker())}>Create Scrapbook</button></section></main>;
 }
 
-function Premium({ profile, user }) {
-  return <main className="page"><h1>Premium</h1><section className="createPaper"><div className="washiTape" /><h2>Your plan: {hasPremium(profile, user) ? (isCreatorEmail(profile?.email || user?.email) ? "Creator — unlocked" : "Premium") : "Free"}</h2><table><tbody><tr><th>Feature</th><th>Free</th><th>Premium</th></tr><tr><td>Photo uploads</td><td>15</td><td>Unlimited</td></tr><tr><td>Premium templates</td><td>$0.99 each</td><td>Included</td></tr><tr><td>Advanced stickers</td><td>Basic</td><td>All</td></tr><tr><td>Curved text</td><td>—</td><td>✓</td></tr></tbody></table><button className="gradientBtn">Upgrade $4.99/mo</button><p className="hint">Stripe needed before real payments work.</p></section></main>;
-<div className="photoBuyCard">
-  <div className="photoBuyIcon">📷</div>
-
-  <div className="photoBuyInfo">
-    <h3>Need more photo space?</h3>
-    <p>Add 20 more photo uploads to your account.</p>
-  </div>
-
-  <div className="photoBuyPrice">$0.99</div>
-
-  <button onClick={() => alert("Stripe checkout coming soon ♡")}>
-    Buy 20
-  </button>
-</div>
+function Premium({ profile }) {
+  return <main className="page"><h1>Premium</h1><section className="createPaper"><div className="washiTape" /><h2>Your plan: {profile?.subscription || "Free"}</h2><table><tbody><tr><th>Feature</th><th>Free</th><th>Premium</th></tr><tr><td>Photo uploads</td><td>15</td><td>Unlimited</td></tr><tr><td>Premium templates</td><td>$0.99 each</td><td>Included</td></tr><tr><td>Advanced stickers</td><td>Basic</td><td>All</td></tr><tr><td>Curved text</td><td>—</td><td>✓</td></tr></tbody></table><button className="gradientBtn">Upgrade $4.99/mo</button><p className="hint">Stripe needed before real payments work.</p></section></main>;
 }
 
 function Profile({ user, profile, setModal, showToast }) {
@@ -442,27 +507,16 @@ function Profile({ user, profile, setModal, showToast }) {
   function deleteAccount() {
     setModal({ title: "Delete Account?", message: "Are you sure? This permanently deletes your account. You may need to log in again first.", danger: true, confirmText: "Delete", onCancel: () => setModal(null), onConfirm: async () => { try { await deleteUser(user); setModal(null); } catch { setModal({ title: "Log in again", message: "For security, log out and log back in before deleting your account.", confirmText: "Okay", onConfirm: () => setModal(null) }); } } });
   }
-  return <main className="page profilePage"><h1>Profile</h1><section className="profileCard"><div className="washiTape" /><label className="avatarFrame"><img src={profile?.photoURL || user?.photoURL || "https://images.unsplash.com/photo-1526047932273-341f2a7631f9?w=300"} alt="profile" /><input type="file" hidden accept="image/*" onChange={uploadProfile} /></label>{isCreatorEmail(profile?.email || user?.email) && <p className="creatorBadge">⭐ Creator — everything unlocked</p>}<input value={name} onChange={(e) => setName(e.target.value)} placeholder="Name" /><button onClick={async () => { await updateProfile(user, { displayName: name }); await updateDoc(doc(db, "users", user.uid), { name }); showToast("Name saved ♡"); }}>Save Name</button><h2>Settings</h2><label className="toggle">Email notifications about new updates <input type="checkbox" checked={!!profile?.notifications} onChange={(e) => updateDoc(doc(db, "users", user.uid), { notifications: e.target.checked })} /></label><label className="toggle">Dark theme <input type="checkbox" checked={!!profile?.dark} onChange={(e) => updateDoc(doc(db, "users", user.uid), { dark: e.target.checked })} /></label><input value={email} onChange={(e) => setEmail(e.target.value)} /><button onClick={() => updateEmail(user, email)}>Update Email</button><input type="password" value={pass} onChange={(e) => setPass(e.target.value)} placeholder="New password" /><button onClick={() => pass && updatePassword(user, pass)}>Update Password</button><p>Subscription: {hasPremium(profile, user) ? (isCreatorEmail(profile?.email || user?.email) ? "Creator unlocked" : "Premium") : "Free"}</p><button onClick={() => signOut(auth)}>Logout</button><button className="dangerBtn full" onClick={deleteAccount}>Delete Account</button></section></main>;
+  return <main className="page profilePage"><h1>Profile</h1><section className="profileCard"><div className="washiTape" /><label className="avatarFrame"><img src={profile?.photoURL || user?.photoURL || "https://images.unsplash.com/photo-1526047932273-341f2a7631f9?w=300"} alt="profile" /><input type="file" hidden accept="image/*" onChange={uploadProfile} /></label><input value={name} onChange={(e) => setName(e.target.value)} placeholder="Name" /><button onClick={async () => { await updateProfile(user, { displayName: name }); await updateDoc(doc(db, "users", user.uid), { name }); showToast("Name saved ♡"); }}>Save Name</button><h2>Settings</h2><label className="toggle">Email notifications about new updates <input type="checkbox" checked={!!profile?.notifications} onChange={(e) => updateDoc(doc(db, "users", user.uid), { notifications: e.target.checked })} /></label><label className="toggle">Dark theme <input type="checkbox" checked={!!profile?.dark} onChange={(e) => updateDoc(doc(db, "users", user.uid), { dark: e.target.checked })} /></label><input value={email} onChange={(e) => setEmail(e.target.value)} /><button onClick={() => updateEmail(user, email)}>Update Email</button><input type="password" value={pass} onChange={(e) => setPass(e.target.value)} placeholder="New password" /><button onClick={() => pass && updatePassword(user, pass)}>Update Password</button><p>Subscription: {profile?.subscription || "Free"}</p><button onClick={() => signOut(auth)}>Logout</button><button className="dangerBtn full" onClick={deleteAccount}>Delete Account</button></section></main>;
 }
 
-function Editor({ book, pageIndex, setPageIndex, saveBook, setScreen, home, profile, user, showToast, setModal }) {
+function Editor({ book, pageIndex, setPageIndex, saveBook, setScreen, home, profile, showToast, setModal }) {
   const [selected, setSelected] = useState(null);
   const [sheet, setSheet] = useState(null);
   const [search, setSearch] = useState("");
   const pageRef = useRef(null);
   const cur = book.pages?.[pageIndex] || page("cream", []);
   const selectedEl = cur.elements.find((e) => e.id === selected);
-
-  useEffect(() => {
-    function keyDelete(e) {
-      if ((e.key === "Delete" || e.key === "Backspace") && selected && !["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement?.tagName)) {
-        e.preventDefault();
-        removeElement(selected);
-      }
-    }
-    window.addEventListener("keydown", keyDelete);
-    return () => window.removeEventListener("keydown", keyDelete);
-  }, [selected, cur.elements]);
 
   function changePage(fn) {
     const next = { ...book, pages: (book.pages || []).map((p, i) => i === pageIndex ? { ...p, elements: [...(p.elements || [])] } : p) };
@@ -523,14 +577,14 @@ function Editor({ book, pageIndex, setPageIndex, saveBook, setScreen, home, prof
 
   const filtered = STICKERS.filter(s => `${s.name} ${s.category}`.toLowerCase().includes(search.toLowerCase()));
 
-  return <main className="editorPage"><header className="editorHeader"><button onClick={home}>⌂ Home</button><strong>{book.name}</strong><button onClick={() => setScreen("flipbook")}>Flipbook</button></header><div className="editorScroll"><div ref={pageRef} className={`scrapPage ${cur.bg}`} onClick={() => setSelected(null)} onDragOver={(e) => e.preventDefault()} onDrop={onDrop}>{cur.elements.map((el) => <div key={el.id} className={`editorEl ${selected === el.id ? "selected" : ""} ${el.locked ? "locked" : ""}`} style={{ left: `${el.x}%`, top: `${el.y}%`, width: `${el.w}%`, height: `${el.h}%`, transform: `rotate(${el.rotate || 0}deg)` }} onMouseDown={(e) => pointerDown(e, el)} onClick={(e) => { e.stopPropagation(); setSelected(el.id); }}>{el.type === "photo" && (el.src ? <img src={el.src} alt="" /> : <label className="uploadBox">Upload Photo<input type="file" accept="image/*" hidden onChange={(e) => uploadPhoto(e, el.id)} /></label>)}{el.type === "text" && <textarea disabled={el.locked} value={el.text} style={{ fontSize: el.size, color: el.color, fontFamily: el.font }} onChange={(e) => updateElement(el.id, { text: e.target.value })} />}{el.type === "sticker" && (el.src ? <img src={el.src} alt={el.value || "sticker"} /> : <div className="stickerEmoji">{el.value}</div>)}{selected === el.id && <><div className="miniTools"><button onClick={() => updateElement(el.id, { locked: !el.locked })}>{el.locked ? "🔒" : "🔓"}</button><button disabled={el.locked} onClick={() => updateElement(el.id, { rotate: (el.rotate || 0) + 10 })}>↻</button><button disabled={el.locked} onClick={() => duplicateElement(el)}>⧉</button><button disabled={el.locked} onClick={() => removeElement(el.id)}>🗑</button></div>{!el.locked && <span className="resizeHandle" onMouseDown={(e) => resizeDown(e, el)} />}</>}</div>)}</div><div className="pageNav"><button disabled={pageIndex === 0} onClick={() => setPageIndex(pageIndex - 1)}>Prev</button><span>Page {pageIndex + 1} of {book.pages.length}</span><button disabled={pageIndex === book.pages.length - 1} onClick={() => setPageIndex(pageIndex + 1)}>Next</button></div>{selectedEl?.type === "text" && !selectedEl.locked && <div className="textPanel"><select value={selectedEl.font} onChange={(e) => updateElement(selectedEl.id, { font: e.target.value })}>{FONT_OPTIONS.map(f => <option key={f} value={f}>{f}</option>)}</select><input type="range" min="10" max="54" value={selectedEl.size} onChange={(e) => updateElement(selectedEl.id, { size: Number(e.target.value) })} /><div className="colorRow">{COLORS.map(c => <button key={c} style={{ background: c }} onClick={() => updateElement(selectedEl.id, { color: c })} />)}</div><button onClick={() => setModal({ title: "Premium Effect", message: "Curved text is part of Premium.", confirmText: "Okay", onConfirm: () => setModal(null) })}>Curve Text ✨</button></div>}</div><nav className="editorTools"><button onClick={() => addElement(textEl("New text", 25, 25, 42, 10, { size: 22 }))}>Text</button><button onClick={() => addElement(photoEl(20, 22, 52, 42))}>Photo</button><button onClick={() => setSheet(sheet === "stickers" ? null : "stickers")}>Stickers</button><button onClick={() => setSheet(sheet === "backgrounds" ? null : "backgrounds")}>Backgrounds</button><button onClick={() => changePage((p, next) => next.pages.push(page("cream", [])))}>Page</button></nav>{sheet && <div className="stickerSheet"><div className="washiTape" />{sheet === "stickers" ? <><input placeholder="Search stickers..." value={search} onChange={(e) => setSearch(e.target.value)} /><div className="stickerGrid">{emojiStickers.map((s) => <button key={s} onClick={() => { addElement(stickerEl(s, 30, 30, 12, 12)); setSheet(null); }}>{s}</button>)}{filtered.map((s) => <button key={s.src} className={s.premium ? "premiumSticker" : ""} onClick={() => { if (s.premium && !hasPremium(profile, user)) { setModal({ title: "Premium Sticker", message: `${s.name} is part of Premium stickers.`, confirmText: "Okay", onConfirm: () => setModal(null) }); return; } addElement(stickerEl(s.name, 30, 30, 18, 18, { src: s.src })); setSheet(null); }}><img src={s.src} alt={s.name} />{s.premium && <span>🔒</span>}</button>)}</div></> : <div className="backgroundGrid">{BG_OPTIONS.map((b) => <button key={b.id} onClick={() => { changePage((p) => { p.bg = b.id; }); setSheet(null); }}>{b.name}</button>)}</div>}</div>}</main>;
+  return <main className="editorPage"><header className="editorHeader"><button onClick={home}>⌂ Home</button><strong>{book.name}</strong><button onClick={() => setScreen("flipbook")}>Flipbook</button></header><div className="editorScroll"><div ref={pageRef} className={`scrapPage ${cur.bg}`} onClick={() => setSelected(null)} onDragOver={(e) => e.preventDefault()} onDrop={onDrop}>{cur.elements.map((el) => <div key={el.id} className={`editorEl ${selected === el.id ? "selected" : ""} ${el.locked ? "locked" : ""}`} style={{ left: `${el.x}%`, top: `${el.y}%`, width: `${el.w}%`, height: `${el.h}%`, transform: `rotate(${el.rotate || 0}deg)` }} onMouseDown={(e) => pointerDown(e, el)} onClick={(e) => { e.stopPropagation(); setSelected(el.id); }}>{el.type === "photo" && (el.src ? <img src={el.src} alt="" /> : <label className="uploadBox">Upload Photo<input type="file" accept="image/*" hidden onChange={(e) => uploadPhoto(e, el.id)} /></label>)}{el.type === "text" && <textarea disabled={el.locked} value={el.text} style={{ fontSize: el.size, color: el.color, fontFamily: el.font }} onChange={(e) => updateElement(el.id, { text: e.target.value })} />}{el.type === "sticker" && (el.src ? <img src={el.src} alt={el.value || "sticker"} /> : el.kind ? <div className={`cssSticker ${el.kind}`} /> : <div className="stickerEmoji">{el.value}</div>)}{selected === el.id && <><div className="miniTools"><button onClick={() => updateElement(el.id, { locked: !el.locked })}>{el.locked ? "🔒" : "🔓"}</button><button disabled={el.locked} onClick={() => updateElement(el.id, { rotate: (el.rotate || 0) + 10 })}>↻</button><button disabled={el.locked} onClick={() => duplicateElement(el)}>⧉</button><button disabled={el.locked} onClick={() => removeElement(el.id)}>🗑</button></div>{!el.locked && <span className="resizeHandle" onMouseDown={(e) => resizeDown(e, el)} />}</>}</div>)}</div><div className="pageNav"><button disabled={pageIndex === 0} onClick={() => setPageIndex(pageIndex - 1)}>Prev</button><span>Page {pageIndex + 1} of {book.pages.length}</span><button disabled={pageIndex === book.pages.length - 1} onClick={() => setPageIndex(pageIndex + 1)}>Next</button></div>{selectedEl?.type === "text" && !selectedEl.locked && <div className="textPanel"><select value={selectedEl.font} onChange={(e) => updateElement(selectedEl.id, { font: e.target.value })}>{FONT_OPTIONS.map(f => <option key={f} value={f}>{f}</option>)}</select><input type="range" min="10" max="54" value={selectedEl.size} onChange={(e) => updateElement(selectedEl.id, { size: Number(e.target.value) })} /><div className="colorRow">{COLORS.map(c => <button key={c} style={{ background: c }} onClick={() => updateElement(selectedEl.id, { color: c })} />)}</div><button onClick={() => setModal({ title: "Premium Effect", message: "Curved text is part of Premium.", confirmText: "Okay", onConfirm: () => setModal(null) })}>Curve Text ✨</button></div>}</div><nav className="editorTools"><button onClick={() => addElement(textEl("New text", 25, 25, 42, 10, { size: 22 }))}>Text</button><button onClick={() => addElement(photoEl(20, 22, 52, 42))}>Photo</button><button onClick={() => setSheet(sheet === "stickers" ? null : "stickers")}>Stickers</button><button onClick={() => setSheet(sheet === "backgrounds" ? null : "backgrounds")}>Backgrounds</button><button onClick={() => changePage((p, next) => next.pages.push(page("cream", [])))}>Page</button></nav>{sheet && <div className="stickerSheet"><div className="washiTape" />{sheet === "stickers" ? <><input placeholder="Search stickers..." value={search} onChange={(e) => setSearch(e.target.value)} /><div className="stickerGrid">{emojiStickers.map((s) => <button key={s} onClick={() => { addElement(stickerEl(s, 30, 30, 12, 12)); setSheet(null); }}>{s}</button>)}{filtered.map((s) => <button key={s.src} className={s.premium ? "premiumSticker" : ""} onClick={() => { if (s.premium && profile?.subscription !== "Premium") { setModal({ title: "Premium Sticker", message: `${s.name} is part of Premium stickers.`, confirmText: "Okay", onConfirm: () => setModal(null) }); return; } addElement(stickerEl(s.name, 30, 30, 18, 18, { src: s.src })); setSheet(null); }}><img src={s.src} alt={s.name} />{s.premium && <span>🔒</span>}</button>)}</div></> : <div className="backgroundGrid">{BG_OPTIONS.map((b) => <button key={b.id} onClick={() => { changePage((p) => { p.bg = b.id; }); setSheet(null); }}>{b.name}</button>)}</div>}</div>}</main>;
 }
 
 function Flipbook({ book, pageIndex, setPageIndex, setScreen, deleteBook }) {
   const [menu, setMenu] = useState(false);
   const p = book.pages?.[pageIndex] || page();
   function exportPage() { window.print(); }
-  return <main className="page flipPageScreen"><header className="flipHeader"><button className="backBtn" onClick={() => setScreen("editor")}>← Back</button><strong>{book.name}</strong><button className="dots" onClick={() => setMenu(!menu)}>⋯</button></header>{menu && <div className="paperMenu flip"><div className="washiTape" /><button onClick={exportPage}>Export / Print</button><button onClick={() => setScreen("editor")}>Edit</button><button onClick={() => deleteBook(book)}>Delete</button></div>}<div className={`scrapPage ${p.bg}`}>{p.elements.map(el => <div key={el.id} className="previewEl" style={{ left: `${el.x}%`, top: `${el.y}%`, width: `${el.w}%`, height: `${el.h}%`, transform: `rotate(${el.rotate || 0}deg)`, color: el.color, fontFamily: el.font, fontSize: el.size }}>{el.type === "text" ? el.text : el.type === "photo" && el.src ? <img src={el.src} /> : el.type === "sticker" && el.src ? <img src={el.src} /> : el.value}</div>)}</div><div className="pageNav"><button disabled={pageIndex === 0} onClick={() => setPageIndex(pageIndex - 1)}>Prev</button><span>{pageIndex + 1}/{book.pages.length}</span><button disabled={pageIndex === book.pages.length - 1} onClick={() => setPageIndex(pageIndex + 1)}>Next</button></div></main>;
+  return <main className="page flipPageScreen"><header className="flipHeader"><button className="backBtn" onClick={() => setScreen("editor")}>← Back</button><strong>{book.name}</strong><button className="dots" onClick={() => setMenu(!menu)}>⋯</button></header>{menu && <div className="paperMenu flip"><div className="washiTape" /><button onClick={exportPage}>Export / Print</button><button onClick={() => setScreen("editor")}>Edit</button><button onClick={() => deleteBook(book)}>Delete</button></div>}<div className={`scrapPage ${p.bg}`}>{p.elements.map(el => <div key={el.id} className="previewEl" style={{ left: `${el.x}%`, top: `${el.y}%`, width: `${el.w}%`, height: `${el.h}%`, transform: `rotate(${el.rotate || 0}deg)`, color: el.color, fontFamily: el.font, fontSize: el.size }}>{el.type === "text" ? el.text : el.type === "photo" && el.src ? <img src={el.src} /> : el.type === "sticker" && el.src ? <img src={el.src} /> : el.type === "sticker" && el.kind ? <div className={`cssSticker ${el.kind}`} /> : el.value}</div>)}</div><div className="pageNav"><button disabled={pageIndex === 0} onClick={() => setPageIndex(pageIndex - 1)}>Prev</button><span>{pageIndex + 1}/{book.pages.length}</span><button disabled={pageIndex === book.pages.length - 1} onClick={() => setPageIndex(pageIndex + 1)}>Next</button></div></main>;
 }
 
 function ErrorBoundaryApp() {
@@ -546,4 +600,3 @@ function ErrorBoundaryApp() {
 }
 
 createRoot(document.getElementById("root")).render(<ErrorBoundaryApp />);
-
